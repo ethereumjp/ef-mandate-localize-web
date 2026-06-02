@@ -37,6 +37,9 @@ For merged markdown & pdf:
 # exports a merged markdown and pdf to /dist
 # requires python3, pandoc and lualatex
 python3 scripts/build.py
+
+#also works
+make pdf
 ```
 
 For merged markdown only:
@@ -44,6 +47,9 @@ For merged markdown only:
 # exports a merged markdown without pdf
 # requires only python3, no pandoc needed
 python3 scripts/build.py --no-pdf
+
+# also works
+make markdown
 ```
 The script validates that the English and Japanese chapter numbers line up, writes a merged markdown manuscript to `dist/ef-mandate-ja.md`, and renders `dist/ef-mandate-ja.pdf` when `pandoc` and the LaTeX toolchain are installed.
 
