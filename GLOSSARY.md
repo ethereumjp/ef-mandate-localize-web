@@ -8,7 +8,8 @@ Add entries in this format:
 
 - `English term` -> `Japanese term` - notes
 
-- `Ethereum Foundation` -> `イーサリアム財団`
+- `Ethereum` -> `Ethereum`
+- `Ethereum Foundation` -> `Ethereum 財団 (EF)`
 - `EF Mandate` -> `EF Mandate`
 - `censorship resistant` -> `検閲耐性`
 - `open source` -> `オープンソース`
