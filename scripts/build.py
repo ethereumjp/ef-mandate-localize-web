@@ -157,12 +157,6 @@ def export_pdf(markdown_path: Path, pdf_path: Path) -> None:
         "--pdf-engine=lualatex",
         "-V",
         "documentclass=ltjsarticle",
-        "-V",
-        "mainfont=HaranoAjiMincho-Regular",
-        "-V",
-        "mainfontoptions=BoldFont=HaranoAjiMincho-Bold",
-        "-V",
-        "CJKmainfont=HaranoAjiMincho-Regular",
         "--toc",
     ]
     subprocess.run(command, check=True)
