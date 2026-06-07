@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": false,
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "anchors/**",
+    ".astro/**",
+    "**/*.astro",
+    "**/*.json",
+    "pnpm-lock.yaml"
+  ]
+}

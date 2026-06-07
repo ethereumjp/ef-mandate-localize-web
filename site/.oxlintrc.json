@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    // Spread of `str.slice(...)` into `[...]` is intentional for Unicode
+    // code-point counting (string iteration gives code points, not UTF-16
+    // units). oxlint's no-useless-spread does not distinguish array-spread
+    // from string-spread, so this would produce false positives here.
+    "unicorn/no-useless-spread": "off"
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "anchors/**",
+    ".astro/**",
+    "**/*.astro"
+  ]
+}
