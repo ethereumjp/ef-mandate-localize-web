@@ -180,6 +180,8 @@ The site renders comments on the current version via the projection, always carr
 4. Render the static reading site (all chapters, all configured languages).
 5. (Deploy) publish `dist/` to IPFS; optionally set ENS `contenthash`.
 
+**In-progress translations.** Localization is ongoing, so a translation may cover only some chapters. English is always fully marked (it is the id authority). A translation chapter is **aligned** only when its block count matches English; chapters that don't yet match (untranslated stubs or mid-edit) are treated as **pending** — left unmarked, excluded from `anchors.json`, and reported (not failed) by the parity check. The reading view falls back to English for pending chapters.
+
 ## 12. Frontend / UX
 
 - **Reading view:** bilingual, content‑first; paragraph‑aligned. A **language toggle** switches the surface (EN/JA now).

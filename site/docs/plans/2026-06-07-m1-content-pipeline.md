@@ -720,14 +720,31 @@ for (const [chapter, file] of listChapters(chaptersDir(baseDir, en))) {
   console.log(`en ${chapter}: ${blocks.length} blocks`);
 }
 
-// 2. Translations aligned to EN by position.
+// 2. Translations aligned to EN by position. A chapter whose block count does
+//    not yet match EN is treated as "translation in progress": it is left
+//    untouched and reported as pending (this localization is ongoing).
 for (const src of config.sources.filter((s) => s.lang !== "en")) {
+  const pending: string[] = [];
   for (const [chapter, file] of listChapters(chaptersDir(baseDir, src))) {
     const enIds = enIdsByChapter.get(chapter);
-    if (!enIds) throw new Error(`${src.lang} ${chapter}: no matching EN chapter`);
-    const blocks = alignTranslationIds(parseChapter(readFileSync(file, "utf8")), enIds, chapter);
-    writeFileSync(file, renderChapter(blocks));
-    console.log(`${src.lang} ${chapter}: ${blocks.length} blocks`);
+    if (!enIds) {
+      console.warn(`${src.lang} ${chapter}: no matching EN chapter — skipped`);
+      continue;
+    }
+    const blocks = parseChapter(readFileSync(file, "utf8"));
+    if (blocks.length !== enIds.length) {
+      pending.push(chapter);
+      console.warn(
+        `${src.lang} ${chapter}: ${blocks.length}/${enIds.length} blocks — translation incomplete, skipped`
+      );
+      continue;
+    }
+    const aligned = alignTranslationIds(blocks, enIds, chapter);
+    writeFileSync(file, renderChapter(aligned));
+    console.log(`${src.lang} ${chapter}: ${aligned.length} blocks`);
+  }
+  if (pending.length > 0) {
+    console.log(`${src.lang}: pending translation: ${pending.join(", ")}`);
   }
 }
 console.log("done");
@@ -736,17 +753,17 @@ console.log("done");
 - [ ] **Step 2: Run the injector on the real sources**
 
 Run (from `site/`): `pnpm run blocks:inject`
-Expected: prints `en 01..08` and `ja 01..08` with block counts and `done`.
+Expected: prints `en 01`..`en 08` with block counts; `ja 01`..`ja 03` with block counts (the translated chapters); warnings `ja 04`..`ja 08: N/M blocks — translation incomplete, skipped`; `ja: pending translation: 04, 05, 06, 07, 08`; then `done`. Exit code 0.
 
-If it throws `translation has N blocks but EN has M` for a chapter: the Japanese chapter's paragraph/heading structure diverges from English. Fix by splitting/merging the offending Japanese block(s) so the block count matches EN (the chapters are meant to be paragraph-aligned), then re-run. Do not change ids by hand.
+(The Japanese translation currently covers chapters 01–03; 04–08 are stubs. By design the injector marks EN everywhere and aligns only fully-translated chapters; incomplete chapters are left untouched until their translation lands. This is expected — do NOT edit Japanese prose to force alignment.)
 
 - [ ] **Step 3: Verify markers landed and rendering is unaffected**
 
 Run (from repo root): `git diff --stat source/`
-Expected: every `source/en/chapters/*.md` and `source/ja/chapters/*.md` shows insertions (the marker lines).
+Expected: all 8 `source/en/chapters/*.md` show insertions; `source/ja/chapters/01..03` show insertions; `source/ja/chapters/04..08` are UNCHANGED (still stubs).
 
 Run: `grep -c "<!-- block:" "source/ja/chapters/02-財団の役割.md"`
-Expected: a positive count equal to that chapter's block count.
+Expected: `16` (chapter 02's block count).
 
 - [ ] **Step 4: Confirm idempotency**
 
@@ -945,25 +962,35 @@ const en = config.sources.find((s) => s.lang === "en");
 if (!en) throw new Error("config must include an 'en' source");
 
 const issues: CheckIssue[] = [];
+const pending: string[] = [];
 const enIdsByChapter = new Map<string, string[]>();
 
+// English is the authority: every EN block must be uniquely marked.
 for (const [chapter, file] of listChapters(chaptersDir(baseDir, en))) {
   const blocks = parseChapter(readFileSync(file, "utf8"));
   issues.push(...missingOrDuplicateIds(blocks, "en", chapter));
   enIdsByChapter.set(chapter, blocks.map((b) => b.id ?? ""));
 }
 
-for (const src of config.sources) {
+// Translations: enforce parity only on chapters whose block count matches EN
+// (translated + aligned). In-progress chapters are reported as pending, not failed.
+for (const src of config.sources.filter((s) => s.lang !== "en")) {
   for (const [chapter, file] of listChapters(chaptersDir(baseDir, src))) {
+    const enIds = enIdsByChapter.get(chapter);
+    if (!enIds) continue;
     const blocks = parseChapter(readFileSync(file, "utf8"));
-    issues.push(...missingOrDuplicateIds(blocks, src.lang, chapter));
-    if (src.lang !== "en") {
-      const enIds = enIdsByChapter.get(chapter) ?? [];
-      issues.push(...parityIssues(enIds, blocks.map((b) => b.id ?? ""), src.lang, chapter));
+    if (blocks.length !== enIds.length) {
+      pending.push(`${src.lang} ${chapter} (${blocks.length}/${enIds.length})`);
+      continue;
     }
+    issues.push(...missingOrDuplicateIds(blocks, src.lang, chapter));
+    issues.push(...parityIssues(enIds, blocks.map((b) => b.id ?? ""), src.lang, chapter));
   }
 }
 
+if (pending.length > 0) {
+  console.log(`ℹ pending translation (skipped): ${pending.join(", ")}`);
+}
 if (issues.length > 0) {
   for (const i of issues) console.error(`✗ ${i.lang} ${i.chapter} [${i.kind}] ${i.detail}`);
   console.error(`\n${issues.length} issue(s). Run: pnpm run blocks:inject`);
@@ -975,7 +1002,7 @@ console.log("✓ all block markers valid and aligned");
 - [ ] **Step 6: Run the check against the real sources**
 
 Run (from `site/`): `pnpm run blocks:check`
-Expected: `✓ all block markers valid and aligned` (exit 0). (Sources were injected in Task 8.)
+Expected: an info line `ℹ pending translation (skipped): ja 04 (...), ja 05 (...), ja 06 (...), ja 07 (...), ja 08 (...)` followed by `✓ all block markers valid and aligned` (exit 0). EN 01–08 and JA 01–03 are enforced; JA 04–08 are reported as pending (translation in progress). Sources were injected in Task 8.
 
 - [ ] **Step 7: Commit**
 
@@ -1067,6 +1094,7 @@ Expected: PASS (2 tests).
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { loadConfig, listChapters, chaptersDir, sourceIdHash } from "../src/lib/sources";
+import { parseChapter } from "../src/lib/blocks";
 import { buildChapterAnchors, ChapterAnchors } from "../src/lib/anchors";
 
 const configPath = process.argv[2] ?? "config.json";
@@ -1076,8 +1104,15 @@ mkdirSync(outDir, { recursive: true });
 
 for (const src of config.sources) {
   const chapters: Record<string, ChapterAnchors> = {};
+  const pending: string[] = [];
   for (const [chapter, file] of listChapters(chaptersDir(baseDir, src))) {
-    chapters[chapter] = buildChapterAnchors(readFileSync(file, "utf8"));
+    const source = readFileSync(file, "utf8");
+    // Skip chapters that are not fully marked yet (translation in progress).
+    if (!parseChapter(source).every((b) => b.id !== null)) {
+      pending.push(chapter);
+      continue;
+    }
+    chapters[chapter] = buildChapterAnchors(source);
   }
   const doc = {
     lang: src.lang,
@@ -1087,17 +1122,18 @@ for (const src of config.sources) {
   };
   const out = resolve(outDir, `${src.lang}.json`);
   writeFileSync(out, JSON.stringify(doc, null, 2) + "\n");
-  console.log(`wrote ${out}`);
+  const note = pending.length > 0 ? `, pending: ${pending.join(", ")}` : "";
+  console.log(`wrote ${out} (${Object.keys(chapters).length} chapters${note})`);
 }
 ```
 
 - [ ] **Step 6: Build anchors against the real sources**
 
 Run (from `site/`): `pnpm run anchors:build`
-Expected: `wrote .../site/anchors/en.json` and `.../site/anchors/ja.json`.
+Expected: `wrote .../site/anchors/en.json (8 chapters)` and `wrote .../site/anchors/ja.json (3 chapters, pending: 04, 05, 06, 07, 08)`.
 
 Run: `node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('anchors/ja.json','utf8')); console.log(d.lang, Object.keys(d.chapters).length, Object.keys(d.chapters['02']).length)"`
-Expected: `ja 8 <n>` where `<n>` is chapter 02's block count (matches the `grep -c` from Task 8).
+Expected: `ja 3 16` (3 translated chapters; chapter 02 has 16 blocks).
 
 (`anchors/` is gitignored — do not commit it.)
 
