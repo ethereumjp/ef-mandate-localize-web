@@ -6,7 +6,7 @@ export const MESSAGES = {
   en: {
     siteTitle: "EF Mandate",
     index: "Chapters",
-    backToIndex: "Back to chapters",
+    backToIndex: "Back to index",
     language: "Language",
     comments: "Comments",
     on: "On",
