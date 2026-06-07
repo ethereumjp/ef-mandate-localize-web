@@ -57,7 +57,7 @@ Modified:
   "name": "ef-mandate-site",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@9.12.0",
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -1135,7 +1135,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20
