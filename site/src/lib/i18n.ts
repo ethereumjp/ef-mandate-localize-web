@@ -5,7 +5,6 @@ export const LANGS: Lang[] = ["en", "ja"];
 export const MESSAGES = {
   en: {
     siteTitle: "EF Mandate",
-    tagline: "Japanese localization with on-chain commentary",
     index: "Index",
     backToIndex: "Back to index",
     language: "Language",
@@ -17,7 +16,6 @@ export const MESSAGES = {
   },
   ja: {
     siteTitle: "EF Mandate",
-    tagline: "オンチェーン・コメンタリー付き日本語ローカライズ",
     index: "目次",
     backToIndex: "目次へ戻る",
     language: "言語",
