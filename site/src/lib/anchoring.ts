@@ -55,3 +55,31 @@ export function findOccurrences(haystack: string[], needle: string[]): number[] 
   }
   return out;
 }
+
+/** Default amount of surrounding context (in code points) captured per side. */
+export const CONTEXT_LEN = 32;
+
+/**
+ * Build an anchor for a [start, end) code-point span of a block's normalized text.
+ * Called at authoring time (M4). `blockHash` is the hash of the same normalized text.
+ */
+export function makeAnchor(
+  blockHash: `0x${string}`,
+  text: string,
+  start: number,
+  end: number,
+  contextLen: number = CONTEXT_LEN
+): Anchor {
+  const cps = codePoints(text);
+  if (start < 0 || end > cps.length || start >= end) {
+    throw new Error(`invalid span [${start}, ${end}) for text of length ${cps.length}`);
+  }
+  return {
+    blockHash,
+    exact: cps.slice(start, end).join(""),
+    prefix: cps.slice(Math.max(0, start - contextLen), start).join(""),
+    suffix: cps.slice(end, end + contextLen).join(""),
+    start,
+    end,
+  };
+}
