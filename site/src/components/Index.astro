@@ -1,9 +1,11 @@
 ---
 import type { Chapter } from "../lib/content";
+import type { Lang } from "../lib/i18n";
 interface Props {
   chapters: Chapter[];
+  lang: Lang;
 }
-const { chapters } = Astro.props;
+const { chapters, lang } = Astro.props;
 ---
 <ol class="divide-y divide-stone-200 text-sm">
   {chapters.map((ch) => (
@@ -13,8 +15,7 @@ const { chapters } = Astro.props;
         class="flex items-baseline gap-2 py-2 text-stone-600 hover:text-stone-900"
       >
         <span class="w-6 shrink-0 tabular-nums text-stone-400">{ch.number}</span>
-        <span class="lang lang-en">{ch.title}</span>
-        <span class="lang lang-ja">{ch.jaTitle ?? ch.title}</span>
+        <span>{lang === "ja" ? (ch.jaTitle ?? ch.title) : ch.title}</span>
       </a>
     </li>
   ))}

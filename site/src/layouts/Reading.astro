@@ -1,20 +1,22 @@
 ---
 import "../styles/global.css";
 import Toolbar from "../components/Toolbar.astro";
+import type { Lang } from "../lib/i18n";
 interface Props {
   title: string;
+  lang: Lang;
 }
-const { title } = Astro.props;
+const { title, lang } = Astro.props;
 ---
 <!doctype html>
-<html lang="en" data-lang="en" data-comments="off">
+<html lang={lang} data-lang={lang} data-comments="off">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
   </head>
   <body class="min-h-screen bg-white text-stone-900 antialiased">
-    <Toolbar />
+    <Toolbar lang={lang} />
     <slot />
   </body>
 </html>

@@ -1,17 +1,21 @@
 ---
 import type { RenderedBlock } from "../lib/content";
+import type { Lang } from "../lib/i18n";
 interface Props {
   block: RenderedBlock;
+  lang: Lang;
 }
-const { block } = Astro.props;
-const jaFallback = block.jaHtml === null;
+const { block, lang } = Astro.props;
+const html = lang === "ja" ? (block.jaHtml ?? block.enHtml) : block.enHtml;
+const jaFallback = lang === "ja" && block.jaHtml === null;
 ---
 <div class="block relative" data-block-id={block.blockId}>
   <div class="gutter absolute right-full top-0 mr-2 hidden w-10 text-right text-xs text-stone-400 md:block">
     <!-- commentary gutter slot (badges arrive in M5) -->
   </div>
-  <div class="prose prose-stone max-w-none">
-    <div class="lang lang-en" set:html={block.enHtml} />
-    <div class="lang lang-ja" set:html={block.jaHtml ?? block.enHtml} data-fallback={jaFallback ? "en" : undefined} />
-  </div>
+  <div
+    class="prose prose-stone max-w-none"
+    data-fallback={jaFallback ? "en" : undefined}
+    set:html={html}
+  />
 </div>

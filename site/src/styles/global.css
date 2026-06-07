@@ -4,28 +4,50 @@
 @import "@fontsource/noto-serif-jp/japanese-700.css";
 @plugin "@tailwindcss/typography";
 
+@theme {
+    --color-dark: rgb(55, 55, 52);
+    --color-light: oklch(0.98 0.003 106.4);
+}
+
+html {
+    @apply bg-light text-dark;
+}
+
 /* Language toggle: show only the active language's spans/blocks. */
-[data-lang="en"] .lang-ja { display: none; }
-[data-lang="ja"] .lang-en { display: none; }
+[data-lang="en"] .lang-ja {
+    display: none;
+}
+[data-lang="ja"] .lang-en {
+    display: none;
+}
 
 /* Commentary off: hide the gutter column. */
-[data-comments="off"] .gutter { display: none; }
+[data-comments="off"] .gutter {
+    display: none;
+}
 
-html { scroll-behavior: smooth; }
+html {
+    scroll-behavior: smooth;
+}
 
 body {
-  font-family: "Noto Serif Variable", "Noto Serif JP", ui-serif, Georgia, serif;
+    font-family:
+        "Noto Serif Variable", "Noto Serif JP", ui-serif, Georgia, serif;
 }
 
 /* Reading column + block layout. */
-.block { scroll-margin-top: 5rem; }
+.block {
+    scroll-margin-top: 5rem;
+}
 
 /* Gutter is only meaningful when commentary is on; the toggle CSS above hides it
    when off. Give it a subtle hover affordance for when M5 adds badges. */
-[data-comments="on"] .gutter { display: block; }
+[data-comments="on"] .gutter {
+    display: block;
+}
 
 /* Fallback (EN shown in JA mode for pending chapters) gets a faint left rule. */
-[data-lang="ja"] .lang-ja[data-fallback="en"] {
-  border-left: 2px solid var(--color-amber-200);
-  padding-left: 0.75rem;
+[data-fallback="en"] {
+    border-left: 2px solid var(--color-amber-200);
+    padding-left: 0.75rem;
 }

@@ -48,15 +48,15 @@ reported as **pending** and skipped by `blocks:inject`, `blocks:check`, and `anc
 Run from `site/`:
 
 - `pnpm dev` — local dev server (Astro).
-- `pnpm build` — static build to `dist/` (a single page with all chapters and a jump-link index).
+- `pnpm build` — static build to `dist/`: English at `/`, Japanese at `/ja`, each a single page with all chapters and a jump-link index.
 - `pnpm preview` — preview the built site.
 - `pnpm run check:astro` — type-check `.astro` files.
 
-The reading view renders each block in both languages (`data-block-id`, `.lang-en` /
-`.lang-ja`); a small script flips `data-lang` / `data-comments` on `<html>` (saved in
-`localStorage`), so toggling language is instant and keeps your place. Chapters without a
-complete Japanese translation fall back to English with a notice. UI strings live in
-`src/lib/i18n.ts`.
+The site has two routes — English at `/` and Japanese at `/ja`; each renders a single
+language (Japanese chapters not yet translated fall back to English with a notice). The
+toolbar's EN / 日本語 links carry the current section hash so you keep your place when
+switching, and a small script persists the commentary on/off toggle in `localStorage`.
+UI strings live in `src/lib/i18n.ts`.
 
 ## Re-anchoring (M3)
 
