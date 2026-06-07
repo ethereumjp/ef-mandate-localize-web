@@ -13,7 +13,7 @@ const chapters = loadChapters();
 ---
 <div class="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 md:flex-row md:py-12">
   <aside id="index" class="scroll-mt-20 md:w-56 md:shrink-0">
-    <div class="md:sticky md:top-20">
+    <div class="md:sticky md:top-20 md:flex md:h-[calc(100vh-5rem)] md:flex-col">
       <details class="rounded border border-stone-200 dark:border-stone-800 md:hidden">
         <summary class="cursor-pointer px-3 py-2 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
           <T k="index" />
@@ -29,9 +29,9 @@ const chapters = loadChapters();
         <div class="mt-3">
           <Index chapters={chapters} lang={lang} />
         </div>
-        <div class="mt-8 border-t border-stone-200 pt-6 dark:border-stone-800">
-          <SiteMeta lang={lang} />
-        </div>
+      </div>
+      <div class="mt-8 hidden border-t border-stone-200 pt-6 dark:border-stone-800 md:mt-auto md:block">
+        <SiteMeta lang={lang} />
       </div>
     </div>
   </aside>
