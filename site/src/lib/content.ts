@@ -29,10 +29,20 @@ export function mergeChapter(
   enBlocks: Block[],
   jaBlocks: Block[] | null
 ): Chapter {
+  // A translation chapter is "aligned" only when it has the same number of
+  // blocks as EN, every JA block is uniquely marked, AND its id set matches
+  // EN's exactly. (Count + uniqueness + EN ⊆ JA ⇒ set equality.) Otherwise the
+  // chapter is pending and falls back to English.
+  const jaIds = new Set(
+    (jaBlocks ?? [])
+      .map((b) => b.id)
+      .filter((x): x is string => x !== null)
+  );
   const aligned =
     jaBlocks !== null &&
     jaBlocks.length === enBlocks.length &&
-    jaBlocks.every((b) => b.id !== null);
+    jaIds.size === jaBlocks.length &&
+    enBlocks.every((b) => b.id !== null && jaIds.has(b.id));
 
   const jaById = new Map<string, string>();
   if (aligned) {

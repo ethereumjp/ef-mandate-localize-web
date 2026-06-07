@@ -35,6 +35,13 @@ describe("mergeChapter", () => {
     expect(ch.jaPending).toBe(true);
     expect(ch.blocks[0].jaHtml).toBeNull();
   });
+  it("marks pending when JA block count matches but ids differ", () => {
+    const en = parseChapter("<!-- block: 02-p1 -->\nA\n\n<!-- block: 02-p2 -->\nB");
+    const ja = parseChapter("<!-- block: 02-p1 -->\nあ\n\n<!-- block: 02-p9 -->\nい"); // p9 != p2
+    const ch = mergeChapter("02", en, ja);
+    expect(ch.jaPending).toBe(true);
+    expect(ch.blocks[1].jaHtml).toBeNull();
+  });
   it("throws if an EN block is unmarked", () => {
     const en = parseChapter("# Title"); // no marker
     expect(() => mergeChapter("02", en, null)).toThrow(/unmarked/);
