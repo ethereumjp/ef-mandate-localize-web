@@ -23,6 +23,8 @@
     ]
   },
   "dependencies": {
+    "@fontsource-variable/noto-serif": "^5.2.9",
+    "@fontsource/noto-serif-jp": "^5.2.8",
     "astro": "^5.18.2",
     "marked": "^14.1.4",
     "viem": "^2.21.0"

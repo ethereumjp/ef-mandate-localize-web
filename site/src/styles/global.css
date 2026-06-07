@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "@fontsource-variable/noto-serif/wght.css";
+@import "@fontsource/noto-serif-jp/japanese-400.css";
+@import "@fontsource/noto-serif-jp/japanese-700.css";
 @plugin "@tailwindcss/typography";
 
 /* Language toggle: show only the active language's spans/blocks. */
@@ -9,6 +12,10 @@
 [data-comments="off"] .gutter { display: none; }
 
 html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Noto Serif Variable", "Noto Serif JP", ui-serif, Georgia, serif;
+}
 
 /* Reading column + block layout. */
 .block { scroll-margin-top: 5rem; }
