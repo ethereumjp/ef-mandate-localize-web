@@ -83,3 +83,39 @@ export function makeAnchor(
     end,
   };
 }
+
+/**
+ * Project a stored anchor onto the current block (or null if the block is gone).
+ * Immutable attestations are never moved; this is the derived current-version view.
+ */
+export function project(anchor: Anchor, current: CurrentBlock | null): Projection {
+  // Block no longer exists in the current version.
+  if (current === null) {
+    return { status: "orphaned", start: null, end: null, pastVersion: true };
+  }
+
+  const pastVersion = anchor.blockHash !== current.blockHash;
+
+  // Block unchanged since authoring → the stored offsets are still valid verbatim.
+  if (!pastVersion) {
+    return { status: "anchored", start: anchor.start, end: anchor.end, pastVersion: false };
+  }
+
+  // Block changed → re-match the quoted span by exact text.
+  const cps = codePoints(current.text);
+  const exact = codePoints(anchor.exact);
+  const candidates = findOccurrences(cps, exact);
+
+  // The quoted text itself was edited or removed — don't guess a location.
+  if (candidates.length === 0) {
+    return { status: "needs-review", start: null, end: null, pastVersion: true };
+  }
+
+  // (Disambiguation of multiple candidates is added in the next task.)
+  if (candidates.length > 1) {
+    return { status: "needs-review", start: null, end: null, pastVersion: true };
+  }
+
+  const idx = candidates[0];
+  return { status: "re-anchored", start: idx, end: idx + exact.length, pastVersion: true };
+}

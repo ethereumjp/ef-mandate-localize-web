@@ -54,3 +54,53 @@ describe("makeAnchor", () => {
     expect(() => makeAnchor(H as `0x${string}`, "abc", 0, 9)).toThrow(/invalid span/);
   });
 });
+
+import { project } from "../src/lib/anchoring";
+
+describe("project", () => {
+  const H1 = "0x01" as `0x${string}`;
+  const H2 = "0x02" as `0x${string}`;
+
+  it("orphaned when the block is gone", () => {
+    const a = makeAnchor(H1, "the walkaway test is robust", 4, 12); // "walkaway"
+    expect(project(a, null)).toEqual({
+      status: "orphaned",
+      start: null,
+      end: null,
+      pastVersion: true,
+    });
+  });
+
+  it("anchored (offsets verbatim) when the block hash is unchanged", () => {
+    const text = "the walkaway test is robust";
+    const a = makeAnchor(H1, text, 4, 12);
+    expect(project(a, { blockHash: H1, text })).toEqual({
+      status: "anchored",
+      start: 4,
+      end: 12,
+      pastVersion: false,
+    });
+  });
+
+  it("re-anchored when the block changed but the quote moved (unique)", () => {
+    const original = "the walkaway test is robust";
+    const a = makeAnchor(H1, original, 4, 12); // "walkaway"
+    const edited = "we think the walkaway test is robust"; // shifted
+    const p = project(a, { blockHash: H2, text: edited });
+    expect(p.status).toBe("re-anchored");
+    expect(p.pastVersion).toBe(true);
+    expect(edited.slice(p.start!, p.end!)).toBe("walkaway");
+  });
+
+  it("needs-review when the quoted text is gone", () => {
+    const original = "the walkaway test is robust";
+    const a = makeAnchor(H1, original, 4, 12); // "walkaway"
+    const edited = "the leave test is robust"; // "walkaway" removed
+    expect(project(a, { blockHash: H2, text: edited })).toEqual({
+      status: "needs-review",
+      start: null,
+      end: null,
+      pastVersion: true,
+    });
+  });
+});
