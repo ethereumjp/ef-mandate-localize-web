@@ -23,6 +23,8 @@ jobs:
           cache-dependency-path: site/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm run typecheck
+      - run: pnpm run check:astro
       - run: pnpm test
       - run: pnpm run blocks:check
       - run: pnpm run anchors:build
+      - run: pnpm build

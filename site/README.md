@@ -42,3 +42,18 @@ Localization is ongoing: a translation chapter is aligned only once its block co
 matches English. Chapters that don't yet match (untranslated stubs or mid-edit) are
 reported as **pending** and skipped by `blocks:inject`, `blocks:check`, and `anchors:build`
 — they never fail CI.
+
+## Reading site (M2)
+
+Run from `site/`:
+
+- `pnpm dev` — local dev server (Astro).
+- `pnpm build` — static build to `dist/` (one page per chapter + a table of contents).
+- `pnpm preview` — preview the built site.
+- `pnpm run check:astro` — type-check `.astro` files.
+
+The reading view renders each block in both languages (`data-block-id`, `.lang-en` /
+`.lang-ja`); a small script flips `data-lang` / `data-comments` on `<html>` (saved in
+`localStorage`), so toggling language is instant and keeps your place. Chapters without a
+complete Japanese translation fall back to English with a notice. UI strings live in
+`src/lib/i18n.ts`.
