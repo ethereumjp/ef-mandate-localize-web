@@ -1,0 +1,21 @@
+---
+import type { Chapter } from "../lib/content";
+interface Props {
+  chapters: Chapter[];
+}
+const { chapters } = Astro.props;
+---
+<ol class="divide-y divide-stone-200 text-sm">
+  {chapters.map((ch) => (
+    <li>
+      <a
+        href={`#ch-${ch.number}`}
+        class="flex items-baseline gap-2 py-2 text-stone-600 hover:text-stone-900"
+      >
+        <span class="w-6 shrink-0 tabular-nums text-stone-400">{ch.number}</span>
+        <span class="lang lang-en">{ch.title}</span>
+        <span class="lang lang-ja">{ch.jaTitle ?? ch.title}</span>
+      </a>
+    </li>
+  ))}
+</ol>

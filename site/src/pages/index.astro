@@ -1,43 +1,57 @@
 ---
 import Reading from "../layouts/Reading.astro";
 import Block from "../components/Block.astro";
+import Index from "../components/Index.astro";
 import T from "../components/T.astro";
 import { loadChapters } from "../lib/content";
 const chapters = loadChapters();
 ---
 <Reading title="EF Mandate">
-  <main class="mx-auto max-w-3xl px-4 py-12 md:px-0">
-    <h1 class="text-3xl font-bold tracking-tight">EF Mandate</h1>
-    <p class="mt-2 text-stone-600"><T k="tagline" /></p>
-
-    <nav aria-label="index" class="mt-10">
-      <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">
-        <T k="index" />
-      </h2>
-      <ol class="mt-4 divide-y divide-stone-200">
-        {chapters.map((ch) => (
-          <li>
-            <a href={`#ch-${ch.number}`} class="flex items-baseline gap-3 py-3 hover:bg-stone-50">
-              <span class="w-8 shrink-0 tabular-nums text-stone-400">{ch.number}</span>
-              <span class="lang lang-en">{ch.title}</span>
-              <span class="lang lang-ja">{ch.jaTitle ?? ch.title}</span>
-            </a>
-          </li>
-        ))}
-      </ol>
-    </nav>
-
-    {chapters.map((ch) => (
-      <section id={`ch-${ch.number}`} class="mt-16 scroll-mt-24">
-        {ch.jaPending && (
-          <p class="lang lang-ja mb-6 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            <T k="jaPending" />
-          </p>
-        )}
-        <div class="space-y-6">
-          {ch.blocks.map((block) => <Block block={block} />)}
+  <div class="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 md:flex-row md:py-12">
+    <!-- Index: a click-to-expand menu on small screens, a sticky sidebar on desktop. -->
+    <aside id="index" class="scroll-mt-20 md:w-56 md:shrink-0">
+      <div class="md:sticky md:top-20">
+        <details class="rounded border border-stone-200 md:hidden">
+          <summary class="cursor-pointer px-3 py-2 text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <T k="index" />
+          </summary>
+          <div class="border-t border-stone-200 p-2">
+            <Index chapters={chapters} />
+          </div>
+        </details>
+        <div class="hidden md:block">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">
+            <T k="index" />
+          </h2>
+          <div class="mt-3">
+            <Index chapters={chapters} />
+          </div>
         </div>
-      </section>
-    ))}
-  </main>
+      </div>
+    </aside>
+
+    <!-- Reading column: all chapters on one page. -->
+    <main class="min-w-0 md:max-w-3xl">
+      <h1 class="text-3xl font-bold tracking-tight">EF Mandate</h1>
+      <p class="mt-2 text-stone-600"><T k="tagline" /></p>
+
+      {chapters.map((ch) => (
+        <section id={`ch-${ch.number}`} class="mt-16 scroll-mt-24">
+          {ch.jaPending && (
+            <p class="lang lang-ja mb-6 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              <T k="jaPending" />
+            </p>
+          )}
+          <div class="space-y-6">
+            {ch.blocks.map((block) => <Block block={block} />)}
+          </div>
+          <p class="mt-6 text-right">
+            <a href="#index" class="text-xs text-stone-400 hover:text-stone-600">
+              <T k="backToIndex" /> ↑
+            </a>
+          </p>
+        </section>
+      ))}
+    </main>
+  </div>
 </Reading>
