@@ -12,10 +12,9 @@ const { chapters, lang } = Astro.props;
     <li>
       <a
         href={`#ch-${ch.number}`}
-        class="flex items-baseline gap-2 py-2 text-stone-600 hover:text-stone-900"
+        class="block py-2 text-stone-600 hover:text-stone-900"
       >
-        <span class="w-6 shrink-0 tabular-nums text-stone-400">{ch.number}</span>
-        <span>{lang === "ja" ? (ch.jaTitle ?? ch.title) : ch.title}</span>
+        {lang === "ja" ? (ch.jaTitle ?? ch.title) : ch.title}
       </a>
     </li>
   ))}
