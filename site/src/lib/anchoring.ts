@@ -76,7 +76,7 @@ export function makeAnchor(
   text: string,
   start: number,
   end: number,
-  contextLen: number = CONTEXT_LEN
+  contextLen: number = CONTEXT_LEN,
 ): Anchor {
   const cps = codePoints(text);
   if (start < 0 || end > cps.length || start >= end) {
@@ -125,7 +125,7 @@ export function project(anchor: Anchor, current: CurrentBlock | null): Projectio
   } else {
     // Multiple occurrences → keep only those whose surrounding context matches.
     const byContext = candidates.filter((c) =>
-      contextMatches(cps, c, exact.length, anchor.prefix, anchor.suffix)
+      contextMatches(cps, c, exact.length, anchor.prefix, anchor.suffix),
     );
     if (byContext.length !== 1) {
       return { status: "needs-review", start: null, end: null, pastVersion: true };
@@ -142,7 +142,7 @@ function contextMatches(
   idx: number,
   exactLen: number,
   prefix: string,
-  suffix: string
+  suffix: string,
 ): boolean {
   const pre = codePoints(prefix);
   const suf = codePoints(suffix);

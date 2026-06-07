@@ -16,7 +16,10 @@ const enIdsByChapter = new Map<string, string[]>();
 for (const [chapter, file] of listChapters(chaptersDir(baseDir, en))) {
   const blocks = parseChapter(readFileSync(file, "utf8"));
   issues.push(...missingOrDuplicateIds(blocks, "en", chapter));
-  enIdsByChapter.set(chapter, blocks.map((b) => b.id ?? ""));
+  enIdsByChapter.set(
+    chapter,
+    blocks.map((b) => b.id ?? ""),
+  );
 }
 
 // Translations: enforce parity only on chapters whose block count matches EN
@@ -31,7 +34,14 @@ for (const src of config.sources.filter((s) => s.lang !== "en")) {
       continue;
     }
     issues.push(...missingOrDuplicateIds(blocks, src.lang, chapter));
-    issues.push(...parityIssues(enIds, blocks.map((b) => b.id ?? ""), src.lang, chapter));
+    issues.push(
+      ...parityIssues(
+        enIds,
+        blocks.map((b) => b.id ?? ""),
+        src.lang,
+        chapter,
+      ),
+    );
   }
 }
 

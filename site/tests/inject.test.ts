@@ -21,7 +21,7 @@ describe("alignTranslationIds", () => {
   });
   it("throws when block counts differ", () => {
     expect(() => alignTranslationIds(parseChapter("X"), ["02-p1", "02-p2"], "02")).toThrow(
-      /1 blocks but EN has 2/
+      /1 blocks but EN has 2/,
     );
   });
 });
@@ -29,8 +29,6 @@ describe("alignTranslationIds", () => {
 describe("renderChapter", () => {
   it("writes a marker line above each block, one blank line between", () => {
     const blocks = assignEnIds(parseChapter("A\n\nB"), "02");
-    expect(renderChapter(blocks)).toBe(
-      "<!-- block: 02-p1 -->\nA\n\n<!-- block: 02-p2 -->\nB\n"
-    );
+    expect(renderChapter(blocks)).toBe("<!-- block: 02-p1 -->\nA\n\n<!-- block: 02-p2 -->\nB\n");
   });
 });

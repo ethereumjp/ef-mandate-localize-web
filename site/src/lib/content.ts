@@ -24,20 +24,12 @@ export function chapterTitle(headingBlockContent: string): string {
 }
 
 /** Merge an EN chapter with its (possibly pending) JA counterpart, by blockId. */
-export function mergeChapter(
-  number: string,
-  enBlocks: Block[],
-  jaBlocks: Block[] | null
-): Chapter {
+export function mergeChapter(number: string, enBlocks: Block[], jaBlocks: Block[] | null): Chapter {
   // A translation chapter is "aligned" only when it has the same number of
   // blocks as EN, every JA block is uniquely marked, AND its id set matches
   // EN's exactly. (Count + uniqueness + EN ⊆ JA ⇒ set equality.) Otherwise the
   // chapter is pending and falls back to English.
-  const jaIds = new Set(
-    (jaBlocks ?? [])
-      .map((b) => b.id)
-      .filter((x): x is string => x !== null)
-  );
+  const jaIds = new Set((jaBlocks ?? []).map((b) => b.id).filter((x): x is string => x !== null));
   const aligned =
     jaBlocks !== null &&
     jaBlocks.length === enBlocks.length &&
@@ -80,9 +72,7 @@ export function loadChapters(configPath = "config.json"): Chapter[] {
   const ja = config.sources.find((s) => s.lang === "ja");
 
   const enChapters = listChapters(chaptersDir(baseDir, en));
-  const jaChapters = ja
-    ? listChapters(chaptersDir(baseDir, ja))
-    : new Map<string, string>();
+  const jaChapters = ja ? listChapters(chaptersDir(baseDir, ja)) : new Map<string, string>();
 
   const out: Chapter[] = [];
   for (const [number, enFile] of enChapters) {

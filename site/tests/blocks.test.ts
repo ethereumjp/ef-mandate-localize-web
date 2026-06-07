@@ -4,11 +4,7 @@ import { parseChapter } from "../src/lib/blocks";
 describe("parseChapter", () => {
   it("splits on blank lines into blocks", () => {
     const blocks = parseChapter("# Heading\n\nFirst para.\n\nSecond para.");
-    expect(blocks.map((b) => b.content)).toEqual([
-      "# Heading",
-      "First para.",
-      "Second para.",
-    ]);
+    expect(blocks.map((b) => b.content)).toEqual(["# Heading", "First para.", "Second para."]);
   });
   it("captures an existing marker id and excludes it from content", () => {
     const blocks = parseChapter("<!-- block: 02-p1 -->\n# Heading\n\nBody");

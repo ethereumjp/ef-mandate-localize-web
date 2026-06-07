@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { blockHash, blockHashFromNormalized } from "../src/lib/hash";
 
-const EMPTY_KECCAK =
-  "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";
+const EMPTY_KECCAK = "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";
 
 describe("blockHash", () => {
   it("matches the known keccak256 of empty input", () => {

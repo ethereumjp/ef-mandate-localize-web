@@ -3,18 +3,14 @@ import { Block } from "./blocks";
 export interface CheckIssue {
   lang: string;
   chapter: string;
-  kind:
-    | "missing-marker"
-    | "duplicate-id"
-    | "missing-in-translation"
-    | "extra-in-translation";
+  kind: "missing-marker" | "duplicate-id" | "missing-in-translation" | "extra-in-translation";
   detail: string;
 }
 
 export function missingOrDuplicateIds(
   blocks: Block[],
   lang: string,
-  chapter: string
+  chapter: string,
 ): CheckIssue[] {
   const issues: CheckIssue[] = [];
   const seen = new Set<string>();
@@ -34,7 +30,7 @@ export function parityIssues(
   enIds: string[],
   langIds: string[],
   lang: string,
-  chapter: string
+  chapter: string,
 ): CheckIssue[] {
   const en = new Set(enIds);
   const lg = new Set(langIds);

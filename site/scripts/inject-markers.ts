@@ -14,7 +14,10 @@ const enIdsByChapter = new Map<string, string[]>();
 for (const [chapter, file] of listChapters(chaptersDir(baseDir, en))) {
   const blocks = assignEnIds(parseChapter(readFileSync(file, "utf8")), chapter);
   writeFileSync(file, renderChapter(blocks));
-  enIdsByChapter.set(chapter, blocks.map((b) => b.id as string));
+  enIdsByChapter.set(
+    chapter,
+    blocks.map((b) => b.id as string),
+  );
   console.log(`en ${chapter}: ${blocks.length} blocks`);
 }
 
@@ -33,7 +36,7 @@ for (const src of config.sources.filter((s) => s.lang !== "en")) {
     if (blocks.length !== enIds.length) {
       pending.push(chapter);
       console.warn(
-        `${src.lang} ${chapter}: ${blocks.length}/${enIds.length} blocks — translation incomplete, skipped`
+        `${src.lang} ${chapter}: ${blocks.length}/${enIds.length} blocks — translation incomplete, skipped`,
       );
       continue;
     }
