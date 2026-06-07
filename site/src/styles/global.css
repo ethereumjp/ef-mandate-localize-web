@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Language toggle: show only the active language's spans/blocks. */
+[data-lang="en"] .lang-ja { display: none; }
+[data-lang="ja"] .lang-en { display: none; }
+
+/* Commentary off: hide the gutter column. */
+[data-comments="off"] .gutter { display: none; }
+
+html { scroll-behavior: smooth; }
