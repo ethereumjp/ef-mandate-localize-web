@@ -5,8 +5,8 @@ export const LANGS: Lang[] = ["en", "ja"];
 export const MESSAGES = {
   en: {
     siteTitle: "EF Mandate",
-    index: "Index",
-    backToIndex: "Back to index",
+    index: "Chapters",
+    backToIndex: "Back to chapters",
     language: "Language",
     comments: "Comments",
     on: "On",
