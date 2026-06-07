@@ -104,3 +104,31 @@ describe("project", () => {
     });
   });
 });
+
+describe("project — disambiguation", () => {
+  const H1 = "0x01" as `0x${string}`;
+  const H2 = "0x02" as `0x${string}`;
+
+  it("re-anchors to the context-matching occurrence when the quote repeats", () => {
+    const original = "the walkaway test, not the unit test";
+    const a = makeAnchor(H1, original, 13, 17); // first "test"
+    expect(a.exact).toBe("test");
+    const edited = "note: the walkaway test, not the unit test";
+    const p = project(a, { blockHash: H2, text: edited });
+    expect(p.status).toBe("re-anchored");
+    expect(p.start).toBe(19); // the first "test" in the edited text
+    expect(edited.slice(p.start!, p.end!)).toBe("test");
+  });
+
+  it("needs-review when repeated quote can't be disambiguated by context", () => {
+    const original = "ab xx cd xx ef";
+    const a = makeAnchor(H1, original, 3, 5, 0); // "xx", NO context captured
+    const edited = "z ab xx cd xx ef";
+    expect(project(a, { blockHash: H2, text: edited })).toEqual({
+      status: "needs-review",
+      start: null,
+      end: null,
+      pastVersion: true,
+    });
+  });
+});

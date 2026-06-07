@@ -111,11 +111,42 @@ export function project(anchor: Anchor, current: CurrentBlock | null): Projectio
     return { status: "needs-review", start: null, end: null, pastVersion: true };
   }
 
-  // (Disambiguation of multiple candidates is added in the next task.)
-  if (candidates.length > 1) {
-    return { status: "needs-review", start: null, end: null, pastVersion: true };
+  let idx: number;
+  if (candidates.length === 1) {
+    idx = candidates[0];
+  } else {
+    // Multiple occurrences → keep only those whose surrounding context matches.
+    const byContext = candidates.filter((c) =>
+      contextMatches(cps, c, exact.length, anchor.prefix, anchor.suffix)
+    );
+    if (byContext.length !== 1) {
+      return { status: "needs-review", start: null, end: null, pastVersion: true };
+    }
+    idx = byContext[0];
   }
 
-  const idx = candidates[0];
   return { status: "re-anchored", start: idx, end: idx + exact.length, pastVersion: true };
+}
+
+/** Does the text around `idx` match the anchor's captured prefix/suffix context? */
+function contextMatches(
+  cps: string[],
+  idx: number,
+  exactLen: number,
+  prefix: string,
+  suffix: string
+): boolean {
+  const pre = codePoints(prefix);
+  const suf = codePoints(suffix);
+  // Compare as many context code points as are available on each side.
+  const k = Math.min(pre.length, idx);
+  for (let j = 0; j < k; j++) {
+    if (cps[idx - k + j] !== pre[pre.length - k + j]) return false;
+  }
+  const end = idx + exactLen;
+  const m = Math.min(suf.length, cps.length - end);
+  for (let j = 0; j < m; j++) {
+    if (cps[end + j] !== suf[j]) return false;
+  }
+  return true;
 }
