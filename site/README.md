@@ -48,7 +48,7 @@ reported as **pending** and skipped by `blocks:inject`, `blocks:check`, and `anc
 Run from `site/`:
 
 - `pnpm dev` — local dev server (Astro).
-- `pnpm build` — static build to `dist/` (one page per chapter + a table of contents).
+- `pnpm build` — static build to `dist/` (a single page with all chapters and a jump-link index).
 - `pnpm preview` — preview the built site.
 - `pnpm run check:astro` — type-check `.astro` files.
 

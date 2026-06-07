@@ -6,7 +6,7 @@ export const MESSAGES = {
   en: {
     siteTitle: "EF Mandate",
     tagline: "Japanese localization with on-chain commentary",
-    contents: "Contents",
+    index: "Index",
     language: "Language",
     comments: "Comments",
     on: "On",
@@ -17,7 +17,7 @@ export const MESSAGES = {
   ja: {
     siteTitle: "EF Mandate",
     tagline: "オンチェーン・コメンタリー付き日本語ローカライズ",
-    contents: "目次",
+    index: "目次",
     language: "言語",
     comments: "コメント",
     on: "オン",

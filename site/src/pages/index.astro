@@ -1,27 +1,43 @@
 ---
 import Reading from "../layouts/Reading.astro";
+import Block from "../components/Block.astro";
 import T from "../components/T.astro";
 import { loadChapters } from "../lib/content";
 const chapters = loadChapters();
 ---
 <Reading title="EF Mandate">
   <main class="mx-auto max-w-3xl px-4 py-12 md:px-0">
-    <h1 class="text-3xl font-bold tracking-tight">{`EF Mandate`}</h1>
+    <h1 class="text-3xl font-bold tracking-tight">EF Mandate</h1>
     <p class="mt-2 text-stone-600"><T k="tagline" /></p>
 
-    <h2 class="mt-10 text-sm font-semibold uppercase tracking-wide text-stone-500">
-      <T k="contents" />
-    </h2>
-    <ol class="mt-4 divide-y divide-stone-200">
-      {chapters.map((ch) => (
-        <li>
-          <a href={`/${ch.number}`} class="flex items-baseline gap-3 py-3 hover:bg-stone-50">
-            <span class="w-8 shrink-0 tabular-nums text-stone-400">{ch.number}</span>
-            <span class="lang lang-en">{ch.title}</span>
-            <span class="lang lang-ja">{ch.jaTitle ?? ch.title}</span>
-          </a>
-        </li>
-      ))}
-    </ol>
+    <nav aria-label="index" class="mt-10">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500">
+        <T k="index" />
+      </h2>
+      <ol class="mt-4 divide-y divide-stone-200">
+        {chapters.map((ch) => (
+          <li>
+            <a href={`#ch-${ch.number}`} class="flex items-baseline gap-3 py-3 hover:bg-stone-50">
+              <span class="w-8 shrink-0 tabular-nums text-stone-400">{ch.number}</span>
+              <span class="lang lang-en">{ch.title}</span>
+              <span class="lang lang-ja">{ch.jaTitle ?? ch.title}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    {chapters.map((ch) => (
+      <section id={`ch-${ch.number}`} class="mt-16 scroll-mt-24">
+        {ch.jaPending && (
+          <p class="lang lang-ja mb-6 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            <T k="jaPending" />
+          </p>
+        )}
+        <div class="space-y-6">
+          {ch.blocks.map((block) => <Block block={block} />)}
+        </div>
+      </section>
+    ))}
   </main>
 </Reading>
