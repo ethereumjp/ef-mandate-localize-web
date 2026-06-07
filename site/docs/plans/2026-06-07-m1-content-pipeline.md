@@ -13,7 +13,7 @@
 ## Context for the implementer
 
 - The repo root holds the translation sources: `source/en/chapters/*.md` (English authority) and `source/ja/chapters/*.md` (Japanese). Chapters are matched by a two-digit filename prefix (`02-ourrole.md` ↔ `02-財団の役割.md`) and are paragraph-aligned.
-- All work in this plan happens inside `site/` (run npm scripts from there). The CLIs read sources via paths in `site/config.json` (relative to that file).
+- All work in this plan happens inside `site/` (run pnpm scripts from there). The CLIs read sources via paths in `site/config.json` (relative to that file).
 - This branch is `feat/commentary` on the fork. Task 8 **edits the real `source/**/*.md` files** to inject markers — that is intended by the design (markers are invisible in every Markdown renderer and stripped from build output).
 - A "block" = a run of non-empty lines delimited by blank lines (a paragraph or heading). Block text may contain a single internal `\n` (some paragraphs wrap mid-line in the source); that is preserved.
 - Module imports are extensionless (TS `moduleResolution: Bundler` + `tsx`/`vitest`).
@@ -21,7 +21,7 @@
 ## File Structure
 
 Created under `site/`:
-- `package.json`, `tsconfig.json`, `.gitignore`, `package-lock.json`
+- `package.json`, `tsconfig.json`, `.gitignore`, `pnpm-lock.yaml`
 - `config.json` — source manifest (en, ja)
 - `src/lib/normalize.ts` — canonicalize block text + code-point length
 - `src/lib/hash.ts` — `blockHash` via viem keccak256
@@ -57,6 +57,7 @@ Modified:
   "name": "ef-mandate-site",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -119,18 +120,18 @@ describe("toolchain", () => {
 
 - [ ] **Step 5: Install dependencies**
 
-Run (from `site/`): `npm install`
-Expected: creates `node_modules/` and `package-lock.json`, no errors.
+Run (from `site/`): `pnpm install`
+Expected: creates `node_modules/` and `pnpm-lock.yaml`, no errors.
 
 - [ ] **Step 6: Run the smoke test**
 
-Run (from `site/`): `npm test`
+Run (from `site/`): `pnpm test`
 Expected: PASS, 1 test passed.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add site/package.json site/tsconfig.json site/.gitignore site/package-lock.json site/tests/smoke.test.ts
+git add site/package.json site/tsconfig.json site/.gitignore site/pnpm-lock.yaml site/tests/smoke.test.ts
 git commit -m "chore(site): scaffold TypeScript pipeline package"
 ```
 
@@ -172,7 +173,7 @@ describe("normalizeBlockText", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run tests/normalize.test.ts`
+Run: `pnpm exec vitest run tests/normalize.test.ts`
 Expected: FAIL ("Cannot find module ../src/lib/normalize").
 
 - [ ] **Step 3: Write minimal implementation**
@@ -212,7 +213,7 @@ export function codePointLength(text: string): number {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run tests/normalize.test.ts`
+Run: `pnpm exec vitest run tests/normalize.test.ts`
 Expected: PASS (6 tests).
 
 - [ ] **Step 5: Commit**
@@ -259,7 +260,7 @@ describe("blockHash", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run tests/hash.test.ts`
+Run: `pnpm exec vitest run tests/hash.test.ts`
 Expected: FAIL ("Cannot find module ../src/lib/hash").
 
 - [ ] **Step 3: Write minimal implementation**
@@ -282,7 +283,7 @@ export function blockHash(blockSource: string): `0x${string}` {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run tests/hash.test.ts`
+Run: `pnpm exec vitest run tests/hash.test.ts`
 Expected: PASS (4 tests).
 
 - [ ] **Step 5: Commit**
@@ -325,7 +326,7 @@ describe("ids", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run tests/ids.test.ts`
+Run: `pnpm exec vitest run tests/ids.test.ts`
 Expected: FAIL ("Cannot find module ../src/lib/ids").
 
 - [ ] **Step 3: Write minimal implementation**
@@ -356,7 +357,7 @@ export function nextIdNumber(existing: string[]): number {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run tests/ids.test.ts`
+Run: `pnpm exec vitest run tests/ids.test.ts`
 Expected: PASS (4 tests).
 
 - [ ] **Step 5: Commit**
@@ -409,7 +410,7 @@ describe("parseChapter", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run tests/blocks.test.ts`
+Run: `pnpm exec vitest run tests/blocks.test.ts`
 Expected: FAIL ("Cannot find module ../src/lib/blocks").
 
 - [ ] **Step 3: Write minimal implementation**
@@ -450,7 +451,7 @@ export function parseChapter(source: string): Block[] {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run tests/blocks.test.ts`
+Run: `pnpm exec vitest run tests/blocks.test.ts`
 Expected: PASS (4 tests).
 
 - [ ] **Step 5: Commit**
@@ -494,7 +495,7 @@ describe("sources", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run tests/sources.test.ts`
+Run: `pnpm exec vitest run tests/sources.test.ts`
 Expected: FAIL ("Cannot find module ../src/lib/sources").
 
 - [ ] **Step 3: Write minimal implementation**
@@ -570,7 +571,7 @@ export function listChapters(dir: string): Map<string, string> {
 
 - [ ] **Step 5: Run test to verify it passes**
 
-Run: `npx vitest run tests/sources.test.ts`
+Run: `pnpm exec vitest run tests/sources.test.ts`
 Expected: PASS (2 tests).
 
 - [ ] **Step 6: Commit**
@@ -631,7 +632,7 @@ describe("renderChapter", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run tests/inject.test.ts`
+Run: `pnpm exec vitest run tests/inject.test.ts`
 Expected: FAIL ("Cannot find module ../src/lib/inject").
 
 - [ ] **Step 3: Write minimal implementation**
@@ -677,7 +678,7 @@ export function renderChapter(blocks: Block[]): string {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run tests/inject.test.ts`
+Run: `pnpm exec vitest run tests/inject.test.ts`
 Expected: PASS (5 tests).
 
 - [ ] **Step 5: Commit**
@@ -734,7 +735,7 @@ console.log("done");
 
 - [ ] **Step 2: Run the injector on the real sources**
 
-Run (from `site/`): `npm run blocks:inject`
+Run (from `site/`): `pnpm run blocks:inject`
 Expected: prints `en 01..08` and `ja 01..08` with block counts and `done`.
 
 If it throws `translation has N blocks but EN has M` for a chapter: the Japanese chapter's paragraph/heading structure diverges from English. Fix by splitting/merging the offending Japanese block(s) so the block count matches EN (the chapters are meant to be paragraph-aligned), then re-run. Do not change ids by hand.
@@ -749,7 +750,7 @@ Expected: a positive count equal to that chapter's block count.
 
 - [ ] **Step 4: Confirm idempotency**
 
-Run (from `site/`): `npm run blocks:inject` again, then (repo root) `git diff --stat source/`
+Run (from `site/`): `pnpm run blocks:inject` again, then (repo root) `git diff --stat source/`
 Expected: **no further changes** beyond Step 2 (re-running injects nothing new).
 
 - [ ] **Step 5: Commit**
@@ -866,7 +867,7 @@ describe("parityIssues", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run tests/check.test.ts`
+Run: `pnpm exec vitest run tests/check.test.ts`
 Expected: FAIL ("Cannot find module ../src/lib/check").
 
 - [ ] **Step 3: Write minimal implementation**
@@ -926,7 +927,7 @@ export function parityIssues(
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run tests/check.test.ts`
+Run: `pnpm exec vitest run tests/check.test.ts`
 Expected: PASS (5 tests).
 
 - [ ] **Step 5: Write the check CLI**
@@ -965,7 +966,7 @@ for (const src of config.sources) {
 
 if (issues.length > 0) {
   for (const i of issues) console.error(`✗ ${i.lang} ${i.chapter} [${i.kind}] ${i.detail}`);
-  console.error(`\n${issues.length} issue(s). Run: npm run blocks:inject`);
+  console.error(`\n${issues.length} issue(s). Run: pnpm run blocks:inject`);
   process.exit(1);
 }
 console.log("✓ all block markers valid and aligned");
@@ -973,7 +974,7 @@ console.log("✓ all block markers valid and aligned");
 
 - [ ] **Step 6: Run the check against the real sources**
 
-Run (from `site/`): `npm run blocks:check`
+Run (from `site/`): `pnpm run blocks:check`
 Expected: `✓ all block markers valid and aligned` (exit 0). (Sources were injected in Task 8.)
 
 - [ ] **Step 7: Commit**
@@ -1020,7 +1021,7 @@ describe("buildChapterAnchors", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run tests/anchors.test.ts`
+Run: `pnpm exec vitest run tests/anchors.test.ts`
 Expected: FAIL ("Cannot find module ../src/lib/anchors").
 
 - [ ] **Step 3: Write minimal implementation**
@@ -1056,7 +1057,7 @@ export function buildChapterAnchors(source: string): ChapterAnchors {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run tests/anchors.test.ts`
+Run: `pnpm exec vitest run tests/anchors.test.ts`
 Expected: PASS (2 tests).
 
 - [ ] **Step 5: Write the build-anchors CLI**
@@ -1092,10 +1093,10 @@ for (const src of config.sources) {
 
 - [ ] **Step 6: Build anchors against the real sources**
 
-Run (from `site/`): `npm run anchors:build`
+Run (from `site/`): `pnpm run anchors:build`
 Expected: `wrote .../site/anchors/en.json` and `.../site/anchors/ja.json`.
 
-Run: `node -e "const d=require('./anchors/ja.json'); console.log(d.lang, Object.keys(d.chapters).length, Object.keys(d.chapters['02']).length)"`
+Run: `node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('anchors/ja.json','utf8')); console.log(d.lang, Object.keys(d.chapters).length, Object.keys(d.chapters['02']).length)"`
 Expected: `ja 8 <n>` where `<n>` is chapter 02's block count (matches the `grep -c` from Task 8).
 
 (`anchors/` is gitignored — do not commit it.)
@@ -1132,15 +1133,18 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: site/package-lock.json
-      - run: npm ci
-      - run: npm test
-      - run: npm run blocks:check
-      - run: npm run anchors:build
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm run blocks:check
+      - run: pnpm run anchors:build
 ```
 
 - [ ] **Step 2: Validate the workflow YAML locally**
@@ -1171,14 +1175,14 @@ Append the following section to the end of `site/README.md`:
 
 Run from `site/`:
 
-- `npm run blocks:inject` — inject/normalize `<!-- block: NN-pM -->` markers in the
+- `pnpm run blocks:inject` — inject/normalize `<!-- block: NN-pM -->` markers in the
   configured sources. English (`source/en`) is the id authority; translations mirror
   EN ids by position. Idempotent.
-- `npm run blocks:check` — validate that every block has a unique marker and that each
+- `pnpm run blocks:check` — validate that every block has a unique marker and that each
   translation's id set matches English (used in CI).
-- `npm run anchors:build` — emit `anchors/<lang>.json` (`blockId -> { order, text,
+- `pnpm run anchors:build` — emit `anchors/<lang>.json` (`blockId -> { order, text,
   blockHash }`) for the runtime re-anchoring layer. Output is gitignored.
-- `npm test` — unit tests for normalization, hashing, parsing, ids, injection, checks,
+- `pnpm test` — unit tests for normalization, hashing, parsing, ids, injection, checks,
   anchors.
 
 Sources are declared in `config.json`. Markers are invisible in Markdown renderers and
@@ -1187,10 +1191,10 @@ stripped from the merged manuscript by `scripts/build.py`.
 
 - [ ] **Step 2: Full-suite verification**
 
-Run (from `site/`): `npm test`
+Run (from `site/`): `pnpm test`
 Expected: PASS — all suites (smoke, normalize, hash, ids, blocks, sources, inject, check, anchors).
 
-Run (from `site/`): `npm run blocks:check`
+Run (from `site/`): `pnpm run blocks:check`
 Expected: `✓ all block markers valid and aligned`.
 
 - [ ] **Step 3: Commit**
