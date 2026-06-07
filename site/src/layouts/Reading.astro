@@ -24,7 +24,7 @@ const { title, lang } = Astro.props;
     </script>
     <title>{title}</title>
   </head>
-  <body class="min-h-screen bg-white text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
+  <body class="min-h-screen antialiased">
     <Toolbar lang={lang} />
     <slot />
   </body>
