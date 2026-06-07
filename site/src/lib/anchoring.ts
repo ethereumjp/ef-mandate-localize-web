@@ -62,6 +62,14 @@ export const CONTEXT_LEN = 32;
 /**
  * Build an anchor for a [start, end) code-point span of a block's normalized text.
  * Called at authoring time (M4). `blockHash` is the hash of the same normalized text.
+ *
+ * IMPORTANT: pass NFC-normalized text — the same `normalizeBlockText` output the
+ * `blockHash` is computed over. `project` matches `exact` verbatim, so a non-normalized
+ * quote would silently degrade to `needs-review`.
+ *
+ * Field mapping for M4/EAS: this `Anchor`'s `exact` / `prefix` / `suffix` / `start` / `end`
+ * correspond to the schema fields `spanExact` / `spanPrefix` / `spanSuffix` / `spanStart` /
+ * `spanEnd` (spec §7).
  */
 export function makeAnchor(
   blockHash: `0x${string}`,
