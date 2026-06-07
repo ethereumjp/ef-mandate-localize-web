@@ -3,6 +3,7 @@
 @import "@fontsource/noto-serif-jp/japanese-400.css";
 @import "@fontsource/noto-serif-jp/japanese-700.css";
 @plugin "@tailwindcss/typography";
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
     --color-dark: rgb(55, 55, 52);
@@ -50,4 +51,8 @@ body {
 [data-fallback="en"] {
     border-left: 2px solid var(--color-amber-200);
     padding-left: 0.75rem;
+}
+
+[data-theme="dark"] [data-fallback="en"] {
+  border-color: var(--color-amber-700);
 }

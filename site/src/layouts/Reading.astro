@@ -13,9 +13,18 @@ const { title, lang } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem("theme");
+        const dark = saved
+          ? saved === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      })();
+    </script>
     <title>{title}</title>
   </head>
-  <body class="min-h-screen bg-white text-stone-900 antialiased">
+  <body class="min-h-screen bg-white text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100">
     <Toolbar lang={lang} />
     <slot />
   </body>

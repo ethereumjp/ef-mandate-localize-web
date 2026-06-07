@@ -14,7 +14,7 @@ const jaFallback = lang === "ja" && block.jaHtml === null;
     <!-- commentary gutter slot (badges arrive in M5) -->
   </div>
   <div
-    class="prose prose-stone max-w-none"
+    class="prose prose-stone max-w-none dark:prose-invert"
     data-fallback={jaFallback ? "en" : undefined}
     set:html={html}
   />
