@@ -13,6 +13,9 @@ export const MESSAGES = {
     off: "Off",
     jaPending: "This chapter isn't translated to Japanese yet — showing English.",
     home: "Home",
+    sourceCode: "Source code",
+    originalPdf: "Original PDF",
+    projectNote: "A community Japanese localization of the EF Mandate — not an official EF translation.",
   },
   ja: {
     siteTitle: "EF Mandate",
@@ -24,6 +27,9 @@ export const MESSAGES = {
     off: "オフ",
     jaPending: "この章はまだ日本語訳がありません — 英語を表示しています。",
     home: "ホーム",
+    sourceCode: "ソースコード",
+    originalPdf: "原文PDF",
+    projectNote: "EF Mandate のコミュニティによる日本語ローカライズです（EF 公式翻訳ではありません）。",
   },
 } as const;
 
