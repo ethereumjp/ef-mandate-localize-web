@@ -9,3 +9,16 @@
 [data-comments="off"] .gutter { display: none; }
 
 html { scroll-behavior: smooth; }
+
+/* Reading column + block layout. */
+.block { scroll-margin-top: 5rem; }
+
+/* Gutter is only meaningful when commentary is on; the toggle CSS above hides it
+   when off. Give it a subtle hover affordance for when M5 adds badges. */
+[data-comments="on"] .gutter { display: block; }
+
+/* Fallback (EN shown in JA mode for pending chapters) gets a faint left rule. */
+[data-lang="ja"] .lang-ja[data-fallback="en"] {
+  border-left: 2px solid var(--color-amber-200);
+  padding-left: 0.75rem;
+}
