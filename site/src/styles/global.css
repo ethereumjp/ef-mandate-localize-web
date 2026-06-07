@@ -5,13 +5,8 @@
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-@theme {
-    --color-dark: rgb(55, 55, 52);
-    --color-light: oklch(0.98 0.003 106.4);
-}
-
 html {
-    @apply bg-light text-dark;
+    @apply bg-stone-200 text-stone-800;
 }
 
 /* Language toggle: show only the active language's spans/blocks. */
@@ -54,5 +49,5 @@ body {
 }
 
 [data-theme="dark"] [data-fallback="en"] {
-  border-color: var(--color-amber-700);
+    border-color: var(--color-amber-700);
 }
