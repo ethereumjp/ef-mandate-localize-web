@@ -7,7 +7,7 @@ A reading website with an on‑chain commentary layer. It is kept here under `si
 - Language toggle (EN / JA, more later), with the UI chrome localized to the selected language
 - Commentary on/off
 - Wallet‑authenticated commentary on any text span, recorded as **EAS** attestations, with anchoring that survives edits to the original and translations
-- Delivery via **GitHub Pages** (`config.{json,yaml}`) or **IPFS + ENS `contenthash`**
+- Delivery via **GitHub Pages** (`config.json`) or **IPFS + ENS `contenthash`**
 
 ## Design
 
