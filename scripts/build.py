@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import subprocess
 from dataclasses import dataclass
@@ -101,10 +102,14 @@ def validate_alignment(source_paths: list[Path], translation_paths: list[Path]) 
         raise ValueError("\n".join(parts))
 
 
+BLOCK_MARKER_RE = re.compile(r"^[ \t]*<!--\s*block:[^>]*-->[ \t]*\n?", re.MULTILINE)
+
+
 def read_chapters(chapter_paths: list[Path]) -> list[Chapter]:
     chapters: list[Chapter] = []
     for path in chapter_paths:
-        text = path.read_text(encoding="utf-8").strip()
+        raw = path.read_text(encoding="utf-8")
+        text = BLOCK_MARKER_RE.sub("", raw).strip()
         if not text:
             raise ValueError(f"Chapter is empty: {path}")
         chapters.append(Chapter(path=path, text=text))
