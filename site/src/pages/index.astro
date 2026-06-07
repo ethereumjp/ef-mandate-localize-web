@@ -43,8 +43,9 @@ const chapters = loadChapters();
             {ch.blocks.map((block) => <Block block={block} />)}
           </div>
           <p class="mt-6 text-right">
-            <a href="#index" class="text-xs text-stone-400 hover:text-stone-600">
-              <T k="backToIndex" /> ↑
+            <a href="#index" class="text-stone-400 hover:text-stone-600">
+              <span class="sr-only"><T k="backToIndex" /></span>
+              <span aria-hidden="true">↑</span>
             </a>
           </p>
         </section>
