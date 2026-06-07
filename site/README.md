@@ -57,3 +57,20 @@ The reading view renders each block in both languages (`data-block-id`, `.lang-e
 `localStorage`), so toggling language is instant and keeps your place. Chapters without a
 complete Japanese translation fall back to English with a notice. UI strings live in
 `src/lib/i18n.ts`.
+
+## Re-anchoring (M3)
+
+`src/lib/anchoring.ts` is the pure module the commentary layer uses to keep comments
+attached to text across edits (spec §6/§9):
+
+- `makeAnchor(blockHash, text, start, end)` — build a comment's anchor at authoring time:
+  the exact quote, a little prefix/suffix context, and code-point offsets.
+- `project(anchor, currentBlock | null)` — classify against the current text:
+  - `anchored` — block hash unchanged; offsets valid as-is.
+  - `re-anchored` — block changed but the quote was re-located (uniquely, using context).
+  - `needs-review` — the quote is gone or ambiguous; surfaced to humans, never guessed.
+  - `orphaned` — the block itself no longer exists.
+  Every status except `anchored` sets `pastVersion: true` (the "Comment for past version"
+  tag). Attestations are immutable; this is the derived current-version view.
+
+`pnpm run reanchor:demo` prints the four outcomes for a scripted in-memory edit.

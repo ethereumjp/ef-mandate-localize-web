@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "blocks:inject": "tsx scripts/inject-markers.ts",
     "blocks:check": "tsx scripts/check-markers.ts",
-    "anchors:build": "tsx scripts/build-anchors.ts"
+    "anchors:build": "tsx scripts/build-anchors.ts",
+    "reanchor:demo": "tsx scripts/reanchor-demo.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["esbuild", "sharp"]
