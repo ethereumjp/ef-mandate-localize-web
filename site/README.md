@@ -20,3 +20,25 @@ Demo (work in progress) on branch `feat/commentary` — Sepolia for the demo, Et
 ## Stack
 
 Astro · Tailwind CSS · Base UI (headless) · wagmi (+ viem) · ethers v6 (via wagmi's adapter) · `@ethereum-attestation-service/eas-sdk` · EAS GraphQL. Fully static, no backend.
+
+## Content pipeline (M1)
+
+Run from `site/`:
+
+- `pnpm run blocks:inject` — inject/normalize `<!-- block: NN-pM -->` markers in the
+  configured sources. English (`source/en`) is the id authority; translations mirror EN
+  ids by position. Idempotent.
+- `pnpm run blocks:check` — validate that every block has a unique marker and that each
+  translation's id set matches English (used in CI).
+- `pnpm run anchors:build` — emit `anchors/<lang>.json` (`blockId -> { order, text,
+  blockHash }`) for the runtime re-anchoring layer. Output is gitignored.
+- `pnpm test` — unit tests for normalization, hashing, parsing, ids, injection, checks,
+  anchors.
+
+Sources are declared in `config.json`. Markers are invisible in Markdown renderers and are
+stripped from the merged manuscript by `scripts/build.py`.
+
+Localization is ongoing: a translation chapter is aligned only once its block count
+matches English. Chapters that don't yet match (untranslated stubs or mid-edit) are
+reported as **pending** and skipped by `blocks:inject`, `blocks:check`, and `anchors:build`
+— they never fail CI.
