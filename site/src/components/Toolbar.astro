@@ -1,5 +1,5 @@
 ---
-import { MESSAGES } from "../lib/i18n";
+import { MESSAGES, LANG_OPTIONS } from "../lib/i18n";
 import type { Lang } from "../lib/i18n";
 interface Props {
     lang: Lang;
@@ -13,29 +13,24 @@ const { lang } = Astro.props;
     <div
         class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3"
     >
-        <a href="/" class="font-bold text-2xl tracking-tight"
+        <a href="/" class="whitespace-nowrap font-bold text-2xl tracking-tight"
             >{MESSAGES.en.siteTitle}</a
         >
         <div class="flex items-center gap-3 text-sm">
             <span id="wallet-slot"></span>
-            <div class="flex items-center gap-1">
-                <a
-                    data-lang-link="en"
-                    href="/"
-                    class:list={[
-                        "rounded px-2 py-1 hover:bg-stone-100 dark:hover:bg-stone-800",
-                        { "font-semibold underline": lang === "en" },
-                    ]}>EN</a
-                >
-                <a
-                    data-lang-link="ja"
-                    href="/ja"
-                    class:list={[
-                        "rounded px-2 py-1 hover:bg-stone-100 dark:hover:bg-stone-800",
-                        { "font-semibold underline": lang === "ja" },
-                    ]}>日本語</a
-                >
-            </div>
+            <select
+                data-lang-select
+                aria-label={MESSAGES[lang].language}
+                class="rounded border border-stone-300 bg-transparent px-2 py-1 text-sm hover:bg-stone-100 dark:border-stone-700 dark:hover:bg-stone-800"
+            >
+                {
+                    LANG_OPTIONS.map((opt) => (
+                        <option value={opt.route} selected={lang === opt.code}>
+                            {opt.label}
+                        </option>
+                    ))
+                }
+            </select>
             <button
                 data-toggle-comments
                 type="button"

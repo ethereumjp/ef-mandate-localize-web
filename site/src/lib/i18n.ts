@@ -2,6 +2,12 @@ export type Lang = "en" | "ja";
 
 export const LANGS: Lang[] = ["en", "ja"];
 
+/** Language switcher options (route + endonym label). Add a row per new language. */
+export const LANG_OPTIONS: { code: Lang; label: string; route: string }[] = [
+  { code: "en", label: "English", route: "/" },
+  { code: "ja", label: "日本語", route: "/ja" },
+];
+
 export const MESSAGES = {
   en: {
     siteTitle: "EF Mandate",

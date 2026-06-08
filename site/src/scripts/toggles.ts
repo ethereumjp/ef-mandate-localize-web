@@ -22,13 +22,9 @@ themeBtn?.addEventListener("click", () => {
   localStorage.setItem("theme", next);
 });
 
-// Language is route-based (/ = en, /ja = ja); carry the current section hash across.
-function syncLangLinks() {
-  const hash = location.hash;
-  for (const el of document.querySelectorAll<HTMLAnchorElement>("[data-lang-link]")) {
-    const base = el.dataset.langLink === "ja" ? "/ja" : "/";
-    el.setAttribute("href", base + hash);
-  }
-}
-syncLangLinks();
-addEventListener("hashchange", syncLangLinks);
+// Language is route-based (/ = en, /ja = ja, …); navigate on change, carrying the hash
+// so the reader keeps their place.
+const langSelect = document.querySelector<HTMLSelectElement>("[data-lang-select]");
+langSelect?.addEventListener("change", () => {
+  location.href = langSelect.value + location.hash;
+});

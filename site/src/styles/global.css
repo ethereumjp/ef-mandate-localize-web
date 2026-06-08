@@ -9,6 +9,14 @@ body {
     @apply bg-stone-50 text-stone-800 dark:bg-stone-800 dark:text-stone-50;
 }
 
+/* Let native controls (the language <select> dropdown, scrollbars) match the theme. */
+[data-theme="light"] {
+    color-scheme: light;
+}
+[data-theme="dark"] {
+    color-scheme: dark;
+}
+
 /* Language toggle: show only the active language's spans/blocks. */
 [data-lang="en"] .lang-ja {
     display: none;
