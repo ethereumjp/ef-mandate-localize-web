@@ -1,5 +1,5 @@
 import { Dialog } from "@base-ui-components/react/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CONTRIBUTION_TYPES, type ContributionType } from "../../web3/types";
 
 interface Props {
@@ -13,6 +13,13 @@ interface Props {
 export function Composer({ open, onOpenChange, onSubmit, pending, error }: Props) {
   const [type, setType] = useState<ContributionType>("Commentary");
   const [body, setBody] = useState("");
+  // Reset the form each time the dialog opens (it's reused across selections).
+  useEffect(() => {
+    if (open) {
+      setBody("");
+      setType("Commentary");
+    }
+  }, [open]);
   return (
     <Dialog.Root open={open} onOpenChange={(next) => onOpenChange(next)}>
       <Dialog.Portal>
