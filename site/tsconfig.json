@@ -4,7 +4,9 @@
     "resolveJsonModule": true,
     "types": ["node"],
     "noEmit": true,
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   },
   "include": ["src", "scripts", "tests"],
   "exclude": ["dist", ".astro"]

@@ -5,6 +5,7 @@ import SiteMeta from "./SiteMeta.astro";
 import T from "./T.astro";
 import { loadChapters } from "../lib/content";
 import type { Lang } from "../lib/i18n";
+import CommentApp from "./comments/CommentApp";
 interface Props {
   lang: Lang;
 }
@@ -60,3 +61,4 @@ const chapters = loadChapters();
 <footer class="mx-auto max-w-6xl border-t border-stone-200 px-4 py-8 dark:border-stone-800 md:hidden">
   <SiteMeta lang={lang} />
 </footer>
+<CommentApp client:load lang={lang} />

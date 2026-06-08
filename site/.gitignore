@@ -3,3 +3,4 @@ dist/
 anchors/
 .astro/
 *.tsbuildinfo
+.env
