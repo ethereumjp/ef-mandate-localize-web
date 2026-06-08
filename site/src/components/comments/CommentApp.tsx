@@ -14,7 +14,7 @@ import { anchorFromSelection } from "../../web3/selection";
 // dynamic import() was elided from the static build, killing on-chain publish.
 import { encodeComment } from "../../web3/schema";
 import { attestComment } from "../../web3/eas";
-import type { Comment, ContributionType } from "../../web3/types";
+import type { Comment } from "../../web3/types";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
 import { Composer } from "./Composer";
@@ -108,7 +108,7 @@ function CommentController({ lang }: Props) {
     setComposerOpen(true);
   }
 
-  async function handleSubmit(type: ContributionType, body: string) {
+  async function handleSubmit(body: string) {
     const target = capturedTarget.current;
     if (!target) return;
 
@@ -129,7 +129,6 @@ function CommentController({ lang }: Props) {
       chapter,
       blockId,
       lang,
-      contributionType: type,
       body,
       spanStart: anchor.start,
       spanEnd: anchor.end,
@@ -154,7 +153,6 @@ function CommentController({ lang }: Props) {
         spanExact: anchor.exact,
         spanPrefix: anchor.prefix,
         spanSuffix: anchor.suffix,
-        contributionType: type,
         parentUid,
         body,
       });

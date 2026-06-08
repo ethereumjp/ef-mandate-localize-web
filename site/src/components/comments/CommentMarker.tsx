@@ -4,7 +4,7 @@ export function CommentMarker({ comments }: { comments: Comment[] }) {
   const pending = comments.some((c) => c.pending);
   return (
     <span
-      title={comments.map((c) => `${c.contributionType}: ${c.body}`).join("\n")}
+      title={comments.map((c) => c.body).join("\n")}
       className="inline-flex items-center gap-0.5 text-xs text-stone-400"
     >
       💬 {comments.length}

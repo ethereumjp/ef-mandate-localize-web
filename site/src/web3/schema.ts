@@ -12,7 +12,6 @@ export interface CommentFields {
   spanExact: string;
   spanPrefix: string;
   spanSuffix: string;
-  contributionType: string;
   parentUid: string;
   body: string;
 }
@@ -31,7 +30,6 @@ export function encodeComment(f: CommentFields): string {
     { name: "spanExact", value: f.spanExact, type: "string" },
     { name: "spanPrefix", value: f.spanPrefix, type: "string" },
     { name: "spanSuffix", value: f.spanSuffix, type: "string" },
-    { name: "contributionType", value: f.contributionType, type: "string" },
     { name: "parentUid", value: f.parentUid, type: "bytes32" },
     { name: "body", value: f.body, type: "string" },
   ]);
@@ -51,7 +49,6 @@ export function decodeComment(data: string): CommentFields {
     spanExact: String(get("spanExact")),
     spanPrefix: String(get("spanPrefix")),
     spanSuffix: String(get("spanSuffix")),
-    contributionType: String(get("contributionType")),
     parentUid: String(get("parentUid")),
     body: String(get("body")),
   };

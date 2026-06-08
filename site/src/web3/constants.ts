@@ -5,4 +5,4 @@ export const SEPOLIA_CHAIN_ID = 11155111;
 
 /** The comment schema (registered once; demo keeps the body inline). */
 export const SCHEMA =
-  "string chapter,string blockId,string lang,bytes32 sourceId,bytes32 blockHash,uint32 spanStart,uint32 spanEnd,string spanExact,string spanPrefix,string spanSuffix,string contributionType,bytes32 parentUid,string body";
+  "string chapter,string blockId,string lang,bytes32 sourceId,bytes32 blockHash,uint32 spanStart,uint32 spanEnd,string spanExact,string spanPrefix,string spanSuffix,bytes32 parentUid,string body";

@@ -81,7 +81,7 @@ attached to text across edits (spec §6/§9):
 
 Reader comments are **EAS attestations published on Sepolia** (Ethereum mainnet for production). Each comment is anchored to the exact text span the reader selects — using the same rendered-text anchoring system built in M1/M3 (`makeAnchor` / `project`). The UI is a client-only React island (`client:only="react"`) that is gated by the existing Comments on/off toggle in the toolbar; it has no server component and produces no SSR output.
 
-When a reader selects text in a chapter block, a popover offers a 💬 button. Clicking it opens the Composer, where the reader chooses a comment type (*Question*, *Commentary*, *Critique*, *Localization note*, or *Clarification*) and writes a body. Pressing **Publish** asks the connected wallet (MetaMask/Rabby on Sepolia) to sign the attestation transaction. The comment badge appears immediately (optimistic), then resolves once the transaction confirms.
+When a reader selects text in a chapter block, a popover offers a 💬 button. Clicking it opens the Composer, where the reader writes a comment. Pressing **Publish** asks the connected wallet (MetaMask/Rabby on Sepolia) to sign the attestation transaction. The comment badge appears immediately (optimistic), then resolves once the transaction confirms.
 
 Reading existing attestations and projecting the comment gutter thread view is **M5**.
 
