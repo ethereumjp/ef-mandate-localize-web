@@ -29,4 +29,6 @@ jobs:
       - run: pnpm test
       - run: pnpm run blocks:check
       - run: pnpm run anchors:build
+      # The on-chain attest path (EAS attestation via a Sepolia wallet) is verified
+      # manually — there is no wallet or Sepolia RPC in CI.  See site/docs/m4-demo-checklist.md.
       - run: pnpm build

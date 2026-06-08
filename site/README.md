@@ -74,3 +74,42 @@ attached to text across edits (spec §6/§9):
   tag). Attestations are immutable; this is the derived current-version view.
 
 `pnpm run reanchor:demo` prints the four outcomes for a scripted in-memory edit.
+
+## Commenting (M4)
+
+### What it is
+
+Reader comments are **EAS attestations published on Sepolia** (Ethereum mainnet for production). Each comment is anchored to the exact text span the reader selects — using the same rendered-text anchoring system built in M1/M3 (`makeAnchor` / `project`). The UI is a client-only React island (`client:only="react"`) that is gated by the existing Comments on/off toggle in the toolbar; it has no server component and produces no SSR output.
+
+When a reader selects text in a chapter block, a popover offers a 💬 button. Clicking it opens the Composer, where the reader chooses a comment type (e.g. *question*, *correction*, *translation-note*) and writes a body. Pressing **Publish** asks the connected wallet (MetaMask/Rabby on Sepolia) to sign the attestation transaction. The comment badge appears immediately (optimistic), then resolves once the transaction confirms.
+
+Reading existing attestations and projecting the comment gutter thread view is **M5**.
+
+### Environment variables
+
+| Variable | Required | When read | Notes |
+|---|---|---|---|
+| `PUBLIC_SEPOLIA_RPC_URL` | No | runtime | JSON-RPC endpoint; defaults to the public node in `.env.example` if unset |
+| `PUBLIC_EAS_SCHEMA_UID` | **Yes (for attest path)** | **build time** | UID of the registered EAS schema. The attest code ships in every build; the submit path only *functions* when this was set at build time. If unset, the UI shows "Connect a wallet on Sepolia (and set PUBLIC_EAS_SCHEMA_UID)" and no transaction is attempted. |
+| `SEPOLIA_PRIVATE_KEY` | Schema-register script only | `pnpm run schema:register` | A throwaway testnet key; **never commit**. Not read by the site. |
+
+**Build-time note:** `PUBLIC_EAS_SCHEMA_UID` is baked in at `pnpm build` time (Astro static build). For a deployed or IPFS artifact (M6), set this variable in `.env` *before* running `pnpm build`. If you change `.env` after building, rebuild the artifact.
+
+### One-time setup
+
+1. **Wallet + testnet ETH** — Install MetaMask or Rabby and obtain Sepolia ETH from a faucet (e.g. `sepoliafaucet.com` or the Alchemy Sepolia faucet).
+2. **Copy the env file** — `cp .env.example .env` (`.env` is gitignored).
+3. **Register the schema** — Fund a throwaway Sepolia key, then run:
+   ```
+   SEPOLIA_PRIVATE_KEY=0x… PUBLIC_SEPOLIA_RPC_URL=https://… pnpm run schema:register
+   ```
+   Copy the printed UID and set it in `.env`:
+   ```
+   PUBLIC_EAS_SCHEMA_UID=0x<uid>
+   ```
+   Alternatively, register the same schema string at [easscan.org](https://sepolia.easscan.org) via the Sepolia SchemaRegistry UI and copy the resulting UID.
+4. **Rebuild / start dev** — Run `pnpm dev` (or `pnpm build` for a static artifact). The attest path is now live.
+
+### Manual demo checklist
+
+See [`docs/m4-demo-checklist.md`](docs/m4-demo-checklist.md).
