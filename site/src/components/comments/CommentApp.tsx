@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { WagmiProvider } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useAccount } from "wagmi";
+import { WagmiProvider, useAccount } from "wagmi";
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { wagmiConfig, SCHEMA_UID } from "../../web3/config";
 import { useEthersSigner } from "../../web3/ethers";
 import { anchorFromSelection } from "../../web3/selection";
@@ -13,16 +12,21 @@ import { anchorFromSelection } from "../../web3/selection";
 // dynamic import() was elided from the static build, killing on-chain publish.
 import { encodeComment } from "../../web3/schema";
 import { attestComment } from "../../web3/eas";
-import type { Comment } from "../../web3/types";
+import { fetchComments, type StoredComment } from "../../web3/read";
+import { projectComments, type ProjectedComment } from "../../web3/projectComments";
+import { rangeForOffsets, applyHighlights } from "../../web3/highlight";
+import type { Lang } from "../../lib/i18n";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
 import { Composer } from "./Composer";
 import { CommentMarker } from "./CommentMarker";
+import { CommentThread } from "./CommentThread";
 
 const queryClient = new QueryClient();
+const ZERO_UID = "0x" + "00".repeat(32);
 
 interface Props {
-  lang: string;
+  lang: Lang;
 }
 
 interface SelectionTarget {
@@ -32,20 +36,51 @@ interface SelectionTarget {
   rect: DOMRect;
 }
 
+/** Read whether commentary is currently toggled on (driven by scripts/toggles.ts). */
+function commentsEnabled(): boolean {
+  return document.documentElement.dataset.comments === "on";
+}
+
 function CommentController({ lang }: Props) {
   const signer = useEthersSigner();
   const { address } = useAccount();
+  const qc = useQueryClient();
 
   const [walletSlot, setWalletSlot] = useState<Element | null>(null);
   const [selection, setSelection] = useState<SelectionTarget | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerError, setComposerError] = useState<string | null>(null);
   const [composerPending, setComposerPending] = useState(false);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentsOn, setCommentsOn] = useState(false);
+  const [openBlock, setOpenBlock] = useState<string | null>(null);
+
+  // Optimistic comments live as full StoredComments; `pending` tracks the
+  // temp-uids that are still unconfirmed so one list + one renderer handles both.
+  const [optimistic, setOptimistic] = useState<StoredComment[]>([]);
+  const [pending, setPending] = useState<Set<string>>(() => new Set());
+
+  // Projected comments per block, for the thread panel (kept in a ref because the
+  // projection effect already drives a re-render via its own setState companion).
+  const projectedByBlock = useRef<Map<string, ProjectedComment[]>>(new Map());
+  const [commentedBlocks, setCommentedBlocks] = useState<string[]>([]);
 
   // Capture the selection target when opening the composer, so it is stable
   // even after the DOM selection is cleared.
   const capturedTarget = useRef<SelectionTarget | null>(null);
+
+  // All confirmed comments for the schema (refetched after a successful attest).
+  const { data: stored = [] } = useQuery({
+    queryKey: ["comments", SCHEMA_UID],
+    queryFn: () => fetchComments(SCHEMA_UID),
+    enabled: !!SCHEMA_UID,
+    staleTime: 15000,
+  });
+
+  // Merge stored + optimistic, deduped by uid (confirmed wins over its temp dupe).
+  const merged = useMemo(() => {
+    const storedUids = new Set(stored.map((c) => c.uid));
+    return [...stored, ...optimistic.filter((o) => !storedUids.has(o.uid))];
+  }, [stored, optimistic]);
 
   // Resolve #wallet-slot after mount (it exists in the static DOM at client:load).
   useEffect(() => {
@@ -53,10 +88,26 @@ function CommentController({ lang }: Props) {
     if (el) setWalletSlot(el);
   }, []);
 
+  // Track the comments on/off state (toggles.ts flips data-comments on <html>).
+  useEffect(() => {
+    setCommentsOn(commentsEnabled());
+    const obs = new MutationObserver(() => setCommentsOn(commentsEnabled()));
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-comments"],
+    });
+    return () => obs.disconnect();
+  }, []);
+
+  // Close the thread panel when commentary is turned off.
+  useEffect(() => {
+    if (!commentsOn) setOpenBlock(null);
+  }, [commentsOn]);
+
   // selectionchange listener gated by data-comments="on".
   useEffect(() => {
     function onSelectionChange() {
-      if (document.documentElement.dataset.comments !== "on") {
+      if (!commentsEnabled()) {
         setSelection(null);
         return;
       }
@@ -101,6 +152,48 @@ function CommentController({ lang }: Props) {
     return () => document.removeEventListener("selectionchange", onSelectionChange);
   }, []);
 
+  // Project the (lang-filtered) comments per block and paint inline highlights.
+  // Re-runs whenever the merged list, language, or on/off state changes.
+  useEffect(() => {
+    const byBlock = projectedByBlock.current;
+    byBlock.clear();
+
+    if (!commentsOn) {
+      applyHighlights("comment", []);
+      setCommentedBlocks([]);
+      return;
+    }
+
+    // Filter to this page's language, then group by block.
+    const groups = new Map<string, StoredComment[]>();
+    for (const c of merged) {
+      if (c.lang !== lang) continue;
+      const arr = groups.get(c.blockId) ?? [];
+      arr.push(c);
+      groups.set(c.blockId, arr);
+    }
+
+    const ranges: Range[] = [];
+    const blocks: string[] = [];
+    for (const [blockId, group] of groups) {
+      const blockEl = document.querySelector(`[data-block-id="${blockId}"]`);
+      if (!blockEl) continue;
+      const projected = projectComments(blockEl, group);
+      byBlock.set(blockId, projected);
+      blocks.push(blockId);
+      for (const p of projected) {
+        const s = p.projection.status;
+        if (s !== "anchored" && s !== "re-anchored") continue;
+        if (p.projection.start === null || p.projection.end === null) continue;
+        const r = rangeForOffsets(blockEl, p.projection.start, p.projection.end);
+        if (r) ranges.push(r);
+      }
+    }
+
+    applyHighlights("comment", ranges);
+    setCommentedBlocks(blocks);
+  }, [merged, lang, commentsOn]);
+
   function openComposer() {
     capturedTarget.current = selection;
     setComposerError(null);
@@ -118,47 +211,52 @@ function CommentController({ lang }: Props) {
 
     const { anchor, blockId } = target;
     const chapter = blockId.slice(0, 2);
-    const parentUid = "0x" + "00".repeat(32);
-
-    const optimisticId = `opt-${Date.now()}`;
-    const optimistic: Comment = {
-      uid: optimisticId,
+    const fields = {
       chapter,
       blockId,
       lang,
-      body,
+      blockHash: anchor.blockHash,
       spanStart: anchor.start,
       spanEnd: anchor.end,
       spanExact: anchor.exact,
-      author: address ?? "you",
-      pending: true,
+      spanPrefix: anchor.prefix,
+      spanSuffix: anchor.suffix,
+      parentUid: ZERO_UID,
+      body,
     };
 
-    setComments((prev) => [...prev, optimistic]);
+    const tempUid = `opt-${Date.now()}`;
+    const optimisticComment: StoredComment = {
+      ...fields,
+      uid: tempUid,
+      attester: address ?? "you",
+      time: 0,
+    };
+
+    setOptimistic((prev) => [...prev, optimisticComment]);
+    setPending((prev) => new Set(prev).add(tempUid));
     setComposerOpen(false);
     setComposerPending(true);
 
     try {
-      const encoded = encodeComment({
-        chapter,
-        blockId,
-        lang,
-        blockHash: anchor.blockHash,
-        spanStart: anchor.start,
-        spanEnd: anchor.end,
-        spanExact: anchor.exact,
-        spanPrefix: anchor.prefix,
-        spanSuffix: anchor.suffix,
-        parentUid,
-        body,
+      const uid = await attestComment(signer, SCHEMA_UID, encodeComment(fields));
+      // Swap the temp-uid → the real returned uid, then refetch so the confirmed
+      // attestation arrives from EAS and the optimistic dupe collapses by uid.
+      setOptimistic((prev) => prev.map((c) => (c.uid === tempUid ? { ...c, uid } : c)));
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tempUid);
+        return next;
       });
-      const uid = await attestComment(signer, SCHEMA_UID, encoded);
-      setComments((prev) =>
-        prev.map((c) => (c.uid === optimisticId ? { ...c, uid, pending: false } : c)),
-      );
+      qc.invalidateQueries({ queryKey: ["comments", SCHEMA_UID] });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      setComments((prev) => prev.filter((c) => c.uid !== optimisticId));
+      setOptimistic((prev) => prev.filter((c) => c.uid !== tempUid));
+      setPending((prev) => {
+        const next = new Set(prev);
+        next.delete(tempUid);
+        return next;
+      });
       setComposerError(msg);
       setComposerOpen(true);
     } finally {
@@ -166,20 +264,23 @@ function CommentController({ lang }: Props) {
     }
   }
 
-  // Group comments by blockId for gutter markers.
-  const byBlock = new Map<string, Comment[]>();
-  for (const c of comments) {
-    const arr = byBlock.get(c.blockId) ?? [];
-    arr.push(c);
-    byBlock.set(c.blockId, arr);
-  }
+  const isPending = (c: StoredComment) => pending.has(c.uid);
 
-  // Build portals for each commented block's .gutter.
-  const gutterPortals = Array.from(byBlock.entries()).map(([blockId, list]) => {
+  // Gutter badge per commented block → opens that block's thread panel.
+  const gutterPortals = commentedBlocks.map((blockId) => {
     const blockEl = document.querySelector(`[data-block-id="${blockId}"]`);
     const gutter = blockEl?.querySelector(".gutter") ?? null;
     if (!gutter) return null;
-    return createPortal(<CommentMarker key={blockId} comments={list} />, gutter);
+    const group = projectedByBlock.current.get(blockId) ?? [];
+    return createPortal(
+      <CommentMarker
+        count={group.length}
+        pending={group.some((p) => isPending(p.comment))}
+        onClick={() => setOpenBlock(blockId)}
+      />,
+      gutter,
+      blockId,
+    );
   });
 
   return (
@@ -199,6 +300,13 @@ function CommentController({ lang }: Props) {
         error={composerError}
       />
       {gutterPortals}
+      {openBlock ? (
+        <CommentThread
+          projected={projectedByBlock.current.get(openBlock) ?? []}
+          lang={lang}
+          onClose={() => setOpenBlock(null)}
+        />
+      ) : null}
     </>
   );
 }

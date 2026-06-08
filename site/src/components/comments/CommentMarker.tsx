@@ -1,14 +1,23 @@
-import type { Comment } from "../../web3/types";
+interface Props {
+  count: number;
+  pending: boolean;
+  onClick: () => void;
+}
 
-export function CommentMarker({ comments }: { comments: Comment[] }) {
-  const pending = comments.some((c) => c.pending);
+/** Gutter badge: opens the thread panel for a block. Shows a pending dot while
+ *  any of the block's comments is still an unconfirmed (optimistic) attestation. */
+export function CommentMarker({ count, pending, onClick }: Props) {
   return (
-    <span
-      title={comments.map((c) => c.body).join("\n")}
-      className="inline-flex items-center gap-0.5 text-xs text-stone-400"
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${count} comment${count === 1 ? "" : "s"}`}
+      className="inline-flex items-center gap-0.5 rounded text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
     >
-      💬 {comments.length}
-      {pending ? <span className="text-amber-500">…</span> : null}
-    </span>
+      💬 {count}
+      {pending ? (
+        <span aria-hidden className="inline-block size-1.5 rounded-full bg-amber-500" />
+      ) : null}
+    </button>
   );
 }

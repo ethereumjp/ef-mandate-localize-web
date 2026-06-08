@@ -30,6 +30,16 @@ body {
     display: none;
 }
 
+/* Inline highlight for projected (anchored / re-anchored) comment spans. The
+   CSS Custom Highlight API draws decoration only — the gutter badge is the
+   click affordance, not the highlighted text. */
+::highlight(comment) {
+    background-color: var(--color-amber-200);
+}
+[data-theme="dark"] ::highlight(comment) {
+    background-color: color-mix(in oklab, var(--color-amber-500) 40%, transparent);
+}
+
 html {
     scroll-behavior: smooth;
 }
