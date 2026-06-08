@@ -24,6 +24,19 @@ describe("selection", () => {
     expect(selectionToOffsets(el, range)).toEqual({ start: 4, end: 12, exact: "walkaway" });
   });
 
+  it("accounts for leading-whitespace trim when mapping offsets", () => {
+    const el = blockEl("  the walkaway test"); // 2 leading spaces are trimmed by normalize
+    const node = el.firstChild as Text;
+    const range = document.createRange();
+    range.setStart(node, 6); // raw index of "walkaway"
+    range.setEnd(node, 14);
+    const offsets = selectionToOffsets(el, range);
+    expect(offsets).toEqual({ start: 4, end: 12, exact: "walkaway" });
+    // invariant: the offsets index the NORMALIZED text to exactly the quote
+    const norm = normalizedBlockText(el);
+    expect([...norm].slice(offsets!.start, offsets!.end).join("")).toBe("walkaway");
+  });
+
   it("returns null when the range is collapsed or outside the block", () => {
     const el = blockEl("abc");
     const node = el.firstChild as Text;
