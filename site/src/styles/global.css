@@ -42,6 +42,17 @@ body {
     display: block;
 }
 
+/* Comments on/off toggle switch: track colour + knob position follow the state. */
+[data-comments="on"] .comments-switch {
+    background-color: var(--color-stone-800);
+}
+[data-theme="dark"] [data-comments="on"] .comments-switch {
+    background-color: var(--color-stone-200);
+}
+[data-comments="on"] .comments-switch-knob {
+    transform: translateX(1rem);
+}
+
 /* Fallback (EN shown in JA mode for pending chapters) gets a faint left rule. */
 [data-fallback="en"] {
     border-left: 2px solid var(--color-amber-200);

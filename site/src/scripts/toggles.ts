@@ -6,10 +6,12 @@ const savedComments = localStorage.getItem("comments") === "on" ? "on" : "off";
 root.dataset.comments = savedComments;
 
 const commentsBtn = document.querySelector<HTMLElement>("[data-toggle-comments]");
+commentsBtn?.setAttribute("aria-checked", String(savedComments === "on"));
 commentsBtn?.addEventListener("click", () => {
   const next = root.dataset.comments === "on" ? "off" : "on";
   root.dataset.comments = next;
   localStorage.setItem("comments", next);
+  commentsBtn.setAttribute("aria-checked", String(next === "on"));
 });
 
 // Dark / light theme (initialised by the inline <head> script; persisted here).
