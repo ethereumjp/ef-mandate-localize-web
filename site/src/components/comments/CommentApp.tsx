@@ -7,8 +7,13 @@ import { keccak256, stringToBytes } from "viem";
 import { wagmiConfig, SCHEMA_UID } from "../../web3/config";
 import { useEthersSigner } from "../../web3/ethers";
 import { anchorFromSelection } from "../../web3/selection";
-// encodeComment and attestComment are dynamically imported at call time to
-// keep the EAS SDK (which uses lodash ESM) out of the SSR module graph.
+// Static imports of the EAS attest path. Safe because Document.astro mounts
+// this island with client:only="react", so it is never SSR-rendered and the
+// EAS SDK (lodash ESM re-export) never enters the SSR module graph. Vite
+// bundles encodeComment/attestComment into the client chunk this way; the old
+// dynamic import() was elided from the static build, killing on-chain publish.
+import { encodeComment } from "../../web3/schema";
+import { attestComment } from "../../web3/eas";
 import type { Comment, ContributionType } from "../../web3/types";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
@@ -138,9 +143,6 @@ function CommentController({ lang }: Props) {
     setComposerPending(true);
 
     try {
-      // Dynamic imports keep EAS SDK (lodash ESM) out of the SSR module graph.
-      const { encodeComment } = await import("../../web3/schema");
-      const { attestComment } = await import("../../web3/eas");
       const encoded = encodeComment({
         chapter,
         blockId,
