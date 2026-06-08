@@ -17,6 +17,7 @@
     "blocks:inject": "tsx scripts/inject-markers.ts",
     "blocks:check": "tsx scripts/check-markers.ts",
     "anchors:build": "tsx scripts/build-anchors.ts",
+    "schema:register": "tsx scripts/register-schema.ts",
     "reanchor:demo": "tsx scripts/reanchor-demo.ts"
   },
   "pnpm": {
