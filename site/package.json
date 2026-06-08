@@ -33,7 +33,7 @@
     "@fontsource-variable/noto-serif": "^5.2.9",
     "@fontsource/noto-serif-jp": "^5.2.8",
     "@tanstack/react-query": "^5.101.0",
-    "astro": "^5.18.2",
+    "astro": "^6.4.4",
     "ethers": "^6.16.0",
     "marked": "^14.1.4",
     "react": "^19.2.7",
