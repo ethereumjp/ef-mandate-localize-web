@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
-import { keccak256, stringToBytes } from "viem";
 import { wagmiConfig, SCHEMA_UID } from "../../web3/config";
 import { useEthersSigner } from "../../web3/ethers";
 import { anchorFromSelection } from "../../web3/selection";
@@ -120,8 +119,6 @@ function CommentController({ lang }: Props) {
     const { anchor, blockId } = target;
     const chapter = blockId.slice(0, 2);
     const parentUid = "0x" + "00".repeat(32);
-    // Compute sourceId inline — do NOT import from src/lib/sources.ts (node:fs).
-    const sourceId = keccak256(stringToBytes(`ethereumjp/ef-mandate-localize-jp@${lang}`));
 
     const optimisticId = `opt-${Date.now()}`;
     const optimistic: Comment = {
@@ -146,7 +143,6 @@ function CommentController({ lang }: Props) {
         chapter,
         blockId,
         lang,
-        sourceId,
         blockHash: anchor.blockHash,
         spanStart: anchor.start,
         spanEnd: anchor.end,

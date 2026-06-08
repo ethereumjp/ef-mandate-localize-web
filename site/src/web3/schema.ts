@@ -5,7 +5,6 @@ export interface CommentFields {
   chapter: string;
   blockId: string;
   lang: string;
-  sourceId: string;
   blockHash: string;
   spanStart: number;
   spanEnd: number;
@@ -23,7 +22,6 @@ export function encodeComment(f: CommentFields): string {
     { name: "chapter", value: f.chapter, type: "string" },
     { name: "blockId", value: f.blockId, type: "string" },
     { name: "lang", value: f.lang, type: "string" },
-    { name: "sourceId", value: f.sourceId, type: "bytes32" },
     { name: "blockHash", value: f.blockHash, type: "bytes32" },
     { name: "spanStart", value: f.spanStart, type: "uint32" },
     { name: "spanEnd", value: f.spanEnd, type: "uint32" },
@@ -42,7 +40,6 @@ export function decodeComment(data: string): CommentFields {
     chapter: String(get("chapter")),
     blockId: String(get("blockId")),
     lang: String(get("lang")),
-    sourceId: String(get("sourceId")),
     blockHash: String(get("blockHash")),
     spanStart: Number(get("spanStart")),
     spanEnd: Number(get("spanEnd")),

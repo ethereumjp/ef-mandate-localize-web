@@ -5,7 +5,6 @@ const fields: CommentFields = {
   chapter: "02",
   blockId: "02-p7",
   lang: "ja",
-  sourceId: "0x" + "11".repeat(32),
   blockHash: "0x" + "22".repeat(32),
   spanStart: 4,
   spanEnd: 12,
