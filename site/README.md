@@ -113,3 +113,37 @@ Reading existing attestations and projecting the comment gutter thread view is *
 ### Manual demo checklist
 
 See [`docs/m4-demo-checklist.md`](docs/m4-demo-checklist.md).
+
+## Reading comments (M5)
+
+### What it is
+
+M5 closes the loop: the `CommentApp` island now **reads** all non-revoked EAS attestations for the schema from the **EAS GraphQL API (Sepolia)** (`fetchComments`), decodes each one, and **projects it onto the current rendered text** using the M3 `project()` function — so comments survive edits to the source just like anchors do.
+
+**Rendering pipeline (comments-on state):**
+
+1. `fetchComments(SCHEMA_UID)` — POST query to `sepolia.easscan.org/graphql`, returns decoded `StoredComment[]`, filtered to non-revoked, ordered by time.
+2. Comments are grouped by `blockId` and language, then `projectComments(blockEl, group)` is called for each block. This calls `project(anchor, currentBlock)` for every comment, yielding a `Projection` with status `anchored | re-anchored | needs-review | orphaned`.
+3. `anchored` and `re-anchored` comments paint an **inline amber highlight** on the quoted span via the CSS Custom Highlight API (`::highlight(comment)`).
+4. Every block with at least one comment gets a **gutter badge** (💬 + count). The gutter badge is the click affordance — the CSS highlight decoration is not clickable.
+5. Clicking the gutter badge opens the **CommentThread** panel (right-side drawer), which shows:
+   - Inline-anchored threads, grouped by `parentUid` (replies nested under their root).
+   - An **anchor-status badge** on each card: nothing for `anchored`; amber `re-anchored` or `needs review` badge otherwise.
+   - The localized **"Comment for past version"** label for any `pastVersion: true` projection (`re-anchored`, `needs-review`, `orphaned`).
+   - A separate **Needs Review** section at the bottom of the panel for `needs-review` and `orphaned` comments — these are never shown inline.
+6. Toggling Comments **off** clears all highlights, badges, and closes the panel immediately.
+
+ENS author names and the reply Composer are deferred to later milestones.
+
+### Environment variables
+
+Same as M4 — `PUBLIC_EAS_SCHEMA_UID` must be set at `pnpm build` time (or `pnpm dev` time) for the read path to function. Without it, `fetchComments` returns an empty list and nothing is queried.
+
+| Variable | Required | Notes |
+|---|---|---|
+| `PUBLIC_EAS_SCHEMA_UID` | **Yes (for read + attest paths)** | Set in `.env` before building. Same UID as M4. |
+| `PUBLIC_SEPOLIA_RPC_URL` | No | Only needed for the attest submit path; read path uses EAS GraphQL directly. |
+
+### Manual demo checklist
+
+See [`docs/m5-demo-checklist.md`](docs/m5-demo-checklist.md).
