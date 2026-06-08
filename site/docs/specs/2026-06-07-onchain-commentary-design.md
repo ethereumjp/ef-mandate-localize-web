@@ -21,7 +21,7 @@ The first deliverable is a **working on‑chain demo on Sepolia** (D2), built on
 
 - The repository is a Markdown localization of the EF Mandate. `source/en/chapters/` holds frozen English snapshots; `source/ja/chapters/` holds the Japanese translation. Chapters are **paragraph‑aligned** and matched by a two‑digit chapter number; `scripts/build.py` validates alignment and merges to `dist/`.
 - The source of truth is **GitHub, versioned by commit**. The website builds from it; edits continue to arrive as PRs. This is unchanged.
-- Today, contribution/commentary happens through GitHub issues/PRs with a typed taxonomy (`Question`, `Commentary`, `Critique`, `Localization note`, `Clarification`). We **reuse that taxonomy** for on‑chain commentary.
+- Today, contribution/commentary happens through GitHub issues/PRs with a typed taxonomy (`Question`, `Commentary`, `Critique`, `Localization note`, `Clarification`). On‑chain commentary starts **flat/untyped** for the demo (§7); reintroducing that taxonomy as a typed field is deferred (§17).
 - This work is started as a **demo on a fork branch** because the approach is not yet approved upstream. It must not affect `ethereumjp`.
 
 ## 3. Goals & non‑goals
@@ -49,27 +49,26 @@ The first deliverable is a **working on‑chain demo on Sepolia** (D2), built on
 - **Block** — a content unit of a chapter (paragraph or heading). The display and aggregation unit.
 - **`blockId`** — a stable, content‑independent identifier for a block, e.g. `02-p7`. Defined on the English original and **mirrored** by every translation. The backbone of cross‑language addressing.
 - **Span** — a substring within a block; the precise target of a comment.
-- **Source** — a per‑language origin of Markdown (a repo+path+ref, or later an IPFS/ENS pointer).
-- **`sourceId`** — a stable id for a source, namespacing comments per source+version.
-- **Attestation** — an EAS record carrying a comment's pointer, integrity hashes, thread link, and (demo) body.
+- **Source** — a per‑language origin of Markdown (a path now; later a repo+ref or an IPFS/ENS pointer). Which source a reader loads is the site's own identity (`config.json` / ENS `translate:<lang>`), **not** part of a comment's payload.
+- **Attestation** — an EAS record carrying a comment's pointer, integrity hash, thread link, and (demo) body.
 - **Projection** — the off‑chain, derived mapping of immutable attestations onto the *current* version of the text (where re‑anchoring happens). Computed at build time and/or client side; never mutates the attestation.
 
 ## 5. Architecture overview (North Star)
 
-1. **Config‑driven sources (no hard‑coded org).** A committed **`config.json`** declares, per language, `{ lang, sourceId, type, repo, path, ref }`. On the IPFS+ENS target these may additionally be supplied or overridden by ENS **text records** `translate:<lang>` on the project's ENS name. The build resolves them, pulls each language's Markdown, and bakes an immutable snapshot.
+1. **Config‑driven sources (no hard‑coded org).** A committed **`config.json`** declares, per language, `{ lang, path }`. On the IPFS+ENS target the source for a language may additionally be supplied or overridden by an ENS **text record** `translate:<lang>` on the project's ENS name. The build resolves them, pulls each language's Markdown, and bakes an immutable snapshot. **Reader identity** — which Markdown to load and which ENS name the site is — lives here, separate from any comment's payload.
 2. **Universal coordinates.** `blockId` is defined on the English original; every translation mirrors the same `blockId`s (validated per chapter at build). Therefore `chapter` + `blockId` is a **language‑ and org‑independent address** for any paragraph.
-3. **Per‑surface pointer with `sourceId`.** A comment targets a specific rendered surface: `(chapter, blockId, lang, sourceId)` plus a span. `sourceId` keeps "KO from org A" distinct from "KO from org B."
-4. **Global commentary commons (default).** One shared EAS **schema UID** per chain. Any instance — the canonical site or an org's self‑hosted copy — reads/writes the same schema. Because coordinates are universal, a comment made on one instance appears on the others (filtered by `lang`/`sourceId` as desired). The frontend is a viewer; the commentary layer is a shared on‑chain commons. *(An org may opt out by registering a private schema UID; default is the shared commons.)*
-5. **Decentralized delivery.** Static build → **IPFS** → ENS `contenthash` (served via `eth.limo`). Each deploy is an immutable snapshot pinned to specific `(sourceId, commit)` per language; re‑anchoring of existing comments is recomputed on each rebuild.
+3. **Text‑keyed pointer.** A comment targets a rendered surface by `(chapter, blockId, lang)` plus a span, with the anchor's **`blockHash`** pinning the exact text it was written against. The commons is keyed by *text*, not by a per‑attestation source namespace: identical translations (same `blockHash`) naturally share comments, and differing translations separate at re‑anchoring (§9).
+4. **Global commentary commons (default).** One shared EAS **schema UID** per chain. Any instance — the canonical site or an org's self‑hosted copy — reads/writes the same schema. Because coordinates are universal and the anchor is text‑keyed (`blockHash`), a comment made on one instance appears on the others (filtered by `lang` as desired). The frontend is a viewer; the commentary layer is a shared on‑chain commons. *(An org may opt out by registering a private schema UID; default is the shared commons.)*
+5. **Decentralized delivery.** Static build → **IPFS** → ENS `contenthash` (served via `eth.limo`). Each deploy is an immutable snapshot pinned to a specific commit per language; re‑anchoring of existing comments is recomputed on each rebuild.
 
 ```
 ENS name ──contenthash──> IPFS (static site snapshot)
    │
-   ├─ text: translate:en ─> EF source (repo/path/ref)
+   ├─ text: translate:en ─> EF source (path/repo)
    ├─ text: translate:ja ─> ethereumjp source
    └─ text: translate:ko ─> (other org) source
                                    │
-   EAS (shared schema UID) <───────┴── comment commons keyed by chapter+blockId
+   EAS (shared schema UID) <───────┴── comment commons keyed by chapter+blockId+blockHash
 ```
 
 ## 6. Anchoring model (3‑layer pointer)
@@ -83,14 +82,15 @@ A pointer is deliberately redundant so it degrades gracefully.
 | `chapter` | `"02"` | Chapter number (shared across languages). |
 | `blockId` | `"02-p7"` | Stable block id (not a line number). |
 | `lang` | `"ja"` | Which surface the comment is about (original vs a translation are different targets). |
-| `sourceId` | `keccak(source identifier)` | Which source/repo of that language. |
+
+*(Which source/repo of that language is the site's own identity — `config.json` / ENS `translate:<lang>` — not a pointer field; see §5.)*
 
 **Layer 2 — version pin (provenance + change detection)**
 
 | Field | Example | Meaning |
 |---|---|---|
-| `sourceCommit` | git SHA (bytes32) | Version the comment was authored against (provenance/audit). |
-| `blockHash` | `keccak256(normalized block text)` | Cheap, verifiable check of whether *this block* changed since authoring. |
+| `blockHash` | `keccak256(normalized block text)` | Cheap, verifiable check of whether *this block* changed since authoring. This is the demo's sole version pin. |
+| `sourceCommit` *(production/deferred)* | git SHA (bytes32) | Version the comment was authored against (provenance/audit). **Not in the demo pointer**; change detection there is purely `blockHash`. |
 
 **Layer 3 — span selector (precise location inside the block; W3C Web Annotation style)**
 
@@ -115,35 +115,37 @@ The same routine is used at authoring time (in the browser) and at projection ti
 
 ## 7. EAS schema
 
-Registered once per chain via the EAS `SchemaRegistry`; **revocable**. Demo (Sepolia) schema, body inline:
+Registered once per chain via the EAS `SchemaRegistry`; **revocable**. Demo (Sepolia) schema, body inline — **finalized at 11 fields** (this is the ABI/encode order):
 
 ```
 string  chapter
 string  blockId
 string  lang
-bytes32 sourceId
-bytes32 sourceCommit
 bytes32 blockHash
 uint32  spanStart
 uint32  spanEnd
 string  spanExact
 string  spanPrefix
 string  spanSuffix
-string  contributionType   // Question | Commentary | Critique | Localization note | Clarification
-bytes32 parentUID          // replied-to attestation UID; 0x0 for top-level
-bytes32 bodyHash           // keccak256 of the body (always present)
+bytes32 parentUid          // replied-to attestation UID; 0x0 for top-level
 string  body               // inline body (demo); empty in the prod variant
-string  schemaVersion      // e.g. "1"
 ```
 
 - **Author identity** = the attester (wallet) address; displayed as ENS name/avatar when available. No separate login.
-- **Threads** via `parentUID`.
+- **Threads** via `parentUid`.
 - **Recipient** = `0x0` (commentary is not addressed to a party).
-- **Production variant** (separate schema UID): replace inline `body` with `string bodyURI` (IPFS) and keep `bodyHash`; optionally drop on‑chain attestations in favor of off‑chain attestations + periodic on‑chain Merkle timestamp (see §13).
+- **Production variant** (separate schema UID): replace inline `body` with `string bodyURI` (IPFS) plus a `bytes32 bodyHash` for integrity; optionally drop on‑chain attestations in favor of off‑chain attestations + periodic on‑chain Merkle timestamp (see §13).
+
+### Schema decisions
+
+- **Finalized at 11 fields** above (matches `site/src/web3/constants.ts`; an EAS schema is immutable once registered).
+- **Dropped `contributionType`.** Comments are **flat/untyped** — no Question/Commentary/Critique taxonomy. Removed from the schema and from the compose/display UX (§8, §12).
+- **Dropped `sourceId`.** The commons is **keyed by text** — `(chapter, blockId, lang)` + the anchor's `blockHash` — not by a per‑attestation source namespace. **Reader identity** (which Markdown to load, which ENS the site is) comes from `config.json` / ENS `translate:<lang>` (§5, §14), separate from the comment payload. Consequence: identical translations share comments (same `blockHash`); different translations are separated by the M3 re‑anchoring projection. The same‑language "org A vs org B" hard‑isolation that `sourceId` gave is intentionally traded for a simpler, unified commons; if needed later it returns as **schema v2** (immutable → applies only to future comments). See §17.
+- **`sourceCommit`, `bodyHash`, `schemaVersion` are production/deferred** — legitimate future fields (provenance/version‑link, body integrity once the body moves to IPFS, schema versioning) that the demo's 11‑field schema does not include.
 
 ## 8. On‑chain vs off‑chain split
 
-- **On‑chain (EAS):** pointer (Layers 1–3) + `blockHash`/`bodyHash` integrity + thread structure + `contributionType`. The **immutable historical fact**.
+- **On‑chain (EAS):** pointer (Layers 1–3) + `blockHash` integrity + thread structure (`parentUid`). The **immutable historical fact**. Comments are untyped.
 - **Comment body:** inline in the attestation for the demo (free on Sepolia, fully on‑chain). Production moves the body to IPFS (content‑addressed) with `bodyURI` + `bodyHash`.
 - **Projection (off‑chain):** the current‑version mapping; derived, never written back on‑chain.
 
@@ -151,17 +153,17 @@ string  schemaVersion      // e.g. "1"
 
 **Key separation: the attestation is immutable (on‑chain historical fact); "placing it on the current version" is a derived projection (off‑chain).** The on‑chain record always reads "a comment on block X, span Y, at commit Z"; it is never moved or rewritten.
 
-When a new commit changes a chapter, the projection re‑evaluates each attestation for that `(chapter, lang, sourceId)`:
+When a new commit changes a chapter, the projection re‑evaluates each attestation for that `(chapter, lang)` block:
 
 1. Find the block with the same `blockId` in the new version.
    - **Missing** (block deleted) → status **`orphaned`**: retained and tagged **"Comment for past version"**, surfaced in an "unanchored" panel, never silently moved.
 2. Compare `blockHash`:
    - **Unchanged** → status **`anchored`**; offsets valid as‑is.
    - **Changed** → fuzzy re‑match the span using `spanExact` + `spanPrefix`/`spanSuffix`:
-     - unique confident match → status **`re-anchored`**: shown at the new position and tagged **"Comment for past version"** (links to the original quoted text and the version it was authored against);
+     - unique confident match → status **`re-anchored`**: shown at the new position and tagged **"Comment for past version"** (links to the original quoted text it was authored against);
      - ambiguous / not found → status **`needs-review`**: retained and tagged **"Comment for past version"**, surfaced to humans for re‑placement.
 
-**Version tagging.** A comment is never deleted on edit. Whenever its authored `blockHash` differs from the current block's hash, the comment is **retained and labeled "Comment for past version"**, linking to the exact version (`sourceCommit`) and the original quoted text (`spanExact`) it was written against. The label applies to `re-anchored`, `needs-review`, and `orphaned` alike; only `anchored` (hash unchanged) is untagged. This label is a **localized UI string** (§12), not stored on‑chain — e.g. in Japanese it reads 「過去のバージョンに対するコメント」.
+**Version tagging.** A comment is never deleted on edit. Whenever its authored `blockHash` differs from the current block's hash, the comment is **retained and labeled "Comment for past version"**, linking to the original quoted text (`spanExact`) it was written against. The demo detects past‑version purely by this **`blockHash` mismatch** — no `sourceCommit` link (a `sourceCommit` version‑link is production/deferred, §7). The label applies to `re-anchored`, `needs-review`, and `orphaned` alike; only `anchored` (hash unchanged) is untagged. This label is a **localized UI string** (§12), not stored on‑chain — e.g. in Japanese it reads 「過去のバージョンに対するコメント」.
 
 The site renders comments on the current version via the projection, always carrying provenance. **Deletes/corrections** never rewrite history: use EAS **revoke** (hidden in UI, record persists) or **supersede** (a new attestation whose body references the prior UID).
 
@@ -176,7 +178,7 @@ The site renders comments on the current version via the projection, always carr
 
 1. Resolve sources from `config.json` (and, on the IPFS+ENS target, optional ENS `translate:<lang>` records), pulling each language's Markdown at a pinned ref.
 2. Normalize markers (auto‑inject/validate), parse chapters into blocks, validate cross‑language `blockId` parity.
-3. For each `(chapter, lang, sourceId, blockId)` emit a static **`anchors.json`**: `{ blockId → { normalizedText, blockHash } }` plus paragraph order. This is what the client projection runs against (no backend needed).
+3. For each `(chapter, lang, blockId)` emit static anchors: per block `{ normalizedText, blockHash }` plus paragraph order. The build writes one file per language (`<lang>.json`, shaped `{ lang, chapters }` where `chapters` maps each chapter to its `{ blockId → { normalizedText, blockHash } }`). This is what the client projection runs against (no backend needed).
 4. Render the static reading site (all chapters, all configured languages).
 5. (Deploy) publish `dist/` to IPFS; optionally set ENS `contenthash`.
 
@@ -185,12 +187,12 @@ The site renders comments on the current version via the projection, always carr
 ## 12. Frontend / UX
 
 - **Reading view:** bilingual, content‑first; paragraph‑aligned. A **language toggle** switches the surface (EN/JA now).
-- **Localized UI (i18n):** the UI chrome — toggles, panel titles, compose form, `contributionType` names, and status tags such as **"Comment for past version" → 「過去のバージョンに対するコメント」** — follows the **selected reading language** via a message catalog (EN/JA now), falling back to EN when a reading language has no catalog yet. On‑chain values (e.g. `contributionType` enums, hashes) are stored canonically; only their **display labels** are localized.
+- **Localized UI (i18n):** the UI chrome — toggles, panel titles, compose form, and status tags such as **"Comment for past version" → 「過去のバージョンに対するコメント」** — follows the **selected reading language** via a message catalog (EN/JA now), falling back to EN when a reading language has no catalog yet. On‑chain values (hashes, `blockId`) are stored canonically; only their **display labels** are localized.
 - **Commentary toggle (on/off):** off → clean reading (no gutter, no highlights). On → the overlay appears.
 - **Gutter (the "C as container" primitive):** one marker per block (e.g. `💬 5`) in the margin — the Ghost‑in‑the‑Shell marginalia. Layout stays bounded by block count regardless of comment volume. Counts aggregate `anchored` + `re-anchored`.
 - **Expand a block:** opens the **right drawer** (Hypothes.is‑style; bottom sheet on mobile) showing that block's threads, with the reading text still visible. Spans are highlighted inline (`anchored` solid; `re-anchored` dashed and badged **"Comment for past version"**), and **highlight ⇄ card are bidirectionally linked** (hover/click one to focus the other). `needs-review`/`orphaned` live in the drawer's separate panel (also tagged "past version"), not on the text.
-- **Create a comment:** selecting a span shows a small **selection popover** ("💬 Comment"); choosing it opens the **composer** in the drawer (pick `contributionType`, write body) → connect wallet if needed → sign the EAS attestation (Sepolia) → optimistic render with a tx‑status toast.
-- **Threads:** reply via `parentUID`. Author shown as ENS/address.
+- **Create a comment:** selecting a span shows a small **selection popover** ("💬 Comment"); choosing it opens the **composer** in the drawer (write a body — comments are untyped) → connect wallet if needed → sign the EAS attestation (Sepolia) → optimistic render with a tx‑status toast.
+- **Threads:** reply via `parentUid`. Author shown as ENS/address.
 - **Cross‑language affordance (optional):** because `chapter+blockId` is universal, a block may show "N comments on other languages" and let the reader peek.
 
 ### UI modules & overlay patterns
@@ -200,8 +202,8 @@ The site renders comments on the current version via the projection, always carr
 **Modules**
 - *Chrome (persistent):* `Toolbar` (language toggle · commentary on/off · wallet) · `ConnectButton`/`WalletMenu` (popover) · `NetworkBanner` (wrong‑network prompt).
 - *Reading:* `ChapterReader`/`BlockRenderer` (paragraph‑aligned, owns text selection) · `Gutter`+`CommentBadge` (per‑block `💬 n`) · `SpanHighlight` (anchored solid / past‑version dashed).
-- *Commentary:* `SelectionToolbar` (popover) · `Composer` (drawer; `contributionType` select + body) · `ThreadView` (drawer; threaded cards) · `ReplyComposer` (inline) · `CommentCard` (quote excerpt `spanExact` · ENS/avatar · type chip · body · time · past‑version tag · reply/revoke).
-- *Status & provenance:* `AnchorStatusBadge` · `ProvenancePopover` (authored version `sourceCommit` + original quote) · `UnanchoredPanel` (needs‑review / orphaned).
+- *Commentary:* `SelectionToolbar` (popover) · `Composer` (drawer; body only — comments are untyped) · `ThreadView` (drawer; threaded cards) · `ReplyComposer` (inline) · `CommentCard` (quote excerpt `spanExact` · ENS/avatar · body · time · past‑version tag · reply/revoke).
+- *Status & provenance:* `AnchorStatusBadge` · `ProvenancePopover` (original quote; an authored‑version `sourceCommit` link is production/deferred, §7) · `UnanchoredPanel` (needs‑review / orphaned).
 - *Feedback:* `TxToast` (awaiting‑signature → pending → confirmed/failed) · `Skeleton` / `EmptyState` / `ErrorState` · `Tooltip`.
 
 **Overlay patterns**
@@ -231,15 +233,15 @@ Wallet state via **wagmi**; **ethers** is used only where the EAS SDK needs a si
 
 ## 14. Federation model
 
-- `sourceId = keccak256(canonical source identifier)`, where the identifier is the source's ENS name (preferred) or a normalized repo URL.
-- **Config:** a committed `config.json` manifest (both targets). On the IPFS+ENS target, ENS `translate:<lang>` text records resolve to the same shape.
-- **Onboarding another org:** fork the open site code, point `translate:<lang>` at their repo (EN‑aligned `blockId`s), deploy their own IPFS+ENS instance — *or* be added to the canonical name's records. Either way, comments interoperate because the schema UID and coordinates are shared.
+- **Sources declared by the site, not the comment.** Each instance declares its per‑language sources via a committed `config.json` (`{ lang, path }`, both targets); on the IPFS+ENS target an ENS `translate:<lang>` text record may additionally supply or override a language's source. This is the site's identity — which Markdown it loads and which ENS name it is — and is deliberately **outside** the attestation.
+- **Why instances interoperate:** the **schema UID**, the **universal coordinates** (`chapter`/`blockId`/`lang`), and the anchor **`blockHash`** are shared. Identical translations therefore share comments automatically (same `blockHash`); divergent ones separate at re‑anchoring (§9). No per‑source namespace is needed.
+- **Onboarding another org:** fork the open site code, point `translate:<lang>` at an EN‑aligned `blockId` repo, and deploy their own IPFS+ENS instance — *or* be added to the canonical name's records. Either way, comments interoperate because the schema UID and coordinates are shared.
 
 ## 15. Delivery (two supported targets)
 
 The same static build can be published either way; the target is a deployment choice, not an architectural one. Both are first‑class and selectable per instance — an org may start on Pages and later move to IPFS+ENS without changing the build.
 
-**Sources config (baseline, both targets):** a committed **`config.json`** holds the source manifest (`{ lang, sourceId, type, repo, path, ref }`) plus site settings. On the IPFS+ENS target, ENS `translate:<lang>` text records may additionally supply or override sources.
+**Sources config (baseline, both targets):** a committed **`config.json`** holds the source manifest (`{ lang, path }` per source). On the IPFS+ENS target, ENS `translate:<lang>` text records may additionally supply or override sources.
 
 **Target A — GitHub Pages (simplest; for demo).**
 - A GitHub Actions workflow builds and publishes `dist/` to Pages.
@@ -269,6 +271,9 @@ Demo content: all 8 chapters in the reading view; sample comments seeded on chap
 
 - **Mainnet cost model:** pure on‑chain attestations vs **off‑chain attestations + periodic on‑chain Merkle timestamp** (verifiable, censorship‑evident, far cheaper, better UX for high‑volume casual commentary). Decide before mainnet.
 - **Body storage in production:** IPFS pinning/persistence for bodies; `bodyURI` (`ipfs://`) + `bodyHash` schema variant.
+- **`sourceCommit` / `schemaVersion` schema fields:** an authored‑version provenance link and explicit schema versioning — production fields the demo's 11‑field schema omits (§7).
+- **`sourceId` (per‑source / same‑language isolation):** returns as **schema v2** if the text‑keyed commons proves insufficient (e.g. to hard‑separate "org A vs org B" of the same language). Immutable schema → applies only to future comments (§7).
+- **`contributionType` (typed contributions):** reintroduce the Question/Commentary/Critique taxonomy if untyped commentary proves too coarse — likewise a schema v2 addition.
 - **ENS `translate:<lang>`** record resolution and the canonical project ENS name.
 - **Moderation/curation** at the view layer over a permissionless commons (spam/abuse, especially on mainnet).
 - **Languages beyond EN/JA** (content sources and their UI message catalogs). The i18n mechanism itself is in scope for EN/JA.
