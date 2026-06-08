@@ -1,5 +1,9 @@
 import { normalizeBlockText } from "../lib/normalize";
 
+// Offsets are compensated for normalization's LEADING trim only. Per-line trailing
+// whitespace stripping (rare in browser-rendered prose) can misplace a span — the
+// same accepted limitation as selection.ts (M4-5); exact for plain prose.
+
 /** Count leading code points that normalization trims from the block's raw text. */
 function leadingTrim(blockEl: Element): number {
   const raw = blockEl.textContent ?? "";
