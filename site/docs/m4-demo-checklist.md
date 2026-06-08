@@ -40,7 +40,7 @@ CI does not run these steps (no wallet / Sepolia RPC available there).
    - [ ] The Composer panel should open, showing the selected quote
 
 8. **Fill in the comment**
-   - [ ] Choose a comment type (e.g. *question*, *correction*, *translation-note*)
+   - [ ] Choose a comment type (one of *Question*, *Commentary*, *Critique*, *Localization note*, *Clarification*)
    - [ ] Write a short body (e.g. "Test comment for M4")
 
 9. **Publish**
@@ -55,7 +55,7 @@ CI does not run these steps (no wallet / Sepolia RPC available there).
 11. **Verify on easscan**
     - [ ] Open [sepolia.easscan.org](https://sepolia.easscan.org) in a new tab
     - [ ] Search for your wallet address or the schema UID
-    - [ ] Confirm the new attestation appears with the expected fields (spanPrefix, spanSuffix, blockId, blockHash, commentType, body, lang)
+    - [ ] Confirm the new attestation appears with the expected fields (spanPrefix, spanSuffix, blockId, blockHash, contributionType, body, lang)
 
 ## Pass criteria
 
