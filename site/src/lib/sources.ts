@@ -1,11 +1,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { keccak256, stringToBytes } from "viem";
 
 export interface SourceConfig {
   lang: string;
-  /** Human identifier, e.g. "ethereumjp/ef-mandate-localize-jp@ja". */
-  sourceId: string;
   /** Path to the chapters directory, relative to config.json. */
   path: string;
 }
@@ -22,11 +19,6 @@ export function loadConfig(configPath: string): { config: Config; baseDir: strin
 
 export function chaptersDir(baseDir: string, src: SourceConfig): string {
   return resolve(baseDir, src.path);
-}
-
-/** On-chain sourceId = keccak256(identifier). */
-export function sourceIdHash(identifier: string): `0x${string}` {
-  return keccak256(stringToBytes(identifier));
 }
 
 export function chapterNumberFromFilename(name: string): string | null {

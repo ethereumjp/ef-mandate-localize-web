@@ -2,12 +2,10 @@
   "sources": [
     {
       "lang": "en",
-      "sourceId": "ethereumjp/ef-mandate-localize-jp@en",
       "path": "../source/en/chapters"
     },
     {
       "lang": "ja",
-      "sourceId": "ethereumjp/ef-mandate-localize-jp@ja",
       "path": "../source/ja/chapters"
     }
   ]

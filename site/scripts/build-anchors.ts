@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { loadConfig, listChapters, chaptersDir, sourceIdHash } from "../src/lib/sources";
+import { loadConfig, listChapters, chaptersDir } from "../src/lib/sources";
 import { parseChapter } from "../src/lib/blocks";
 import { buildChapterAnchors, ChapterAnchors } from "../src/lib/anchors";
 
@@ -23,8 +23,6 @@ for (const src of config.sources) {
   }
   const doc = {
     lang: src.lang,
-    sourceIdentifier: src.sourceId,
-    sourceId: sourceIdHash(src.sourceId),
     chapters,
   };
   const out = resolve(outDir, `${src.lang}.json`);
