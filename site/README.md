@@ -129,11 +129,11 @@ M5 closes the loop: the `CommentApp` island now **reads** all non-revoked EAS at
 5. Clicking the gutter badge opens the **CommentThread** panel (right-side drawer), which shows:
    - Inline-anchored threads, grouped by `parentUid` (replies nested under their root).
    - An **anchor-status badge** on each card: nothing for `anchored`; amber `re-anchored` or `needs review` badge otherwise.
-   - The localized **"Comment for past version"** label for any `pastVersion: true` projection (`re-anchored`, `needs-review`, `orphaned`).
-   - A separate **Needs Review** section at the bottom of the panel for `needs-review` and `orphaned` comments — these are never shown inline.
+   - The localized **"Comment for past version"** label for any `pastVersion: true` projection (`re-anchored` / `needs-review`).
+   - A separate **Needs Review** section at the bottom of the panel for `needs-review` comments (the block still exists but the quoted text changed) — these are never shown inline.
 6. Toggling Comments **off** clears all highlights, badges, and closes the panel immediately.
 
-ENS author names and the reply Composer are deferred to later milestones.
+`orphaned` (the entire block was removed) is part of the `project()` contract but is **not surfaced in M5**: such a comment has no on-page block to attach a badge to, so it is skipped — its attestation stays immutable and readable. ENS author names, the reply Composer, and a page-level panel for removed-block (`orphaned`) comments are deferred to later milestones.
 
 ### Environment variables
 
