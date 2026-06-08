@@ -9,7 +9,7 @@ const { lang } = Astro.props;
 ---
 
 <header
-    class="sticky top-0 z-10 border-b border-stone-200 bg-white/90 backdrop-blur dark:border-stone-800 dark:bg-stone-950/90"
+    class="sticky top-0 z-10 border-b bg-stone-50/90 border-stone-200/90 backdrop-blur dark:border-stone-700/90 dark:bg-stone-800/90"
 >
     <div
         class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3"
@@ -18,6 +18,7 @@ const { lang } = Astro.props;
             >{MESSAGES.en.siteTitle}</a
         >
         <div class="flex items-center gap-3 text-sm">
+            <span id="wallet-slot"></span>
             <div class="flex items-center gap-1">
                 <a
                     data-lang-link="en"

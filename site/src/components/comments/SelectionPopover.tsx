@@ -8,7 +8,7 @@ interface Props {
 export function SelectionPopover({ rect, onClick }: Props) {
   const style: CSSProperties = {
     position: "fixed",
-    top: rect.top - 36,
+    top: rect.top,
     left: rect.left,
     zIndex: 20,
   };
