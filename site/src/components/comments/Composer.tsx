@@ -37,7 +37,7 @@ export function Composer({
   return (
     <Dialog.Root open={open} onOpenChange={(next) => onOpenChange(next)}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-30 bg-black/30" />
+        <Dialog.Backdrop className="fixed inset-0 z-30 bg-black/20 dark:bg-white/20 backdrop-blur-xxs" />
         <Dialog.Popup className="fixed left-1/2 top-1/2 z-40 w-[min(28rem,90vw)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-stone-200 bg-white p-4 shadow-lg dark:border-stone-700 dark:bg-stone-900">
           <Dialog.Title className="flex items-center gap-2 text-sm font-semibold">
             <svg
@@ -56,10 +56,7 @@ export function Composer({
             </svg>
             <span className="sr-only">New comment</span>
             {fieldsPreview ? (
-              <span
-                className="min-w-0 truncate font-normal italic text-stone-500 dark:text-stone-400"
-                title={fieldsPreview.spanExact}
-              >
+              <span className="min-w-0 truncate font-normal italic" title={fieldsPreview.spanExact}>
                 “{fieldsPreview.spanExact}”
               </span>
             ) : null}
@@ -77,12 +74,12 @@ export function Composer({
             <div className="mt-3 border-t border-stone-100 pt-2 text-xs text-stone-400 dark:border-stone-800 dark:text-stone-500">
               <p className="mb-1">Recorded on-chain (EAS attestation):</p>
               <dl className="grid grid-cols-[7rem_1fr] gap-x-2 font-mono">
+                <dt>lang</dt>
+                <dd>{fieldsPreview.lang}</dd>
                 <dt>chapter</dt>
                 <dd>{fieldsPreview.chapter}</dd>
                 <dt>blockId</dt>
                 <dd>{fieldsPreview.blockId}</dd>
-                <dt>lang</dt>
-                <dd>{fieldsPreview.lang}</dd>
                 <dt>blockHash</dt>
                 <dd className="truncate">{shortHex(fieldsPreview.blockHash)}</dd>
                 <dt>spanStart</dt>

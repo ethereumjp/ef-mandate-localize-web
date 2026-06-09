@@ -17,7 +17,7 @@ export function SelectionPopover({ rect, onClick }: Props) {
       type="button"
       style={style}
       onClick={onClick}
-      className="rounded border border-stone-300 bg-white px-2 py-1 text-xs shadow hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:hover:bg-stone-800"
+      className="rounded h-8 border border-stone-300 bg-white px-2 py-1 text-xs shadow hover:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:hover:bg-stone-800"
     >
       💬 Comment
     </button>

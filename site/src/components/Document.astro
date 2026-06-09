@@ -7,58 +7,84 @@ import { loadChapters } from "../lib/content";
 import type { Lang } from "../lib/i18n";
 import CommentApp from "./comments/CommentApp";
 interface Props {
-  lang: Lang;
+    lang: Lang;
 }
 const { lang } = Astro.props;
 const chapters = loadChapters();
 ---
-<div class="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 md:flex-row md:py-12">
-  <aside id="index" class="scroll-mt-20 md:w-56 md:shrink-0">
-    <div class="md:sticky md:top-20 md:flex md:h-[calc(100dvh-5rem)] md:flex-col md:overflow-y-auto md:pb-8">
-      <details class="rounded border border-stone-200 dark:border-stone-800 md:hidden">
-        <summary class="cursor-pointer px-3 py-2 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-          <T k="index" />
-        </summary>
-        <div class="border-t border-stone-200 dark:border-stone-800 p-2">
-          <Index chapters={chapters} lang={lang} />
-        </div>
-      </details>
-      <div class="hidden md:block">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">
-          <T k="index" />
-        </h2>
-        <div class="mt-3">
-          <Index chapters={chapters} lang={lang} />
-        </div>
-      </div>
-      <div class="mt-8 hidden border-t border-stone-200 pt-6 dark:border-stone-800 md:mt-auto md:block">
-        <SiteMeta lang={lang} />
-      </div>
-    </div>
-  </aside>
 
-  <main class="min-w-0 space-y-16 md:max-w-3xl">
-    {chapters.map((ch) => (
-      <section id={`ch-${ch.number}`} class="scroll-mt-24">
-        {lang === "ja" && ch.jaPending && (
-          <p class="mb-6 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-            <T k="jaPending" />
-          </p>
-        )}
-        <div class="space-y-6">
-          {ch.blocks.map((block) => <Block block={block} lang={lang} />)}
+<div
+    class="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-8 md:flex-row md:py-12"
+>
+    <aside id="index" class="scroll-mt-20 md:w-56 md:shrink-0">
+        <div
+            class="md:sticky md:top-20 md:flex md:h-[calc(100dvh-5rem)] md:flex-col md:overflow-y-auto md:pb-8"
+        >
+            <details
+                class="rounded border border-stone-200 dark:border-stone-800 md:hidden"
+            >
+                <summary
+                    class="cursor-pointer px-3 py-2 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400"
+                >
+                    <T k="index" />
+                </summary>
+                <div
+                    class="border-t border-stone-200 dark:border-stone-800 p-2"
+                >
+                    <Index chapters={chapters} lang={lang} />
+                </div>
+            </details>
+            <div class="hidden md:block">
+                <h2
+                    class="text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400"
+                >
+                    <T k="index" />
+                </h2>
+                <div class="mt-3">
+                    <Index chapters={chapters} lang={lang} />
+                </div>
+            </div>
+            <div
+                class="mt-8 hidden border-t border-stone-200 pt-6 dark:border-stone-800 md:mt-auto md:block"
+            >
+                <SiteMeta lang={lang} />
+            </div>
         </div>
-        <p class="mt-6 text-right">
-          <a href="#index" class="text-stone-400 hover:text-stone-600 dark:text-stone-500 dark:hover:text-stone-300">
-            <span class="sr-only"><T k="backToIndex" /></span>
-            <span aria-hidden="true">↑</span>
-          </a>
-        </p>
-      </section>
-    ))}
-  </main>
+    </aside>
+
+    <main class="min-w-0 space-y-16 md:max-w-3xl">
+        {
+            chapters.map((ch) => (
+                <section id={`ch-${ch.number}`} class="scroll-mt-24">
+                    {lang === "ja" && ch.jaPending && (
+                        <p class="mb-6 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                            <T k="jaPending" />
+                        </p>
+                    )}
+                    <div class="space-y-6">
+                        {ch.blocks.map((block) => (
+                            <Block block={block} lang={lang} />
+                        ))}
+                    </div>
+                    <p class="mt-6 text-right">
+                        <a
+                            href="#index"
+                            class="text-stone-400 hover:text-stone-600 dark:text-stone-500 dark:hover:text-stone-300"
+                        >
+                            <span class="sr-only">
+                                <T k="backToIndex" />
+                            </span>
+                            <span aria-hidden="true">↑</span>
+                        </a>
+                    </p>
+                </section>
+            ))
+        }
+    </main>
 </div>
-<footer class="mx-auto max-w-6xl border-t border-stone-200 px-4 py-8 dark:border-stone-800 md:hidden">
-  <SiteMeta lang={lang} />
+<footer
+    class="mx-auto max-w-6xl border-t border-stone-200 px-4 py-8 dark:border-stone-800 md:hidden"
+>
+    <SiteMeta lang={lang} />
 </footer>
 <CommentApp client:only="react" lang={lang} />
