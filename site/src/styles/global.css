@@ -62,10 +62,7 @@ body {
 
 /* Comments on/off toggle switch: track colour + knob position follow the state. */
 [data-comments="on"] .comments-switch {
-    background-color: var(--color-stone-800);
-}
-[data-theme="dark"] [data-comments="on"] .comments-switch {
-    background-color: var(--color-stone-200);
+    background-color: var(--color-emerald-400);
 }
 [data-comments="on"] .comments-switch-knob {
     transform: translateX(1rem);
