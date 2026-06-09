@@ -106,7 +106,8 @@ function CommentController({ lang }: Props) {
     if (!commentsOn) setOpenBlock(null);
   }, [commentsOn]);
 
-  // selectionchange listener gated by data-comments="on".
+  // selectionchange → popover. Authoring is independent of the comments toggle
+  // (the toggle only gates display of already-registered comments).
   useEffect(() => {
     function onSelectionChange() {
       const sel = window.getSelection();
