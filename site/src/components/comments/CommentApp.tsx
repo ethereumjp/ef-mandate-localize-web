@@ -16,6 +16,7 @@ import { attestComment } from "../../web3/eas";
 import { fetchComments, type StoredComment } from "../../web3/read";
 import { projectComments, type ProjectedComment } from "../../web3/projectComments";
 import { rangeForOffsets, applyHighlights } from "../../web3/highlight";
+import { buildMockComments } from "../../web3/mock";
 import type { Lang } from "../../lib/i18n";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
@@ -29,6 +30,9 @@ const ZERO_UID = "0x" + "00".repeat(32);
 // disabled/loading — otherwise `[]` is a new array each render, `merged` recomputes,
 // and the projection effect (dep on `merged`) loops "Maximum update depth exceeded".
 const EMPTY_COMMENTS: StoredComment[] = [];
+// Dev-only: PUBLIC_MOCK_COMMENTS=1 (`pnpm run dev:mock`) renders DOM-derived mock
+// comments so the UI can be tuned with no on-chain data.
+const MOCK = import.meta.env.PUBLIC_MOCK_COMMENTS === "1";
 
 interface Props {
   lang: Lang;
@@ -75,13 +79,22 @@ function CommentController({ lang }: Props) {
   // even after the DOM selection is cleared.
   const capturedTarget = useRef<SelectionTarget | null>(null);
 
-  // All confirmed comments for the schema (refetched after a successful attest).
-  const { data: stored = EMPTY_COMMENTS } = useQuery({
+  // Confirmed comments for the schema (refetched after a successful attest). In
+  // mock mode (`pnpm run dev:mock`) we skip the chain and synthesize comments from
+  // the live DOM so the comment UI can be tuned with no on-chain data.
+  const { data: queried = EMPTY_COMMENTS } = useQuery({
     queryKey: ["comments", SCHEMA_UID],
     queryFn: () => fetchComments(SCHEMA_UID),
-    enabled: !!SCHEMA_UID,
+    enabled: !MOCK && !!SCHEMA_UID,
     staleTime: 15000,
   });
+  const [mockData, setMockData] = useState<StoredComment[]>(EMPTY_COMMENTS);
+  useEffect(() => {
+    if (!MOCK) return;
+    setMockData(buildMockComments(lang));
+    document.documentElement.dataset.comments = "on"; // reveal them immediately
+  }, [lang]);
+  const stored = MOCK ? mockData : queried;
 
   // Merge stored + optimistic, deduped by uid (confirmed wins over its temp dupe).
   const merged = useMemo(() => {

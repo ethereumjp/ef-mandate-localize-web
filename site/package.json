@@ -5,6 +5,7 @@
   "packageManager": "pnpm@10.30.3",
   "scripts": {
     "dev": "astro dev",
+    "dev:mock": "PUBLIC_MOCK_COMMENTS=1 astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "typecheck": "tsc --noEmit",
