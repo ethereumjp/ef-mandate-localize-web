@@ -41,7 +41,7 @@ export function Composer({
         <Dialog.Popup className="fixed left-1/2 top-1/2 z-40 w-[min(28rem,90vw)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-stone-200 bg-white p-4 shadow-lg dark:border-stone-700 dark:bg-stone-900">
           <Dialog.Title className="flex items-center gap-2 text-sm font-semibold">
             <svg
-              className="size-5"
+              className="size-5 shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -55,16 +55,23 @@ export function Composer({
               />
             </svg>
             <span className="sr-only">New comment</span>
+            {fieldsPreview ? (
+              <span
+                className="min-w-0 truncate font-normal italic text-stone-500 dark:text-stone-400"
+                title={fieldsPreview.spanExact}
+              >
+                “{fieldsPreview.spanExact}”
+              </span>
+            ) : null}
           </Dialog.Title>
-          <label className="mt-3 block text-xs text-stone-500">
-            Comment
-            <textarea
-              className="mt-1 h-28 w-full rounded border border-stone-300 bg-transparent p-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-700"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              disabled={!connected}
-            />
-          </label>
+          <textarea
+            className="mt-3 h-28 w-full rounded border border-stone-300 bg-transparent p-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-700"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            disabled={!connected}
+            aria-label="Comment"
+            placeholder={connected ? "Write your comment…" : ""}
+          />
           {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
           {fieldsPreview ? (
             <div className="mt-3 border-t border-stone-100 pt-2 text-xs text-stone-400 dark:border-stone-800 dark:text-stone-500">
@@ -91,7 +98,7 @@ export function Composer({
                 <dt>parentUid</dt>
                 <dd className="truncate">{shortHex(fieldsPreview.parentUid)}</dd>
                 <dt>body</dt>
-                <dd className="truncate">{body.trim() ? `"${body.trim()}"` : "(above)"}</dd>
+                <dd className="truncate">{body ? `"${body}"` : "—"}</dd>
               </dl>
               {schemaUid ? (
                 <a
