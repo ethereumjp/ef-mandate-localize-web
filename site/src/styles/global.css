@@ -5,8 +5,8 @@
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-body {
-    @apply bg-stone-50 text-stone-800 dark:bg-stone-800 dark:text-stone-50;
+@theme {
+    --blur-xxs: 1px;
 }
 
 /* Let native controls (the language <select> dropdown, scrollbars) match the theme. */
@@ -37,7 +37,11 @@ body {
     background-color: var(--color-amber-200);
 }
 [data-theme="dark"] ::highlight(comment) {
-    background-color: color-mix(in oklab, var(--color-amber-500) 40%, transparent);
+    background-color: color-mix(
+        in oklab,
+        var(--color-amber-500) 40%,
+        transparent
+    );
 }
 
 html {
@@ -45,6 +49,7 @@ html {
 }
 
 body {
+    @apply bg-stone-50 text-stone-800 dark:bg-stone-800 dark:text-stone-50;
     font-family:
         "Noto Serif Variable", "Noto Serif JP", ui-serif, Georgia, serif;
 }
@@ -62,10 +67,10 @@ body {
 
 /* Comments on/off toggle switch: track colour + knob position follow the state. */
 [data-comments="on"] .comments-switch {
-    background-color: var(--color-emerald-600);
+    @apply bg-emerald-400;
 }
 [data-theme="dark"] [data-comments="on"] .comments-switch {
-    background-color: var(--color-emerald-500);
+    @apply bg-emerald-700;
 }
 [data-comments="on"] .comments-switch-knob {
     transform: translateX(1rem);
