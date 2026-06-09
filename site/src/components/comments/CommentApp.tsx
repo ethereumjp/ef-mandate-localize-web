@@ -25,6 +25,10 @@ import { CommentThread } from "./CommentThread";
 
 const queryClient = new QueryClient();
 const ZERO_UID = "0x" + "00".repeat(32);
+// Stable empty default so `stored` keeps a constant reference while the query is
+// disabled/loading — otherwise `[]` is a new array each render, `merged` recomputes,
+// and the projection effect (dep on `merged`) loops "Maximum update depth exceeded".
+const EMPTY_COMMENTS: StoredComment[] = [];
 
 interface Props {
   lang: Lang;
@@ -72,7 +76,7 @@ function CommentController({ lang }: Props) {
   const capturedTarget = useRef<SelectionTarget | null>(null);
 
   // All confirmed comments for the schema (refetched after a successful attest).
-  const { data: stored = [] } = useQuery({
+  const { data: stored = EMPTY_COMMENTS } = useQuery({
     queryKey: ["comments", SCHEMA_UID],
     queryFn: () => fetchComments(SCHEMA_UID),
     enabled: !!SCHEMA_UID,
