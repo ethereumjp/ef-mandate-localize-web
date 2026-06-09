@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { WagmiProvider, useAccount } from "wagmi";
+import { WagmiProvider, useAccount, useConnect } from "wagmi";
+import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { wagmiConfig, SCHEMA_UID } from "../../web3/config";
 import { useEthersSigner } from "../../web3/ethers";
@@ -43,7 +44,8 @@ function commentsEnabled(): boolean {
 
 function CommentController({ lang }: Props) {
   const signer = useEthersSigner();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
+  const { connect } = useConnect();
   const qc = useQueryClient();
 
   const [walletSlot, setWalletSlot] = useState<Element | null>(null);
@@ -107,10 +109,6 @@ function CommentController({ lang }: Props) {
   // selectionchange listener gated by data-comments="on".
   useEffect(() => {
     function onSelectionChange() {
-      if (!commentsEnabled()) {
-        setSelection(null);
-        return;
-      }
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
         setSelection(null);
@@ -298,6 +296,8 @@ function CommentController({ lang }: Props) {
         onSubmit={handleSubmit}
         pending={composerPending}
         error={composerError}
+        connected={isConnected}
+        onConnect={() => connect({ connector: injected() })}
       />
       {gutterPortals}
       {openBlock ? (
