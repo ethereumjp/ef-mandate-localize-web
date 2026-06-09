@@ -11,7 +11,7 @@ import { anchorFromSelection } from "../../web3/selection";
 // EAS SDK (lodash ESM re-export) never enters the SSR module graph. Vite
 // bundles encodeComment/attestComment into the client chunk this way; the old
 // dynamic import() was elided from the static build, killing on-chain publish.
-import { encodeComment } from "../../web3/schema";
+import { encodeComment, type CommentFields } from "../../web3/schema";
 import { attestComment } from "../../web3/eas";
 import { fetchComments, type StoredComment } from "../../web3/read";
 import { projectComments, type ProjectedComment } from "../../web3/projectComments";
@@ -53,6 +53,7 @@ function CommentController({ lang }: Props) {
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerError, setComposerError] = useState<string | null>(null);
   const [composerPending, setComposerPending] = useState(false);
+  const [composerFields, setComposerFields] = useState<Omit<CommentFields, "body"> | null>(null);
   const [commentsOn, setCommentsOn] = useState(false);
   const [openBlock, setOpenBlock] = useState<string | null>(null);
 
@@ -196,6 +197,23 @@ function CommentController({ lang }: Props) {
   function openComposer() {
     capturedTarget.current = selection;
     setComposerError(null);
+    if (selection) {
+      const { anchor, blockId } = selection;
+      setComposerFields({
+        chapter: blockId.slice(0, 2),
+        blockId,
+        lang,
+        blockHash: anchor.blockHash,
+        spanStart: anchor.start,
+        spanEnd: anchor.end,
+        spanExact: anchor.exact,
+        spanPrefix: anchor.prefix,
+        spanSuffix: anchor.suffix,
+        parentUid: ZERO_UID,
+      });
+    } else {
+      setComposerFields(null);
+    }
     setComposerOpen(true);
   }
 
@@ -299,6 +317,8 @@ function CommentController({ lang }: Props) {
         error={composerError}
         connected={isConnected}
         onConnect={() => connect({ connector: injected() })}
+        fieldsPreview={composerFields}
+        schemaUid={SCHEMA_UID}
       />
       {gutterPortals}
       {openBlock ? (
