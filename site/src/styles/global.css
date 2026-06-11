@@ -1,11 +1,10 @@
 @import "tailwindcss";
-@import "@fontsource-variable/noto-serif/wght.css";
-@import "@fontsource/noto-serif-jp/japanese-400.css";
-@import "@fontsource/noto-serif-jp/japanese-700.css";
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
+    --font-sans: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    --font-serif: "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif;
     --blur-xxs: 1px;
 }
 
@@ -49,9 +48,11 @@ html {
 }
 
 body {
-    @apply bg-stone-50 text-stone-800 dark:bg-stone-800 dark:text-stone-50;
-    font-family:
-        "Noto Serif Variable", "Noto Serif JP", ui-serif, Georgia, serif;
+    @apply font-sans bg-stone-50 text-stone-800 dark:bg-stone-800 dark:text-stone-50;
+}
+
+button {
+    @apply hover:cursor-pointer;
 }
 
 /* Reading column + block layout. */
@@ -84,4 +85,11 @@ body {
 
 [data-theme="dark"] [data-fallback="en"] {
     border-color: var(--color-amber-700);
+}
+
+header {
+    button,
+    select {
+        @apply h-8;
+    }
 }
