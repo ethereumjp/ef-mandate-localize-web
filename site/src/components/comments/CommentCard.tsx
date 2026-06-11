@@ -21,9 +21,11 @@ export function CommentCard({ node, projection, lang, depth = 0 }: Props) {
     <div
       className={depth > 0 ? "mt-3 border-l border-stone-200 pl-3 dark:border-stone-700" : "mt-3"}
     >
-      <blockquote className="border-l-2 border-amber-300 pl-2 text-xs text-stone-500 dark:text-stone-400">
-        {c.spanExact}
-      </blockquote>
+      {depth === 0 ? (
+        <blockquote className="border-l-2 border-amber-300 pl-2 text-xs text-stone-500 dark:text-stone-400">
+          {c.spanExact}
+        </blockquote>
+      ) : null}
       <p className="mt-1 whitespace-pre-wrap text-sm text-stone-800 dark:text-stone-100">
         {c.body}
       </p>
