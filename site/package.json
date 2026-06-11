@@ -2,7 +2,7 @@
   "name": "ef-mandate-translation-site",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed",
   "scripts": {
     "dev": "astro dev",
     "dev:mock": "PUBLIC_MOCK_COMMENTS=1 astro dev",
@@ -31,8 +31,6 @@
     "@astrojs/react": "^5.0.7",
     "@base-ui-components/react": "1.0.0-rc.0",
     "@ethereum-attestation-service/eas-sdk": "^2.9.1",
-    "@fontsource-variable/noto-serif": "^5.2.9",
-    "@fontsource/noto-serif-jp": "^5.2.8",
     "@tanstack/react-query": "^5.101.0",
     "astro": "^6.4.4",
     "ethers": "^6.16.0",
