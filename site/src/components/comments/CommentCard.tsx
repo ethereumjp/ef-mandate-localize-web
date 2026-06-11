@@ -1,4 +1,5 @@
 import type { CommentNode } from "../../web3/thread";
+import type { StoredAnno } from "../../anno/locate";
 import type { Projection } from "../../lib/anchoring";
 import { MESSAGES, type Lang } from "../../lib/i18n";
 import { AnchorStatusBadge } from "./AnchorStatusBadge";
@@ -8,7 +9,7 @@ function short(addr: string) {
 }
 
 interface Props {
-  node: CommentNode;
+  node: CommentNode<StoredAnno>;
   projection?: Projection;
   lang: Lang;
   depth?: number;

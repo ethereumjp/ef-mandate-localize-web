@@ -1,6 +1,6 @@
 import { Dialog } from "@base-ui-components/react/dialog";
 import { useEffect, useState } from "react";
-import type { CommentFields } from "../../web3/schema";
+import type { AnnoFields } from "../../anno/schema";
 
 const shortHex = (h: string) => (h.length > 12 ? `${h.slice(0, 6)}…${h.slice(-4)}` : h);
 
@@ -12,7 +12,7 @@ interface Props {
   error?: string | null;
   connected?: boolean;
   onConnect?: () => void;
-  fieldsPreview?: Omit<CommentFields, "body"> | null;
+  fieldsPreview?: Omit<AnnoFields, "body"> | null;
   schemaUid?: string;
 }
 
@@ -76,12 +76,14 @@ export function Composer({
               <dl className="grid grid-cols-[7rem_1fr] gap-x-2 font-mono">
                 <dt>lang</dt>
                 <dd>{fieldsPreview.lang}</dd>
-                <dt>chapter</dt>
-                <dd>{fieldsPreview.chapter}</dd>
-                <dt>blockId</dt>
-                <dd>{fieldsPreview.blockId}</dd>
-                <dt>blockHash</dt>
-                <dd className="truncate">{shortHex(fieldsPreview.blockHash)}</dd>
+                <dt>origin</dt>
+                <dd className="truncate">{fieldsPreview.origin}</dd>
+                <dt>url</dt>
+                <dd className="truncate">{fieldsPreview.urlCanonical}</dd>
+                <dt>rootSelector</dt>
+                <dd className="truncate">{fieldsPreview.rootSelector}</dd>
+                <dt>containerHash</dt>
+                <dd className="truncate">{shortHex(fieldsPreview.containerHash)}</dd>
                 <dt>spanStart</dt>
                 <dd>{fieldsPreview.spanStart}</dd>
                 <dt>spanEnd</dt>
@@ -94,6 +96,8 @@ export function Composer({
                 <dd className="truncate">{fieldsPreview.spanSuffix}</dd>
                 <dt>parentUid</dt>
                 <dd className="truncate">{shortHex(fieldsPreview.parentUid)}</dd>
+                <dt>meta</dt>
+                <dd className="truncate">{fieldsPreview.meta || "—"}</dd>
                 <dt>body</dt>
                 <dd className="truncate">{body ? `"${body}"` : "—"}</dd>
               </dl>

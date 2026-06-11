@@ -3,20 +3,21 @@ import { createPortal } from "react-dom";
 import { WagmiProvider, useAccount, useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
-import { wagmiConfig, SCHEMA_UID } from "../../web3/config";
+import { wagmiConfig, ANNO_SCHEMA_UID } from "../../web3/config";
 import { useEthersSigner } from "../../web3/ethers";
 import { anchorFromSelection } from "../../web3/selection";
 // Static imports of the EAS attest path. Safe because Document.astro mounts
 // this island with client:only="react", so it is never SSR-rendered and the
 // EAS SDK (lodash ESM re-export) never enters the SSR module graph. Vite
-// bundles encodeComment/attestComment into the client chunk this way; the old
+// bundles encodeAnno/attestComment into the client chunk this way; the old
 // dynamic import() was elided from the static build, killing on-chain publish.
-import { encodeComment, type CommentFields } from "../../web3/schema";
+import { encodeAnno, type AnnoFields } from "../../anno/schema";
 import { attestComment } from "../../web3/eas";
-import { fetchComments, type StoredComment } from "../../web3/read";
-import { projectComments, type ProjectedComment } from "../../web3/projectComments";
+import { fetchAnno } from "../../anno/read";
+import { projectAnno, type StoredAnno, type LocatedAnno } from "../../anno/locate";
+import { canonicalizeUrl } from "../../anno/canonicalUrl";
 import { rangeForOffsets, applyHighlights } from "../../web3/highlight";
-import { buildMockComments } from "../../web3/mock";
+import { buildMockAnno } from "../../anno/mock";
 import type { Lang } from "../../lib/i18n";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
@@ -29,7 +30,7 @@ const ZERO_UID = "0x" + "00".repeat(32);
 // Stable empty default so `stored` keeps a constant reference while the query is
 // disabled/loading — otherwise `[]` is a new array each render, `merged` recomputes,
 // and the projection effect (dep on `merged`) loops "Maximum update depth exceeded".
-const EMPTY_COMMENTS: StoredComment[] = [];
+const EMPTY_COMMENTS: StoredAnno[] = [];
 // Dev-only: PUBLIC_MOCK_COMMENTS=1 (`pnpm run dev:mock`) renders DOM-derived mock
 // comments so the UI can be tuned with no on-chain data.
 const MOCK = import.meta.env.PUBLIC_MOCK_COMMENTS === "1";
@@ -61,18 +62,19 @@ function CommentController({ lang }: Props) {
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerError, setComposerError] = useState<string | null>(null);
   const [composerPending, setComposerPending] = useState(false);
-  const [composerFields, setComposerFields] = useState<Omit<CommentFields, "body"> | null>(null);
+  const [composerFields, setComposerFields] = useState<Omit<AnnoFields, "body"> | null>(null);
   const [commentsOn, setCommentsOn] = useState(false);
   const [openBlock, setOpenBlock] = useState<string | null>(null);
 
-  // Optimistic comments live as full StoredComments; `pending` tracks the
-  // temp-uids that are still unconfirmed so one list + one renderer handles both.
-  const [optimistic, setOptimistic] = useState<StoredComment[]>([]);
+  // Optimistic comments live as full StoredAnnos; `pending` tracks the temp-uids
+  // that are still unconfirmed so one list + one renderer handles both.
+  const [optimistic, setOptimistic] = useState<StoredAnno[]>([]);
   const [pending, setPending] = useState<Set<string>>(() => new Set());
 
-  // Projected comments per block, for the thread panel (kept in a ref because the
-  // projection effect already drives a re-render via its own setState companion).
-  const projectedByBlock = useRef<Map<string, ProjectedComment[]>>(new Map());
+  // Projected comments per block (keyed by rootSelector), for the thread panel
+  // (kept in a ref because the projection effect already drives a re-render via
+  // its own setState companion).
+  const projectedByBlock = useRef<Map<string, LocatedAnno[]>>(new Map());
   const [commentedBlocks, setCommentedBlocks] = useState<string[]>([]);
 
   // Capture the selection target when opening the composer, so it is stable
@@ -83,15 +85,15 @@ function CommentController({ lang }: Props) {
   // mock mode (`pnpm run dev:mock`) we skip the chain and synthesize comments from
   // the live DOM so the comment UI can be tuned with no on-chain data.
   const { data: queried = EMPTY_COMMENTS } = useQuery({
-    queryKey: ["comments", SCHEMA_UID],
-    queryFn: () => fetchComments(SCHEMA_UID),
-    enabled: !MOCK && !!SCHEMA_UID,
+    queryKey: ["comments", ANNO_SCHEMA_UID],
+    queryFn: () => fetchAnno(ANNO_SCHEMA_UID),
+    enabled: !MOCK && !!ANNO_SCHEMA_UID,
     staleTime: 15000,
   });
-  const [mockData, setMockData] = useState<StoredComment[]>(EMPTY_COMMENTS);
+  const [mockData, setMockData] = useState<StoredAnno[]>(EMPTY_COMMENTS);
   useEffect(() => {
     if (!MOCK) return;
-    setMockData(buildMockComments(lang));
+    setMockData(buildMockAnno(lang));
     document.documentElement.dataset.comments = "on"; // reveal them immediately
   }, [lang]);
   const stored = MOCK ? mockData : queried;
@@ -181,23 +183,23 @@ function CommentController({ lang }: Props) {
       return;
     }
 
-    // Filter to this page's language, then group by block.
-    const groups = new Map<string, StoredComment[]>();
+    // Filter to this page's language, then group by rootSelector (= the block).
+    const groups = new Map<string, StoredAnno[]>();
     for (const c of merged) {
       if (c.lang !== lang) continue;
-      const arr = groups.get(c.blockId) ?? [];
+      const arr = groups.get(c.rootSelector) ?? [];
       arr.push(c);
-      groups.set(c.blockId, arr);
+      groups.set(c.rootSelector, arr);
     }
 
     const ranges: Range[] = [];
     const blocks: string[] = [];
-    for (const [blockId, group] of groups) {
-      const blockEl = document.querySelector(`[data-block-id="${blockId}"]`);
+    for (const [rootSelector, group] of groups) {
+      const blockEl = document.querySelector(rootSelector);
       if (!blockEl) continue;
-      const projected = projectComments(blockEl, group);
-      byBlock.set(blockId, projected);
-      blocks.push(blockId);
+      const projected = projectAnno(blockEl, group);
+      byBlock.set(rootSelector, projected);
+      blocks.push(rootSelector);
       for (const p of projected) {
         const s = p.projection.status;
         if (s !== "anchored" && s !== "re-anchored") continue;
@@ -211,26 +213,32 @@ function CommentController({ lang }: Props) {
     setCommentedBlocks(blocks);
   }, [merged, lang, commentsOn]);
 
+  // Build the anno fields for the captured selection. Shared by the composer
+  // preview and the actual attestation, so the preview matches what's recorded.
+  function annoFieldsFromTarget(target: SelectionTarget): Omit<AnnoFields, "body"> {
+    const { anchor, blockId } = target;
+    const { url, urlCanonical, origin } = canonicalizeUrl(location.href);
+    return {
+      url,
+      urlCanonical,
+      origin,
+      lang,
+      rootSelector: `[data-block-id="${blockId}"]`,
+      containerHash: anchor.blockHash,
+      spanStart: anchor.start,
+      spanEnd: anchor.end,
+      spanExact: anchor.exact,
+      spanPrefix: anchor.prefix,
+      spanSuffix: anchor.suffix,
+      parentUid: ZERO_UID,
+      meta: "",
+    };
+  }
+
   function openComposer() {
     capturedTarget.current = selection;
     setComposerError(null);
-    if (selection) {
-      const { anchor, blockId } = selection;
-      setComposerFields({
-        chapter: blockId.slice(0, 2),
-        blockId,
-        lang,
-        blockHash: anchor.blockHash,
-        spanStart: anchor.start,
-        spanEnd: anchor.end,
-        spanExact: anchor.exact,
-        spanPrefix: anchor.prefix,
-        spanSuffix: anchor.suffix,
-        parentUid: ZERO_UID,
-      });
-    } else {
-      setComposerFields(null);
-    }
+    setComposerFields(selection ? annoFieldsFromTarget(selection) : null);
     setComposerOpen(true);
   }
 
@@ -238,29 +246,15 @@ function CommentController({ lang }: Props) {
     const target = capturedTarget.current;
     if (!target) return;
 
-    if (!signer || !SCHEMA_UID) {
-      setComposerError("Connect a wallet on Sepolia (and set PUBLIC_EAS_SCHEMA_UID).");
+    if (!signer || !ANNO_SCHEMA_UID) {
+      setComposerError("Connect a wallet on Sepolia (and set PUBLIC_EAS_ANNO_SCHEMA_UID).");
       return;
     }
 
-    const { anchor, blockId } = target;
-    const chapter = blockId.slice(0, 2);
-    const fields = {
-      chapter,
-      blockId,
-      lang,
-      blockHash: anchor.blockHash,
-      spanStart: anchor.start,
-      spanEnd: anchor.end,
-      spanExact: anchor.exact,
-      spanPrefix: anchor.prefix,
-      spanSuffix: anchor.suffix,
-      parentUid: ZERO_UID,
-      body,
-    };
+    const fields: AnnoFields = { ...annoFieldsFromTarget(target), body };
 
     const tempUid = `opt-${Date.now()}`;
-    const optimisticComment: StoredComment = {
+    const optimisticComment: StoredAnno = {
       ...fields,
       uid: tempUid,
       attester: address ?? "you",
@@ -273,7 +267,7 @@ function CommentController({ lang }: Props) {
     setComposerPending(true);
 
     try {
-      const uid = await attestComment(signer, SCHEMA_UID, encodeComment(fields));
+      const uid = await attestComment(signer, ANNO_SCHEMA_UID, encodeAnno(fields));
       // Swap the temp-uid → the real returned uid, then refetch so the confirmed
       // attestation arrives from EAS and the optimistic dupe collapses by uid.
       setOptimistic((prev) => prev.map((c) => (c.uid === tempUid ? { ...c, uid } : c)));
@@ -282,7 +276,7 @@ function CommentController({ lang }: Props) {
         next.delete(tempUid);
         return next;
       });
-      qc.invalidateQueries({ queryKey: ["comments", SCHEMA_UID] });
+      qc.invalidateQueries({ queryKey: ["comments", ANNO_SCHEMA_UID] });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setOptimistic((prev) => prev.filter((c) => c.uid !== tempUid));
@@ -298,22 +292,22 @@ function CommentController({ lang }: Props) {
     }
   }
 
-  const isPending = (c: StoredComment) => pending.has(c.uid);
+  const isPending = (c: StoredAnno) => pending.has(c.uid);
 
   // Gutter badge per commented block → opens that block's thread panel.
-  const gutterPortals = commentedBlocks.map((blockId) => {
-    const blockEl = document.querySelector(`[data-block-id="${blockId}"]`);
+  const gutterPortals = commentedBlocks.map((rootSelector) => {
+    const blockEl = document.querySelector(rootSelector);
     const gutter = blockEl?.querySelector(".gutter") ?? null;
     if (!gutter) return null;
-    const group = projectedByBlock.current.get(blockId) ?? [];
+    const group = projectedByBlock.current.get(rootSelector) ?? [];
     return createPortal(
       <CommentMarker
         count={group.length}
         pending={group.some((p) => isPending(p.comment))}
-        onClick={() => setOpenBlock(blockId)}
+        onClick={() => setOpenBlock(rootSelector)}
       />,
       gutter,
-      blockId,
+      rootSelector,
     );
   });
 
@@ -335,7 +329,7 @@ function CommentController({ lang }: Props) {
         connected={isConnected}
         onConnect={() => connect({ connector: injected() })}
         fieldsPreview={composerFields}
-        schemaUid={SCHEMA_UID}
+        schemaUid={ANNO_SCHEMA_UID}
       />
       {gutterPortals}
       {openBlock ? (

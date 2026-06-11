@@ -1,10 +1,10 @@
-import type { ProjectedComment } from "../../web3/projectComments";
+import type { LocatedAnno } from "../../anno/locate";
 import { buildThreads } from "../../web3/thread";
 import { MESSAGES, type Lang } from "../../lib/i18n";
 import { CommentCard } from "./CommentCard";
 
 interface Props {
-  projected: ProjectedComment[];
+  projected: LocatedAnno[];
   lang: Lang;
   onClose: () => void;
 }
