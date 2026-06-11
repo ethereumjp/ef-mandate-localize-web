@@ -1,11 +1,10 @@
 ---
-import { MESSAGES } from "../lib/i18n";
+import { t } from "../lib/i18n";
 import type { Lang } from "../lib/i18n";
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-const m = MESSAGES[lang];
 
 // Project links. Update GITHUB if the canonical repo changes.
 const GITHUB = "https://github.com/ethereumjp/ef-mandate-localize-jp";
@@ -17,7 +16,7 @@ const ORIGINAL_PDF = "https://ethereum.foundation/ef-mandate.pdf";
       href={GITHUB}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={m.sourceCode}
+      aria-label={t(lang, "sourceCode")}
       class="hover:text-stone-900 dark:hover:text-stone-100"
     >
       <svg class="size-5" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -28,7 +27,7 @@ const ORIGINAL_PDF = "https://ethereum.foundation/ef-mandate.pdf";
       href={ORIGINAL_PDF}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={m.originalPdf}
+      aria-label={t(lang, "originalPdf")}
       class="hover:text-stone-900 dark:hover:text-stone-100"
     >
       <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -36,5 +35,5 @@ const ORIGINAL_PDF = "https://ethereum.foundation/ef-mandate.pdf";
       </svg>
     </a>
   </div>
-  <p>{m.projectNote}</p>
+  <p>{t(lang, "projectNote")}</p>
 </div>

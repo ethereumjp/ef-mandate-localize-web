@@ -1,18 +1,31 @@
 import { describe, it, expect } from "vitest";
-import { MESSAGES, LANGS } from "../src/lib/i18n";
+import { langRoute, resolveMessage, t } from "../src/lib/i18n";
 
-describe("i18n", () => {
-  it("LANGS is en, ja", () => {
-    expect(LANGS).toEqual(["en", "ja"]);
+describe("langRoute", () => {
+  it("maps the source language to /", () => {
+    expect(langRoute("en")).toBe("/");
   });
-  it("en and ja have identical key sets", () => {
-    expect(Object.keys(MESSAGES.ja).sort()).toEqual(Object.keys(MESSAGES.en).sort());
+  it("maps other languages to /<code>", () => {
+    expect(langRoute("ja")).toBe("/ja");
   });
-  it("has no empty strings", () => {
-    for (const lang of LANGS) {
-      for (const [k, v] of Object.entries(MESSAGES[lang])) {
-        expect(v, `${lang}.${k}`).not.toBe("");
-      }
-    }
+});
+
+describe("resolveMessage", () => {
+  const table = { en: { a: "A", b: "B" }, fr: { a: "Af" } };
+  it("returns the language's value when present", () => {
+    expect(resolveMessage(table, "en", "fr", "a")).toBe("Af");
+  });
+  it("falls back to the fallback language when the key is missing", () => {
+    expect(resolveMessage(table, "en", "fr", "b")).toBe("B");
+  });
+  it("falls back when the language is absent entirely", () => {
+    expect(resolveMessage(table, "en", "de", "a")).toBe("A");
+  });
+});
+
+describe("t", () => {
+  it("returns the translated UI string, falling back to source", () => {
+    expect(t("ja", "comments")).toBe("コメント");
+    expect(t("en", "comments")).toBe("Comments");
   });
 });

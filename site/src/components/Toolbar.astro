@@ -1,5 +1,5 @@
 ---
-import { MESSAGES, LANG_OPTIONS } from "../lib/i18n";
+import { t, LANG_OPTIONS } from "../lib/i18n";
 import type { Lang } from "../lib/i18n";
 interface Props {
     lang: Lang;
@@ -14,13 +14,13 @@ const { lang } = Astro.props;
         class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3"
     >
         <a href="/" class="whitespace-nowrap font-bold text-2xl tracking-tight"
-            >{MESSAGES.en.siteTitle}</a
+            >{t("en", "siteTitle")}</a
         >
         <div class="flex items-center gap-3 text-sm">
             <span id="wallet-slot"></span>
             <select
                 data-lang-select
-                aria-label={MESSAGES[lang].language}
+                aria-label={t(lang, "language")}
                 class="rounded border border-stone-300 bg-transparent px-2 py-1 text-sm hover:bg-stone-100 dark:border-stone-700 dark:hover:bg-stone-800"
             >
                 {
@@ -35,7 +35,7 @@ const { lang } = Astro.props;
                 data-toggle-comments
                 type="button"
                 role="switch"
-                aria-label={MESSAGES[lang].comments}
+                aria-label={t(lang, "comments")}
                 class="flex items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-stone-100 dark:hover:bg-stone-800 hover:pointer-cursor"
             >
                 <svg
