@@ -21,7 +21,12 @@ export function CommentThread({ projected, lang, onClose }: Props) {
   return (
     <aside className="fixed right-0 top-0 z-40 flex h-full w-80 max-w-[85vw] flex-col overflow-y-auto border-l border-stone-200 bg-white p-4 shadow-lg dark:border-stone-700 dark:bg-stone-900">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">{m.threadTitle}</h2>
+        <h2 className="text-sm font-semibold">
+          {m.threadTitle}
+          {projected.length > 0 ? (
+            <span className="ml-1 font-normal text-stone-400">({projected.length})</span>
+          ) : null}
+        </h2>
         <button
           type="button"
           onClick={onClose}
