@@ -14,7 +14,7 @@ import { anchorFromSelection } from "../../web3/selection";
 import { encodeAnno, type AnnoFields } from "../../anno/schema";
 import { attestComment } from "../../web3/eas";
 import { fetchAnno } from "../../anno/read";
-import { projectAnno, type StoredAnno, type LocatedAnno } from "../../anno/locate";
+import { projectAnno, commentsForUrl, type StoredAnno, type LocatedAnno } from "../../anno/locate";
 import { canonicalizeUrl } from "../../anno/canonicalUrl";
 import { rangeForOffsets, applyHighlights } from "../../web3/highlight";
 import { buildMockAnno } from "../../anno/mock";
@@ -206,10 +206,10 @@ function CommentController({ lang }: Props) {
       return;
     }
 
-    // Filter to this page's language, then group by rootSelector (= the block).
+    // Scope to this page's canonical URL (anno is URL-based), then group by block.
+    const pageUrl = canonicalizeUrl(location.href).urlCanonical;
     const groups = new Map<string, StoredAnno[]>();
-    for (const c of merged) {
-      if (c.lang !== lang) continue;
+    for (const c of commentsForUrl(merged, pageUrl)) {
       const arr = groups.get(c.rootSelector) ?? [];
       arr.push(c);
       groups.set(c.rootSelector, arr);
@@ -235,7 +235,7 @@ function CommentController({ lang }: Props) {
     applyHighlights("comment", ranges);
     resolved.sort((a, b) => a.top - b.top);
     setProjected(resolved.flatMap((r) => r.items));
-  }, [merged, lang, commentsOn]);
+  }, [merged, commentsOn]);
 
   // Focus a comment: open the sidebar, wash its span, scroll the span into view.
   const focusComment = useCallback((uid: string) => {

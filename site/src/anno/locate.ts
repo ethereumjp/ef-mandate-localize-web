@@ -56,3 +56,15 @@ export function projectAnno(blockEl: Element, comments: StoredAnno[]): LocatedAn
   const current = { blockHash: blockHashFromNormalized(text), text };
   return comments.map((c) => ({ comment: c, projection: project(toAnchor(c), current) }));
 }
+
+/**
+ * Scope comments to a single page by canonical URL — the anno identity. The
+ * page's `location.href` must be run through the same `canonicalizeUrl` as the
+ * stored `urlCanonical` so the keys match.
+ */
+export function commentsForUrl<T extends { urlCanonical: string }>(
+  comments: T[],
+  pageUrl: string,
+): T[] {
+  return comments.filter((c) => c.urlCanonical === pageUrl);
+}
