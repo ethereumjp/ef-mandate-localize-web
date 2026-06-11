@@ -20,6 +20,7 @@
     "anchors:build": "tsx scripts/build-anchors.ts",
     "schema:register": "tsx scripts/register-schema.ts",
     "anno:schema:register": "tsx scripts/register-anno-schema.ts",
+    "gen:mock": "tsx scripts/gen-mock-comments.ts",
     "reanchor:demo": "tsx scripts/reanchor-demo.ts"
   },
   "pnpm": {

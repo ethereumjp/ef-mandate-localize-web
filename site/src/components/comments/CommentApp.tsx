@@ -17,7 +17,7 @@ import { fetchAnno } from "../../anno/read";
 import { projectAnno, commentsForUrl, type StoredAnno, type LocatedAnno } from "../../anno/locate";
 import { canonicalizeUrl } from "../../anno/canonicalUrl";
 import { rangeForOffsets, applyHighlights } from "../../web3/highlight";
-import { buildMockAnno } from "../../anno/mock";
+import { loadMockComments } from "../../anno/mock";
 import type { Lang } from "../../lib/i18n";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
@@ -109,9 +109,9 @@ function CommentController({ lang }: Props) {
   const [mockData, setMockData] = useState<StoredAnno[]>(EMPTY_COMMENTS);
   useEffect(() => {
     if (!MOCK) return;
-    setMockData(buildMockAnno(lang));
+    setMockData(loadMockComments());
     document.documentElement.dataset.comments = "on"; // reveal them immediately
-  }, [lang]);
+  }, []);
   const stored = MOCK ? mockData : queried;
 
   // Merge stored + optimistic, deduped by uid (confirmed wins over its temp dupe).

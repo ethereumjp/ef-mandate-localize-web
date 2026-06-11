@@ -10,12 +10,18 @@ const QUERY = `query Comments($schemaId: String!) {
   ) { id attester time revoked data }
 }`;
 
-interface RawAttestation {
+export interface RawAttestation {
   id: string;
   attester: string;
   time: number;
   revoked: boolean;
   data: string;
+}
+
+/** Map a raw EAS attestation (GraphQL shape) to a decoded StoredAnno. Shared by
+ *  `fetchAnno` and the dev mock so both decode identically. */
+export function decodeAttestation(a: RawAttestation): StoredAnno {
+  return { uid: a.id, attester: a.attester, time: Number(a.time), ...decodeAnno(a.data) };
 }
 
 /** Fetch + decode all non-revoked anno comment attestations for a schema. */
@@ -33,10 +39,5 @@ export async function fetchAnno(
   if (!res.ok) throw new Error(`EAS GraphQL ${res.status}`);
   const json = (await res.json()) as { data?: { attestations?: RawAttestation[] } };
   const rows = json.data?.attestations ?? [];
-  return rows.map((a) => ({
-    uid: a.id,
-    attester: a.attester,
-    time: Number(a.time),
-    ...decodeAnno(a.data),
-  }));
+  return rows.map(decodeAttestation);
 }
