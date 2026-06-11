@@ -38,7 +38,7 @@ export function CommentCard({
       className={
         depth > 0
           ? "mt-3 border-l border-stone-200 pl-3 dark:border-stone-700"
-          : `cursor-pointer rounded-r border-l-2 px-2.5 py-3 transition-colors ${
+          : `cursor-pointer rounded-r border-l-3 px-3.5 py-4 transition-colors ${
               focused
                 ? "border-stone-400 bg-stone-100/70 dark:border-stone-500 dark:bg-stone-800/60"
                 : "border-transparent hover:bg-stone-50 dark:hover:bg-stone-800/40"

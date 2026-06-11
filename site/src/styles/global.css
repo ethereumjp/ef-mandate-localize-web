@@ -28,24 +28,28 @@
    underline ("marker" colour). The underline is the in-text comment affordance. */
 ::highlight(comment) {
     text-decoration-line: underline;
-    text-decoration-color: var(--color-amber-400);
+    text-decoration-color: var(--color-amber-200);
     text-decoration-thickness: 2px;
     text-underline-offset: 3px;
 }
 [data-theme="dark"] ::highlight(comment) {
-    text-decoration-color: var(--color-amber-500);
+    text-decoration-color: var(--color-amber-200);
 }
 /* The currently-focused comment's span (card click / hover): amber wash + underline. */
 ::highlight(comment-focus) {
-    background-color: var(--color-amber-200);
+    background-color: var(--color-amber-100);
     text-decoration-line: underline;
-    text-decoration-color: var(--color-amber-500);
+    text-decoration-color: var(--color-amber-200);
     text-decoration-thickness: 2px;
     text-underline-offset: 3px;
 }
 [data-theme="dark"] ::highlight(comment-focus) {
-    background-color: color-mix(in oklab, var(--color-amber-500) 35%, transparent);
-    text-decoration-color: var(--color-amber-400);
+    background-color: color-mix(
+        in oklab,
+        var(--color-amber-200) 35%,
+        transparent
+    );
+    text-decoration-color: var(--color-amber-200);
 }
 
 html {

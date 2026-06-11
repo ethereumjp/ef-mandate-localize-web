@@ -59,7 +59,7 @@ export function CommentThread({
           ✕
         </button>
       </div>
-      <div ref={listRef} className="flex-1 overflow-y-auto px-2 py-2">
+      <div ref={listRef} className="flex-1 overflow-y-auto">
         {comments.length === 0 ? (
           <p className="px-2 py-6 text-center text-sm text-stone-400">{m.noComments}</p>
         ) : null}
