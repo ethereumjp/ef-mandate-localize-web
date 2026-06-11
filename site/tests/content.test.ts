@@ -1,49 +1,52 @@
 import { describe, it, expect } from "vitest";
-import { chapterTitle, mergeChapter } from "../src/lib/content";
-import { parseChapter } from "../src/lib/blocks";
+import { parseChapter, type Block } from "../src/lib/blocks";
+import { renderMarkdown } from "../src/lib/render";
+import { mergeChapter, blockHtml, titleFor, isPending, isFallback } from "../src/lib/content";
+import type { Lang } from "../src/lib/i18n";
 
-describe("chapterTitle", () => {
-  it("strips the leading heading marks", () => {
-    expect(chapterTitle("# II. Our Role")).toBe("II. Our Role");
-  });
-});
+const en = parseChapter(
+  "<!-- block: 01-h -->\n# Chapter One\n\n<!-- block: 01-p -->\nEnglish body.",
+);
+const jaAligned = parseChapter(
+  "<!-- block: 01-h -->\n# 第一章\n\n<!-- block: 01-p -->\n日本語の本文。",
+);
+const jaMisaligned = parseChapter("<!-- block: 01-h -->\n# 第一章のみ"); // 1 block ≠ 2
 
 describe("mergeChapter", () => {
-  it("merges aligned EN/JA by blockId", () => {
-    const en = parseChapter("<!-- block: 02-p1 -->\n# Title\n\n<!-- block: 02-p2 -->\nBody");
-    const ja = parseChapter("<!-- block: 02-p1 -->\n# 題\n\n<!-- block: 02-p2 -->\n本文");
-    const ch = mergeChapter("02", en, ja);
-    expect(ch.jaPending).toBe(false);
-    expect(ch.title).toBe("Title");
-    expect(ch.jaTitle).toBe("題");
-    expect(ch.blocks).toHaveLength(2);
-    expect(ch.blocks[0].blockId).toBe("02-p1");
-    expect(ch.blocks[0].enHtml).toContain("Title");
-    expect(ch.blocks[0].jaHtml).toContain("題");
+  it("stores a translation when aligned", () => {
+    const ch = mergeChapter("01", en, new Map<Lang, Block[]>([["ja", jaAligned]]));
+    expect(ch.sourceTitle).toBe("Chapter One");
+    expect(ch.translations.ja?.title).toBe("第一章");
+    expect(isPending(ch, "ja")).toBe(false);
+    expect(ch.blocks[1].translations.ja).toBe(renderMarkdown("日本語の本文。"));
+    expect(blockHtml(ch.blocks[1], "ja")).toBe(renderMarkdown("日本語の本文。"));
+    expect(isFallback(ch.blocks[1], "ja")).toBe(false);
   });
-  it("marks the chapter pending when JA block count differs (stub)", () => {
-    const en = parseChapter("<!-- block: 04-p1 -->\n# Title\n\n<!-- block: 04-p2 -->\nBody");
-    const ja = parseChapter("# 題"); // stub: 1 unmarked block
-    const ch = mergeChapter("04", en, ja);
-    expect(ch.jaPending).toBe(true);
-    expect(ch.jaTitle).toBeNull();
-    expect(ch.blocks[0].jaHtml).toBeNull();
+
+  it("falls back to EN when a translation is misaligned (pending)", () => {
+    const ch = mergeChapter("01", en, new Map<Lang, Block[]>([["ja", jaMisaligned]]));
+    expect(ch.translations.ja).toBeUndefined();
+    expect(isPending(ch, "ja")).toBe(true);
+    expect(titleFor(ch, "ja")).toBe("Chapter One");
+    expect(blockHtml(ch.blocks[0], "ja")).toBe(renderMarkdown("# Chapter One"));
+    expect(isFallback(ch.blocks[0], "ja")).toBe(true);
   });
-  it("treats a null JA chapter as pending", () => {
-    const en = parseChapter("<!-- block: 07-p1 -->\n# Title");
-    const ch = mergeChapter("07", en, null);
-    expect(ch.jaPending).toBe(true);
-    expect(ch.blocks[0].jaHtml).toBeNull();
+
+  it("treats a missing language as pending", () => {
+    const ch = mergeChapter("01", en, new Map<Lang, Block[]>());
+    expect(isPending(ch, "ja")).toBe(true);
+    expect(blockHtml(ch.blocks[1], "ja")).toBe(renderMarkdown("English body."));
   });
-  it("marks pending when JA block count matches but ids differ", () => {
-    const en = parseChapter("<!-- block: 02-p1 -->\nA\n\n<!-- block: 02-p2 -->\nB");
-    const ja = parseChapter("<!-- block: 02-p1 -->\nあ\n\n<!-- block: 02-p9 -->\nい"); // p9 != p2
-    const ch = mergeChapter("02", en, ja);
-    expect(ch.jaPending).toBe(true);
-    expect(ch.blocks[1].jaHtml).toBeNull();
+
+  it("never reports pending/fallback for the source language", () => {
+    const ch = mergeChapter("01", en, new Map<Lang, Block[]>([["ja", jaAligned]]));
+    expect(isPending(ch, "en")).toBe(false);
+    expect(blockHtml(ch.blocks[0], "en")).toBe(renderMarkdown("# Chapter One"));
+    expect(isFallback(ch.blocks[0], "en")).toBe(false);
   });
-  it("throws if an EN block is unmarked", () => {
-    const en = parseChapter("# Title"); // no marker
-    expect(() => mergeChapter("02", en, null)).toThrow(/unmarked/);
+
+  it("throws when an EN block is unmarked", () => {
+    const unmarked = parseChapter("# No marker here");
+    expect(() => mergeChapter("01", unmarked, new Map<Lang, Block[]>())).toThrow(/unmarked/);
   });
 });

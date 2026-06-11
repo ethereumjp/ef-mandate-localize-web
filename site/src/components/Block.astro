@@ -1,18 +1,19 @@
 ---
 import type { RenderedBlock } from "../lib/content";
+import { blockHtml, isFallback } from "../lib/content";
 import type { Lang } from "../lib/i18n";
 interface Props {
   block: RenderedBlock;
   lang: Lang;
 }
 const { block, lang } = Astro.props;
-const html = lang === "ja" ? (block.jaHtml ?? block.enHtml) : block.enHtml;
-const jaFallback = lang === "ja" && block.jaHtml === null;
+const html = blockHtml(block, lang);
+const fallback = isFallback(block, lang);
 ---
 <div class="block relative" data-block-id={block.blockId}>
   <div
     class="prose prose-stone max-w-none dark:prose-invert"
-    data-fallback={jaFallback ? "en" : undefined}
+    data-fallback={fallback ? "en" : undefined}
     set:html={html}
   />
 </div>
