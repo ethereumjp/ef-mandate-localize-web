@@ -45,3 +45,14 @@ export function locate(doc: Document, c: StoredAnno): LocatedAnno {
   const current = { blockHash: blockHashFromNormalized(text), text };
   return { comment: c, projection: project(toAnchor(c), current) };
 }
+
+/**
+ * Project a group of stored comments (already filtered to one block) onto that
+ * block's live text. The anno counterpart of `web3/projectComments`: resolve the
+ * block's normalized text + hash once, then project each comment's span.
+ */
+export function projectAnno(blockEl: Element, comments: StoredAnno[]): LocatedAnno[] {
+  const text = normalizedBlockText(blockEl);
+  const current = { blockHash: blockHashFromNormalized(text), text };
+  return comments.map((c) => ({ comment: c, projection: project(toAnchor(c), current) }));
+}

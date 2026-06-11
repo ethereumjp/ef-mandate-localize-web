@@ -29,3 +29,6 @@ export const wagmiConfig = createConfig({
 // DEAD in the deployed IPFS build. Bracket access keeps SCHEMA_UID a runtime
 // value, so the attest code is bundled and the guard still works at runtime.
 export const SCHEMA_UID: string = import.meta.env["PUBLIC_EAS_SCHEMA_UID"] ?? "";
+// Generalized (anno) comment schema UID. Same bracket-access rationale as above:
+// keep it a runtime value so the anno attest/read path is not dead-code-eliminated.
+export const ANNO_SCHEMA_UID: string = import.meta.env["PUBLIC_EAS_ANNO_SCHEMA_UID"] ?? "";
