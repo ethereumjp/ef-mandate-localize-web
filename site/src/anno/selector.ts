@@ -39,8 +39,7 @@ function nthOfType(el: Element): number {
 
 /** Nearest id-bearing or block-level ancestor of a node (or the node itself). */
 export function nearestContainer(node: Node): Element | null {
-  let el: Element | null =
-    node.nodeType === 1 ? (node as Element) : node.parentElement;
+  let el: Element | null = node.nodeType === 1 ? (node as Element) : node.parentElement;
   for (; el; el = el.parentElement) {
     if (el.id) return el;
     if (BLOCK_TAGS.has(el.tagName)) return el;

@@ -45,7 +45,10 @@ describe("locate", () => {
 
   it("re-anchors via the fallback when the selector is stale but the quote exists elsewhere", () => {
     document.body.innerHTML = "<article><p>intro</p><p>the walkaway test</p></article>";
-    const out = locate(document, stored({ rootSelector: '[id="gone"]', containerHash: "0x" + "ab".repeat(32) }));
+    const out = locate(
+      document,
+      stored({ rootSelector: '[id="gone"]', containerHash: "0x" + "ab".repeat(32) }),
+    );
     expect(out.projection.status).toBe("re-anchored");
     expect(out.projection.pastVersion).toBe(true);
   });

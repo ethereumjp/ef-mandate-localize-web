@@ -39,9 +39,7 @@ describe("selector generation", () => {
 describe("container resolution", () => {
   it("resolves via the CSS selector when it still matches", () => {
     setBody('<p id="b1">the walkaway test</p>');
-    expect(resolveContainer(document, '[id="b1"]', "walkaway")).toBe(
-      document.querySelector("p"),
-    );
+    expect(resolveContainer(document, '[id="b1"]', "walkaway")).toBe(document.querySelector("p"));
   });
 
   it("falls back to the smallest element containing the quote when the selector is stale", () => {
