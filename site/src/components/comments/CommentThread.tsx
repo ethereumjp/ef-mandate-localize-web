@@ -1,67 +1,80 @@
+import { useEffect, useRef } from "react";
 import type { LocatedAnno } from "../../anno/locate";
 import { buildThreads } from "../../web3/thread";
 import { MESSAGES, type Lang } from "../../lib/i18n";
 import { CommentCard } from "./CommentCard";
 
 interface Props {
-  projected: LocatedAnno[];
+  /** All projected comments for the page (document order), threaded by parentUid. */
+  comments: LocatedAnno[];
   lang: Lang;
+  focusedUid: string | null;
+  pendingUids: Set<string>;
+  onFocus: (uid: string) => void;
   onClose: () => void;
 }
 
-export function CommentThread({ projected, lang, onClose }: Props) {
+/**
+ * Fixed minimal sidebar listing every comment on the page. Layout-independent
+ * (pinned to the viewport, not the host margin) so it works on any site. The
+ * amber underline in the text is the in-place marker; this lists + focuses them.
+ */
+export function CommentThread({
+  comments,
+  lang,
+  focusedUid,
+  pendingUids,
+  onFocus,
+  onClose,
+}: Props) {
   const m = MESSAGES[lang];
-  const isInline = (s: string) => s === "anchored" || s === "re-anchored";
-  const inline = projected.filter((p) => isInline(p.projection.status));
-  const needsReview = projected.filter((p) => !isInline(p.projection.status));
-  const projByUid = new Map(projected.map((p) => [p.comment.uid, p.projection]));
-  const inlineThreads = buildThreads(inline.map((p) => p.comment));
-  const reviewThreads = buildThreads(needsReview.map((p) => p.comment));
+  const projByUid = new Map(comments.map((p) => [p.comment.uid, p.projection]));
+  const threads = buildThreads(comments.map((p) => p.comment));
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // When a span is clicked, scroll its card into view.
+  useEffect(() => {
+    if (!focusedUid || !listRef.current) return;
+    const el = listRef.current.querySelector(`[data-uid="${CSS.escape(focusedUid)}"]`);
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [focusedUid]);
 
   return (
-    <aside className="fixed right-0 top-0 z-40 flex h-full w-80 max-w-[85vw] flex-col overflow-y-auto border-l border-stone-200 bg-white p-4 shadow-lg dark:border-stone-700 dark:bg-stone-900">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">
+    <aside className="fixed right-0 top-0 z-40 flex h-full w-[340px] max-w-[85vw] flex-col border-l border-stone-200 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.05)] dark:border-stone-700 dark:bg-stone-900">
+      <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3 dark:border-stone-700">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
           {m.threadTitle}
-          {projected.length > 0 ? (
-            <span className="ml-1 font-normal text-stone-400">({projected.length})</span>
+          {comments.length > 0 ? (
+            <span className="ml-1.5 font-normal text-stone-400 dark:text-stone-500">
+              {comments.length}
+            </span>
           ) : null}
         </h2>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="rounded p-1 hover:bg-stone-100 dark:hover:bg-stone-800"
+          className="rounded p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
         >
           ✕
         </button>
       </div>
-      {projected.length === 0 ? (
-        <p className="mt-3 text-sm text-stone-500">{m.noComments}</p>
-      ) : null}
-      {inlineThreads.map((n) => (
-        <CommentCard
-          key={n.comment.uid}
-          node={n}
-          projection={projByUid.get(n.comment.uid)}
-          lang={lang}
-        />
-      ))}
-      {reviewThreads.length > 0 ? (
-        <>
-          <h3 className="mt-5 text-xs font-semibold uppercase tracking-wide text-stone-400">
-            {m.needsReviewTitle}
-          </h3>
-          {reviewThreads.map((n) => (
-            <CommentCard
-              key={n.comment.uid}
-              node={n}
-              projection={projByUid.get(n.comment.uid)}
-              lang={lang}
-            />
-          ))}
-        </>
-      ) : null}
+      <div ref={listRef} className="flex-1 overflow-y-auto px-2 py-2">
+        {comments.length === 0 ? (
+          <p className="px-2 py-6 text-center text-sm text-stone-400">{m.noComments}</p>
+        ) : null}
+        {threads.map((n) => (
+          <CommentCard
+            key={n.comment.uid}
+            node={n}
+            projection={projByUid.get(n.comment.uid)}
+            lang={lang}
+            focusedUid={focusedUid}
+            pendingUids={pendingUids}
+            onFocus={onFocus}
+          />
+        ))}
+      </div>
     </aside>
   );
 }

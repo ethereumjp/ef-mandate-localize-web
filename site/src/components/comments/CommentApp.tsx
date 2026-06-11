@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { WagmiProvider, useAccount, useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
@@ -22,7 +22,6 @@ import type { Lang } from "../../lib/i18n";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
 import { Composer } from "./Composer";
-import { CommentMarker } from "./CommentMarker";
 import { CommentThread } from "./CommentThread";
 
 const queryClient = new QueryClient();
@@ -51,6 +50,23 @@ function commentsEnabled(): boolean {
   return document.documentElement.dataset.comments === "on";
 }
 
+/** The caret (node, offset) under a viewport point — used to hit-test span clicks. */
+function caretFromPoint(x: number, y: number): { node: Node; offset: number } | null {
+  const d = document as Document & {
+    caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null;
+    caretRangeFromPoint?: (x: number, y: number) => Range | null;
+  };
+  if (d.caretPositionFromPoint) {
+    const p = d.caretPositionFromPoint(x, y);
+    return p ? { node: p.offsetNode, offset: p.offset } : null;
+  }
+  if (d.caretRangeFromPoint) {
+    const r = d.caretRangeFromPoint(x, y);
+    return r ? { node: r.startContainer, offset: r.startOffset } : null;
+  }
+  return null;
+}
+
 function CommentController({ lang }: Props) {
   const signer = useEthersSigner();
   const { address, isConnected } = useAccount();
@@ -64,18 +80,18 @@ function CommentController({ lang }: Props) {
   const [composerPending, setComposerPending] = useState(false);
   const [composerFields, setComposerFields] = useState<Omit<AnnoFields, "body"> | null>(null);
   const [commentsOn, setCommentsOn] = useState(false);
-  const [openBlock, setOpenBlock] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [focusedUid, setFocusedUid] = useState<string | null>(null);
 
   // Optimistic comments live as full StoredAnnos; `pending` tracks the temp-uids
   // that are still unconfirmed so one list + one renderer handles both.
   const [optimistic, setOptimistic] = useState<StoredAnno[]>([]);
   const [pending, setPending] = useState<Set<string>>(() => new Set());
 
-  // Projected comments per block (keyed by rootSelector), for the thread panel
-  // (kept in a ref because the projection effect already drives a re-render via
-  // its own setState companion).
+  // Projection state: a per-block map (for span lookup / hit-testing) plus the flat,
+  // document-ordered list the sidebar renders.
   const projectedByBlock = useRef<Map<string, LocatedAnno[]>>(new Map());
-  const [commentedBlocks, setCommentedBlocks] = useState<string[]>([]);
+  const [projected, setProjected] = useState<LocatedAnno[]>([]);
 
   // Capture the selection target when opening the composer, so it is stable
   // even after the DOM selection is cleared.
@@ -121,9 +137,15 @@ function CommentController({ lang }: Props) {
     return () => obs.disconnect();
   }, []);
 
-  // Close the thread panel when commentary is turned off.
+  // Comments on → reveal the sidebar; off → hide it and drop any focus.
   useEffect(() => {
-    if (!commentsOn) setOpenBlock(null);
+    if (commentsOn) {
+      setSidebarOpen(true);
+    } else {
+      setSidebarOpen(false);
+      setFocusedUid(null);
+      applyHighlights("comment-focus", []);
+    }
   }, [commentsOn]);
 
   // selectionchange → popover. Authoring is independent of the comments toggle
@@ -171,15 +193,16 @@ function CommentController({ lang }: Props) {
     return () => document.removeEventListener("selectionchange", onSelectionChange);
   }, []);
 
-  // Project the (lang-filtered) comments per block and paint inline highlights.
-  // Re-runs whenever the merged list, language, or on/off state changes.
+  // Project the (lang-filtered) comments per block, paint the underline markers,
+  // and publish the flat document-ordered list the sidebar renders.
   useEffect(() => {
     const byBlock = projectedByBlock.current;
     byBlock.clear();
 
     if (!commentsOn) {
       applyHighlights("comment", []);
-      setCommentedBlocks([]);
+      applyHighlights("comment-focus", []);
+      setProjected([]);
       return;
     }
 
@@ -192,15 +215,15 @@ function CommentController({ lang }: Props) {
       groups.set(c.rootSelector, arr);
     }
 
+    const resolved: { top: number; items: LocatedAnno[] }[] = [];
     const ranges: Range[] = [];
-    const blocks: string[] = [];
     for (const [rootSelector, group] of groups) {
       const blockEl = document.querySelector(rootSelector);
       if (!blockEl) continue;
-      const projected = projectAnno(blockEl, group);
-      byBlock.set(rootSelector, projected);
-      blocks.push(rootSelector);
-      for (const p of projected) {
+      const items = projectAnno(blockEl, group);
+      byBlock.set(rootSelector, items);
+      resolved.push({ top: blockEl.getBoundingClientRect().top + window.scrollY, items });
+      for (const p of items) {
         const s = p.projection.status;
         if (s !== "anchored" && s !== "re-anchored") continue;
         if (p.projection.start === null || p.projection.end === null) continue;
@@ -210,8 +233,53 @@ function CommentController({ lang }: Props) {
     }
 
     applyHighlights("comment", ranges);
-    setCommentedBlocks(blocks);
+    resolved.sort((a, b) => a.top - b.top);
+    setProjected(resolved.flatMap((r) => r.items));
   }, [merged, lang, commentsOn]);
+
+  // Focus a comment: open the sidebar, wash its span, scroll the span into view.
+  const focusComment = useCallback((uid: string) => {
+    setFocusedUid(uid);
+    setSidebarOpen(true);
+    for (const [rootSelector, group] of projectedByBlock.current) {
+      const p = group.find((x) => x.comment.uid === uid);
+      if (!p) continue;
+      const blockEl = document.querySelector(rootSelector);
+      if (!blockEl || p.projection.start === null || p.projection.end === null) return;
+      const r = rangeForOffsets(blockEl, p.projection.start, p.projection.end);
+      if (r) {
+        applyHighlights("comment-focus", [r]);
+        blockEl.scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+      return;
+    }
+  }, []);
+
+  // Click an underlined span → focus its card (hit-test the click point against
+  // each anchored comment's range).
+  useEffect(() => {
+    if (!commentsOn) return;
+    function onDocClick(e: MouseEvent) {
+      const t = e.target as Element | null;
+      if (t && t.closest("aside, [role='dialog'], header, #wallet-slot")) return;
+      const pos = caretFromPoint(e.clientX, e.clientY);
+      if (!pos) return;
+      for (const [rootSelector, group] of projectedByBlock.current) {
+        const blockEl = document.querySelector(rootSelector);
+        if (!blockEl || !blockEl.contains(pos.node)) continue;
+        for (const p of group) {
+          if (p.projection.start === null || p.projection.end === null) continue;
+          const r = rangeForOffsets(blockEl, p.projection.start, p.projection.end);
+          if (r && r.comparePoint(pos.node, pos.offset) === 0) {
+            focusComment(p.comment.uid);
+            return;
+          }
+        }
+      }
+    }
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [commentsOn, focusComment]);
 
   // Build the anno fields for the captured selection. Shared by the composer
   // preview and the actual attestation, so the preview matches what's recorded.
@@ -292,25 +360,6 @@ function CommentController({ lang }: Props) {
     }
   }
 
-  const isPending = (c: StoredAnno) => pending.has(c.uid);
-
-  // Gutter badge per commented block → opens that block's thread panel.
-  const gutterPortals = commentedBlocks.map((rootSelector) => {
-    const blockEl = document.querySelector(rootSelector);
-    const gutter = blockEl?.querySelector(".gutter") ?? null;
-    if (!gutter) return null;
-    const group = projectedByBlock.current.get(rootSelector) ?? [];
-    return createPortal(
-      <CommentMarker
-        count={group.length}
-        pending={group.some((p) => isPending(p.comment))}
-        onClick={() => setOpenBlock(rootSelector)}
-      />,
-      gutter,
-      rootSelector,
-    );
-  });
-
   return (
     <>
       {walletSlot ? createPortal(<ConnectButton />, walletSlot) : null}
@@ -331,12 +380,18 @@ function CommentController({ lang }: Props) {
         fieldsPreview={composerFields}
         schemaUid={ANNO_SCHEMA_UID}
       />
-      {gutterPortals}
-      {openBlock ? (
+      {commentsOn && sidebarOpen ? (
         <CommentThread
-          projected={projectedByBlock.current.get(openBlock) ?? []}
+          comments={projected}
           lang={lang}
-          onClose={() => setOpenBlock(null)}
+          focusedUid={focusedUid}
+          pendingUids={pending}
+          onFocus={focusComment}
+          onClose={() => {
+            setSidebarOpen(false);
+            setFocusedUid(null);
+            applyHighlights("comment-focus", []);
+          }}
         />
       ) : null}
     </>
