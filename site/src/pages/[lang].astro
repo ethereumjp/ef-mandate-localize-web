@@ -1,0 +1,16 @@
+---
+import Reading from "../layouts/Reading.astro";
+import Document from "../components/Document.astro";
+import { LANGS, SOURCE_LANG, LANG_OPTIONS, t, type Lang } from "../lib/i18n";
+
+export function getStaticPaths() {
+  return LANGS.filter((l) => l !== SOURCE_LANG).map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const endonym = LANG_OPTIONS.find((o) => o.code === lang)?.label ?? lang;
+const title = `${t(lang, "siteTitle")} · ${endonym}`;
+---
+<Reading title={title} lang={lang}>
+  <Document lang={lang} />
+</Reading>

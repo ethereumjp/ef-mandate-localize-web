@@ -1,7 +1,8 @@
 ---
 import Reading from "../layouts/Reading.astro";
 import Document from "../components/Document.astro";
+import { t } from "../lib/i18n";
 ---
-<Reading title="EF Mandate" lang="en">
+<Reading title={t("en", "siteTitle")} lang="en">
   <Document lang="en" />
 </Reading>
