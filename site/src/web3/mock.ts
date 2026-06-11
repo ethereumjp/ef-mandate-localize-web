@@ -33,7 +33,9 @@ function comment(
 /** A code-point slice [from, from+span) of the block as a fresh anchor (→ anchored). */
 function sliceAnchor(text: string, from: number, span: number): Anchor | null {
   const len = codePoints(text).length;
-  const start = Math.max(0, Math.min(from, len - 1));
+  // Slide the start left so the full span fits short blocks (else it collapses
+  // to a 1-char quote like "。" on the panel).
+  const start = Math.max(0, Math.min(from, len - span));
   const end = Math.min(start + span, len);
   if (end <= start) return null;
   return makeAnchor(blockHash(text), text, start, end);
