@@ -16,14 +16,6 @@
     color-scheme: dark;
 }
 
-/* Language toggle: show only the active language's spans/blocks. */
-[data-lang="en"] .lang-ja {
-    display: none;
-}
-[data-lang="ja"] .lang-en {
-    display: none;
-}
-
 /* Inline marker for projected (anchored / re-anchored) comment spans: an amber
    underline ("marker" colour). The underline is the in-text comment affordance. */
 ::highlight(comment) {

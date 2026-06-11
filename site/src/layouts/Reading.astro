@@ -1,12 +1,15 @@
 ---
 import "../styles/global.css";
 import Toolbar from "../components/Toolbar.astro";
-import type { Lang } from "../lib/i18n";
+import { LANGS, type Lang } from "../lib/i18n";
 interface Props {
   title: string;
   lang: Lang;
 }
 const { title, lang } = Astro.props;
+// Show only the active language's <T> spans. Generated from LANGS so it scales
+// to N languages. `is:inline` keeps Astro from scoping these global selectors.
+const langStyle = LANGS.map((l) => `[data-lang="${l}"] .lang:not(.lang-${l}){display:none}`).join("\n");
 ---
 <!doctype html>
 <html lang={lang} data-lang={lang} data-comments="off">
@@ -23,6 +26,7 @@ const { title, lang } = Astro.props;
       })();
     </script>
     <title>{title}</title>
+    <style is:inline set:html={langStyle}></style>
   </head>
   <body class="min-h-screen antialiased">
     <Toolbar lang={lang} />
