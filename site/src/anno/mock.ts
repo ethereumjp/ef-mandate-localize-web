@@ -15,6 +15,25 @@ const MOCK_TIME = 1717000000; // fixed (deterministic) — shown as a date in th
 
 const rootSelectorFor = (blockId: string) => `[data-block-id="${blockId}"]`;
 
+// Bodies per page language: the same essay at / (en) and /ja (ja) is a different
+// URL, so each carries its own comments. Makes the URL-scoping visible in mock.
+const BODIES = {
+  en: {
+    a1: "Strong opening. Is “mandate” the EF’s remit specifically, or Ethereum’s?",
+    a1r: "The Foundation’s remit — see ch. III “Our Mandate”.",
+    a2: "Translation note: rendering “mandate” as a duty vs. an authority is still open.",
+    b1: "Re-anchored: the source changed since this was written, quote relocated.",
+    c1: "The text I quoted is gone — flagged for review.",
+  },
+  ja: {
+    a1: "力強い書き出し。「mandate(使命)」は EF 固有の話か、イーサリアム全体のことか?",
+    a1r: "財団の使命のこと — 第 III 章「我々の使命」を参照。",
+    a2: "訳語メモ:「mandate」を「使命」と訳すか「権限」とするか検討中。",
+    b1: "再アンカリング:執筆後に原文が変わり、引用位置を再特定した。",
+    c1: "引用していた箇所が消えている — 要確認としてフラグ。",
+  },
+} as const;
+
 function comment(
   over: Partial<StoredAnno> & Pick<StoredAnno, "uid" | "rootSelector" | "lang" | "body">,
 ): StoredAnno {
@@ -69,6 +88,7 @@ export function buildMockAnno(lang: string): StoredAnno[] {
   const blocks = Array.from(document.querySelectorAll<HTMLElement>("[data-block-id]"));
   // Skip the chapter heading (block 0) when there's enough content to choose from.
   const pick = blocks.length > 4 ? blocks.slice(1) : blocks;
+  const t = lang.startsWith("ja") ? BODIES.ja : BODIES.en;
   const out: StoredAnno[] = [];
 
   const a = pick[0];
@@ -82,7 +102,7 @@ export function buildMockAnno(lang: string): StoredAnno[] {
           uid: "mock-a1",
           rootSelector: sel,
           lang,
-          body: "Strong opening. Is “mandate” the EF’s remit specifically, or Ethereum’s?",
+          body: t.a1,
           ...withAnchor(an1, an1.blockHash),
         }),
         comment({
@@ -90,7 +110,7 @@ export function buildMockAnno(lang: string): StoredAnno[] {
           parentUid: "mock-a1",
           rootSelector: sel,
           lang,
-          body: "The Foundation’s remit — see ch. III “Our Mandate”.",
+          body: t.a1r,
           ...withAnchor(an1, an1.blockHash),
         }),
       );
@@ -102,7 +122,7 @@ export function buildMockAnno(lang: string): StoredAnno[] {
           uid: "mock-a2",
           rootSelector: sel,
           lang,
-          body: "Localization note: 「mandate」は「使命」と訳すか検討中。",
+          body: t.a2,
           ...withAnchor(an2, an2.blockHash),
         }),
       );
@@ -121,7 +141,7 @@ export function buildMockAnno(lang: string): StoredAnno[] {
           uid: "mock-b1",
           rootSelector: sel,
           lang,
-          body: "Re-anchored: the source changed since this was written, quote relocated.",
+          body: t.b1,
           ...withAnchor(an, STALE_HASH),
         }),
       );
@@ -138,7 +158,7 @@ export function buildMockAnno(lang: string): StoredAnno[] {
         rootSelector: sel,
         lang,
         spanExact: "⟪a phrase that no longer exists⟫",
-        body: "The text I quoted is gone — flagged for review.",
+        body: t.c1,
       }),
     );
   }
