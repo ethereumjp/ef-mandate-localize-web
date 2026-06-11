@@ -260,6 +260,7 @@ function CommentController({ lang }: Props) {
   useEffect(() => {
     if (!commentsOn) return;
     function onDocClick(e: MouseEvent) {
+      if (composerOpen) return; // don't hit-test spans while the composer modal is open
       const t = e.target as Element | null;
       if (t && t.closest("aside, [role='dialog'], header, #wallet-slot")) return;
       const pos = caretFromPoint(e.clientX, e.clientY);
@@ -279,7 +280,7 @@ function CommentController({ lang }: Props) {
     }
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
-  }, [commentsOn, focusComment]);
+  }, [commentsOn, composerOpen, focusComment]);
 
   // Build the anno fields for the captured selection. Shared by the composer
   // preview and the actual attestation, so the preview matches what's recorded.
