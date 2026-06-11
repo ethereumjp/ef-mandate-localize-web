@@ -1,0 +1,47 @@
+import { project, type Anchor, type Projection } from "../lib/anchoring";
+import { blockHashFromNormalized } from "../lib/hash";
+import { normalizedBlockText } from "../web3/selection";
+import { resolveContainer } from "./selector";
+import type { AnnoFields } from "./schema";
+
+/**
+ * A stored generalized comment = AnnoFields + EAS attestation envelope.
+ * Parallel to `StoredComment` in web3/read.ts (AnnoFields ≠ CommentFields, no shared base).
+ */
+export interface StoredAnno extends AnnoFields {
+  uid: string;
+  attester: string;
+  time: number; // unix seconds
+}
+
+export interface LocatedAnno {
+  comment: StoredAnno;
+  projection: Projection;
+}
+
+/** View a stored comment's anchor fields as an `Anchor` (containerHash = blockHash). */
+function toAnchor(c: AnnoFields): Anchor {
+  return {
+    blockHash: c.containerHash as `0x${string}`,
+    exact: c.spanExact,
+    prefix: c.spanPrefix,
+    suffix: c.spanSuffix,
+    start: c.spanStart,
+    end: c.spanEnd,
+  };
+}
+
+/**
+ * Locate one stored comment within `doc` and project its span onto the live
+ * container. Resolves the container via `rootSelector` (with quote fallback),
+ * then reuses the pure `project()` re-anchoring logic.
+ */
+export function locate(doc: Document, c: StoredAnno): LocatedAnno {
+  const container = resolveContainer(doc, c.rootSelector, c.spanExact);
+  if (container === null) {
+    return { comment: c, projection: project(toAnchor(c), null) };
+  }
+  const text = normalizedBlockText(container);
+  const current = { blockHash: blockHashFromNormalized(text), text };
+  return { comment: c, projection: project(toAnchor(c), current) };
+}
