@@ -29,18 +29,16 @@
     display: none;
 }
 
-/* Inline highlight for projected (anchored / re-anchored) comment spans. The
-   CSS Custom Highlight API draws decoration only — the gutter badge is the
-   click affordance, not the highlighted text. */
+/* Inline marker for projected (anchored / re-anchored) comment spans: an amber
+   underline ("marker" colour). The underline is the in-text comment affordance. */
 ::highlight(comment) {
-    background-color: var(--color-amber-200);
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-amber-400);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
 }
 [data-theme="dark"] ::highlight(comment) {
-    background-color: color-mix(
-        in oklab,
-        var(--color-amber-500) 40%,
-        transparent
-    );
+    text-decoration-color: var(--color-amber-500);
 }
 
 html {
