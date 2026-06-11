@@ -29,7 +29,9 @@ export function CommentCard({ node, projection, lang, depth = 0 }: Props) {
       </p>
       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-stone-400">
         <span className="font-mono">{short(c.attester)}</span>
-        {c.time > 0 ? <span>{new Date(c.time * 1000).toLocaleDateString()}</span> : null}
+        {c.time > 0 ? (
+          <span>{new Date(c.time * 1000).toLocaleDateString(lang === "ja" ? "ja-JP" : "en-US")}</span>
+        ) : null}
         {projection ? <AnchorStatusBadge status={projection.status} lang={lang} /> : null}
         {projection?.pastVersion ? (
           <span className="text-amber-600 dark:text-amber-400">{m.pastVersion}</span>
