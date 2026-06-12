@@ -1,9 +1,11 @@
 // Stage 2 (app): the heavy React chunk, lazy-imported by the loader. Mounts into
-// the shadow root. (Skeleton: a trivial panel proving the lazy chunk + React +
-// shadow render. The real CommentController is wired in next.)
+// the shadow root. (Interim: a trivial panel wired to the Stage-1 display; the
+// real host-decoupled CommentController is integrated next.)
 import { createRoot } from "react-dom/client";
+import type { WidgetConfig } from "./config";
+import type { Display } from "./display";
 
-function Panel() {
+function Panel({ count }: { count: number }) {
   return (
     <div
       style={{
@@ -19,13 +21,18 @@ function Panel() {
         zIndex: 2147483647,
       }}
     >
-      panel loaded
+      panel loaded ({count} comments)
     </div>
   );
 }
 
-export function mountApp(container: ShadowRoot): void {
+export function mountApp(
+  container: ShadowRoot,
+  _config: WidgetConfig,
+  display: Display,
+  _opts?: { focusUid?: string },
+): void {
   const el = document.createElement("div");
   container.appendChild(el);
-  createRoot(el).render(<Panel />);
+  createRoot(el).render(<Panel count={display.count()} />);
 }
