@@ -2,7 +2,7 @@ import { http, createConfig } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
 
-export { SEPOLIA_CHAIN_ID } from "./constants";
+export { SEPOLIA_CHAIN_ID } from "@commentary/core/chain";
 
 const RPC_URL =
   import.meta.env.PUBLIC_SEPOLIA_RPC_URL ?? "https://ethereum-sepolia-rpc.publicnode.com";

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./chain": "./src/chain.ts",
     "./lib/*": "./src/lib/*.ts",
     "./anno/*": "./src/anno/*.ts"
   },

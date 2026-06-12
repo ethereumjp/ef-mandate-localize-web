@@ -8,7 +8,7 @@ import easSdk from "@ethereum-attestation-service/eas-sdk";
 const { SchemaRegistry } = easSdk as unknown as {
   SchemaRegistry: typeof SchemaRegistryType;
 };
-import { SCHEMA_REGISTRY_ADDRESS } from "../src/web3/constants";
+import { SCHEMA_REGISTRY_ADDRESS } from "@commentary/core/chain";
 import { ANNO_SCHEMA } from "@commentary/core/anno/constants";
 
 const pk = process.env.SEPOLIA_PRIVATE_KEY;

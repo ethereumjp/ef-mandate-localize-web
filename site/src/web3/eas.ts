@@ -1,6 +1,6 @@
 import { EAS } from "@ethereum-attestation-service/eas-sdk";
 import type { TransactionSigner } from "@ethereum-attestation-service/eas-sdk";
-import { EAS_ADDRESS } from "./constants";
+import { EAS_ADDRESS } from "@commentary/core/chain";
 
 const ZERO_ADDR = "0x".padEnd(42, "0");
 
