@@ -16,6 +16,10 @@
     color-scheme: dark;
 }
 
+::selection {
+    @apply bg-emerald-400/20;
+}
+
 /* Inline marker for projected (anchored / re-anchored) comment spans: an amber
    underline ("marker" colour). The underline is the in-text comment affordance. */
 ::highlight(comment) {
