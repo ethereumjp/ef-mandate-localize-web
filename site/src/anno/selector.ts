@@ -37,24 +37,39 @@ function nthOfType(el: Element): number {
   return n;
 }
 
-/** Nearest id-bearing or block-level ancestor of a node (or the node itself). */
+/** Nearest [data-block-id]/id-bearing or block-level ancestor (or the node itself). */
 export function nearestContainer(node: Node): Element | null {
   let el: Element | null = node.nodeType === 1 ? (node as Element) : node.parentElement;
+  let blockLevel: Element | null = null;
   for (; el; el = el.parentElement) {
-    if (el.id) return el;
-    if (BLOCK_TAGS.has(el.tagName)) return el;
+    if (el.hasAttribute("data-block-id")) return el; // preferred: stable marker
+    if (blockLevel === null && (el.id || BLOCK_TAGS.has(el.tagName))) blockLevel = el;
   }
-  return null;
+  return blockLevel;
+}
+
+/** `[data-block-id="…"]` selector for a marked element, else null. */
+function blockIdSelector(el: Element): string | null {
+  const v = el.getAttribute("data-block-id");
+  return v ? `[data-block-id="${v.replace(/(["\\])/g, "\\$1")}"]` : null;
 }
 
 /**
- * A CSS selector that re-selects `el`. Stops at the nearest id-bearing ancestor
- * (ids are the most stable); otherwise walks up to <body> using :nth-of-type.
+ * A CSS selector that re-selects `el`. Prefers a `[data-block-id]` marker, then an
+ * id; otherwise walks up to <body> with :nth-of-type, stopping at the nearest
+ * marker/id ancestor.
  */
 export function selectorFor(el: Element): string {
+  const ownBid = blockIdSelector(el);
+  if (ownBid) return ownBid;
   if (el.id) return idSelector(el.id);
   const parts: string[] = [];
   for (let cur: Element | null = el; cur && cur.tagName !== "BODY"; cur = cur.parentElement) {
+    const bid = blockIdSelector(cur);
+    if (bid) {
+      parts.unshift(bid);
+      return parts.join(" > ");
+    }
     if (cur.id) {
       parts.unshift(idSelector(cur.id));
       return parts.join(" > ");
