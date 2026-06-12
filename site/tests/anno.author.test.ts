@@ -1,6 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
 import { buildAnnoFields } from "../src/anno/author";
+import { anchorFromSelection } from "../src/lib/anchor-dom";
+
+function rangeOver(textNode: Node, start: number, end: number): Range {
+  const r = document.createRange();
+  r.setStart(textNode, start);
+  r.setEnd(textNode, end);
+  return r;
+}
 
 function selectQuote(el: Element, quote: string): Range {
   const text = el.firstChild as Text;
@@ -48,5 +56,25 @@ describe("buildAnnoFields", () => {
     range.selectNodeContents(p);
     range.collapse(true); // valid container, but collapsed → anchor === null (guard 2)
     expect(buildAnnoFields({ href: "https://e.com/", lang: "en", range, body: "x" })).toBeNull();
+  });
+});
+
+describe("buildAnnoFields on a site-like block", () => {
+  it("produces a [data-block-id] rootSelector and matches the legacy block anchor", () => {
+    document.body.innerHTML = `<div data-block-id="01-p"><div class="prose"><p>the walkaway test</p></div></div>`;
+    const blockDiv = document.querySelector("[data-block-id]")!;
+    const text = document.querySelector("p")!.firstChild!;
+    const range = rangeOver(text, 4, 12); // "walkaway"
+
+    const fields = buildAnnoFields({ href: "https://x.test/p", lang: "en", range, body: "hi" });
+    expect(fields).not.toBeNull();
+    expect(fields!.rootSelector).toBe(`[data-block-id="01-p"]`);
+    expect(fields!.spanExact).toBe("walkaway");
+    expect(fields!.body).toBe("hi");
+
+    const legacy = anchorFromSelection(blockDiv, range)!;
+    expect(fields!.containerHash).toBe(legacy.blockHash);
+    expect(fields!.spanStart).toBe(legacy.start);
+    expect(fields!.spanEnd).toBe(legacy.end);
   });
 });

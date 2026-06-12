@@ -12,7 +12,7 @@ interface Props {
   error?: string | null;
   connected?: boolean;
   onConnect?: () => void;
-  fieldsPreview?: Omit<AnnoFields, "body"> | null;
+  fieldsPreview?: AnnoFields | null;
   schemaUid?: string;
 }
 

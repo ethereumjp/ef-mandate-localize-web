@@ -5,13 +5,14 @@ import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { wagmiConfig, ANNO_SCHEMA_UID } from "../../web3/config";
 import { useEthersSigner } from "../../web3/ethers";
-import { anchorFromSelection } from "../../lib/anchor-dom";
 // Static imports of the EAS attest path. Safe because Document.astro mounts
 // this island with client:only="react", so it is never SSR-rendered and the
 // EAS SDK (lodash ESM re-export) never enters the SSR module graph. Vite
 // bundles encodeAnno/attestComment into the client chunk this way; the old
 // dynamic import() was elided from the static build, killing on-chain publish.
 import { encodeAnno, type AnnoFields } from "../../anno/schema";
+import { buildAnnoFields } from "../../anno/author";
+import { nearestContainer } from "../../anno/selector";
 import { attestComment } from "../../web3/eas";
 import { fetchAnno } from "../../anno/read";
 import { projectAnno, commentsForUrl, type StoredAnno, type LocatedAnno } from "../../anno/locate";
@@ -25,7 +26,6 @@ import { Composer } from "./Composer";
 import { CommentThread } from "./CommentThread";
 
 const queryClient = new QueryClient();
-const ZERO_UID = "0x" + "00".repeat(32);
 // Stable empty default so `stored` keeps a constant reference while the query is
 // disabled/loading — otherwise `[]` is a new array each render, `merged` recomputes,
 // and the projection effect (dep on `merged`) loops "Maximum update depth exceeded".
@@ -39,9 +39,8 @@ interface Props {
 }
 
 interface SelectionTarget {
-  blockEl: Element;
-  blockId: string;
-  anchor: import("../../lib/anchoring").Anchor;
+  container: Element;
+  range: Range; // a cloned range, stable after the live selection clears
   rect: DOMRect;
 }
 
@@ -78,7 +77,7 @@ function CommentController({ lang }: Props) {
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerError, setComposerError] = useState<string | null>(null);
   const [composerPending, setComposerPending] = useState(false);
-  const [composerFields, setComposerFields] = useState<Omit<AnnoFields, "body"> | null>(null);
+  const [composerFields, setComposerFields] = useState<AnnoFields | null>(null);
   const [commentsOn, setCommentsOn] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [focusedUid, setFocusedUid] = useState<string | null>(null);
@@ -158,35 +157,19 @@ function CommentController({ lang }: Props) {
         return;
       }
       const range = sel.getRangeAt(0);
-      // Walk up from the common ancestor to find a [data-block-id] element.
-      let node: Node | null = range.commonAncestorContainer;
-      let blockEl: Element | null = null;
-      while (node) {
-        if (node instanceof Element && node.hasAttribute("data-block-id")) {
-          blockEl = node;
-          break;
-        }
-        node = node.parentNode;
-      }
-      if (!blockEl) {
-        setSelection(null);
-        return;
-      }
-      const blockId = blockEl.getAttribute("data-block-id") ?? "";
-      const anchor = anchorFromSelection(blockEl, range);
-      if (!anchor) {
+      const container = nearestContainer(range.commonAncestorContainer);
+      if (!container) {
         setSelection(null);
         return;
       }
       const rawRect = range.getBoundingClientRect();
-      // Clamp the popover so it isn't off-screen (M4-7 minor fix).
       const rect = new DOMRect(
         rawRect.left,
         Math.max(8, rawRect.top - 36),
         rawRect.width,
         rawRect.height,
       );
-      setSelection({ blockEl, blockId, anchor, rect });
+      setSelection({ container, range: range.cloneRange(), rect });
     }
 
     document.addEventListener("selectionchange", onSelectionChange);
@@ -282,32 +265,16 @@ function CommentController({ lang }: Props) {
     return () => document.removeEventListener("click", onDocClick);
   }, [commentsOn, composerOpen, focusComment]);
 
-  // Build the anno fields for the captured selection. Shared by the composer
-  // preview and the actual attestation, so the preview matches what's recorded.
-  function annoFieldsFromTarget(target: SelectionTarget): Omit<AnnoFields, "body"> {
-    const { anchor, blockId } = target;
-    const { url, urlCanonical, origin } = canonicalizeUrl(location.href);
-    return {
-      url,
-      urlCanonical,
-      origin,
-      lang,
-      rootSelector: `[data-block-id="${blockId}"]`,
-      containerHash: anchor.blockHash,
-      spanStart: anchor.start,
-      spanEnd: anchor.end,
-      spanExact: anchor.exact,
-      spanPrefix: anchor.prefix,
-      spanSuffix: anchor.suffix,
-      parentUid: ZERO_UID,
-      meta: "",
-    };
+  // Build the anno fields for the captured selection via the generic author path.
+  function annoFieldsFromTarget(target: SelectionTarget, body: string): AnnoFields | null {
+    return buildAnnoFields({ href: location.href, lang, range: target.range, body });
   }
 
   function openComposer() {
     capturedTarget.current = selection;
     setComposerError(null);
-    setComposerFields(selection ? annoFieldsFromTarget(selection) : null);
+    const preview = selection ? annoFieldsFromTarget(selection, "") : null;
+    setComposerFields(preview);
     setComposerOpen(true);
   }
 
@@ -320,7 +287,11 @@ function CommentController({ lang }: Props) {
       return;
     }
 
-    const fields: AnnoFields = { ...annoFieldsFromTarget(target), body };
+    const fields = annoFieldsFromTarget(target, body);
+    if (!fields) {
+      setComposerError("Could not anchor the selection. Try selecting within a single block.");
+      return;
+    }
 
     const tempUid = `opt-${Date.now()}`;
     const optimisticComment: StoredAnno = {
