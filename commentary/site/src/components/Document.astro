@@ -5,12 +5,20 @@ import SiteMeta from "./SiteMeta.astro";
 import T from "./T.astro";
 import { loadChapters, isPending } from "../lib/content";
 import type { Lang } from "../lib/i18n";
-import { CommentApp } from "@commentary/widget";
 interface Props {
     lang: Lang;
 }
 const { lang } = Astro.props;
 const chapters = loadChapters();
+
+// The commentary widget is now an embedded <script> (built separately as
+// @commentary/widget → public/commentary/embed.js), so this site is "just
+// another host". Inject it only when there's something to show: a registered
+// ANNO schema, or mock mode for local preview.
+const schemaUid = import.meta.env.PUBLIC_EAS_ANNO_SCHEMA_UID ?? "";
+const mock = import.meta.env.PUBLIC_MOCK_COMMENTS ? "1" : undefined;
+const rpc = import.meta.env.PUBLIC_SEPOLIA_RPC_URL;
+const commentaryEnabled = Boolean(schemaUid) || Boolean(mock);
 ---
 
 <div
@@ -87,4 +95,17 @@ const chapters = loadChapters();
 >
     <SiteMeta lang={lang} />
 </footer>
-<CommentApp client:only="react" lang={lang} />
+{
+    commentaryEnabled && (
+        <script
+            is:inline
+            type="module"
+            src="/commentary/embed.js"
+            data-schema-uid={schemaUid}
+            data-network="sepolia"
+            data-lang={lang}
+            data-mock={mock}
+            data-rpc={rpc}
+        />
+    )
+}

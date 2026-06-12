@@ -1,18 +1,6 @@
-// Client-only: theme + commentary state + keep-your-place language links.
+// Client-only: theme toggle + keep-your-place language links. (Commentary
+// visibility is now owned by the embedded widget, not the site toolbar.)
 const root = document.documentElement;
-
-// Commentary on/off (persisted). `data-lang` / `data-theme` are set per page load.
-const savedComments = localStorage.getItem("comments") === "on" ? "on" : "off";
-root.dataset.comments = savedComments;
-
-const commentsBtn = document.querySelector<HTMLElement>("[data-toggle-comments]");
-commentsBtn?.setAttribute("aria-checked", String(savedComments === "on"));
-commentsBtn?.addEventListener("click", () => {
-  const next = root.dataset.comments === "on" ? "off" : "on";
-  root.dataset.comments = next;
-  localStorage.setItem("comments", next);
-  commentsBtn.setAttribute("aria-checked", String(next === "on"));
-});
 
 // Dark / light theme (initialised by the inline <head> script; persisted here).
 const themeBtn = document.querySelector<HTMLElement>("[data-toggle-theme]");

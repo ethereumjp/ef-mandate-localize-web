@@ -47,6 +47,28 @@ export function rangeForOffsets(blockEl: Element, start: number, end: number): R
   return range;
 }
 
+// Comment-span highlight styling. The Custom Highlight API registry AND its
+// ::highlight() rules are DOCUMENT-global — a shadow-root stylesheet can't reach
+// highlighted ranges — so the rule must live in document.head. Literal colours
+// (Tailwind amber-100/200), not CSS vars, so highlights render on any host page;
+// the dark-mode focus wash still honours a host's [data-theme="dark"] if present.
+const HIGHLIGHT_STYLE_ID = "commentary-highlight-styles";
+const HIGHLIGHT_CSS = `
+::highlight(comment){text-decoration-line:underline;text-decoration-color:#fde68a;text-decoration-thickness:2px;text-underline-offset:3px}
+::highlight(comment-focus){background-color:#fef3c7;text-decoration-line:underline;text-decoration-color:#fde68a;text-decoration-thickness:2px;text-underline-offset:3px}
+[data-theme="dark"] ::highlight(comment-focus){background-color:color-mix(in oklab,#fde68a 35%,transparent);text-decoration-color:#fde68a}
+`;
+
+/** Inject the document-global ::highlight() rules once (idempotent, browser only). */
+export function ensureHighlightStyles(): void {
+  if (typeof document === "undefined") return;
+  if (document.getElementById(HIGHLIGHT_STYLE_ID)) return;
+  const style = document.createElement("style");
+  style.id = HIGHLIGHT_STYLE_ID;
+  style.textContent = HIGHLIGHT_CSS;
+  document.head.appendChild(style);
+}
+
 /** Register highlight ranges via the CSS Custom Highlight API (browser only). */
 export function applyHighlights(name: string, ranges: Range[]): void {
   const g = globalThis as unknown as {
@@ -54,6 +76,7 @@ export function applyHighlights(name: string, ranges: Range[]): void {
     Highlight?: new (...r: Range[]) => unknown;
   };
   if (!g.CSS?.highlights || !g.Highlight) return; // unsupported → no inline highlight
+  ensureHighlightStyles();
   if (ranges.length === 0) {
     g.CSS.highlights.delete(name);
     return;

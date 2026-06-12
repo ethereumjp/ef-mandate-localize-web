@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { rangeForOffsets } from "@commentary/widget/web3/highlight";
+import { rangeForOffsets, ensureHighlightStyles } from "../src/web3/highlight";
 
 function blockEl(html: string) {
   const el = document.createElement("div");
@@ -30,5 +30,15 @@ describe("rangeForOffsets", () => {
   it("returns null for an out-of-range span", () => {
     const el = blockEl("abc");
     expect(rangeForOffsets(el, 1, 99)).toBeNull();
+  });
+});
+
+describe("ensureHighlightStyles", () => {
+  it("injects the document-global ::highlight rule once (idempotent)", () => {
+    ensureHighlightStyles();
+    ensureHighlightStyles();
+    const styles = document.head.querySelectorAll("#commentary-highlight-styles");
+    expect(styles.length).toBe(1);
+    expect(styles[0].textContent).toContain("::highlight(comment)");
   });
 });
