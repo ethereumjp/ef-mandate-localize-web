@@ -14,6 +14,8 @@ interface Props {
   onConnect?: () => void;
   fieldsPreview?: AnnoFields | null;
   schemaUid?: string;
+  /** Render the dialog portal into this element (the widget shadow root) instead of document.body. */
+  container?: HTMLElement | null;
 }
 
 export function Composer({
@@ -26,6 +28,7 @@ export function Composer({
   onConnect,
   fieldsPreview,
   schemaUid,
+  container,
 }: Props) {
   const [body, setBody] = useState("");
   // Reset the form each time the dialog opens (it's reused across selections).
@@ -36,7 +39,7 @@ export function Composer({
   }, [open]);
   return (
     <Dialog.Root open={open} onOpenChange={(next) => onOpenChange(next)}>
-      <Dialog.Portal>
+      <Dialog.Portal container={container ?? undefined}>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 dark:bg-white/20 backdrop-blur-xxs" />
         <Dialog.Popup className="fixed left-1/2 top-1/2 z-[60] w-[min(28rem,90vw)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-stone-200 bg-white p-4 shadow-lg dark:border-stone-700 dark:bg-stone-900">
           <Dialog.Title className="flex items-center gap-2 text-sm font-semibold">
