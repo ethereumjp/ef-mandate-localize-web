@@ -40,16 +40,16 @@ function mount(): void {
     appMod.mountApp(shadow, config, display, { focusUid });
   }
 
+  // Clicking the button (or an existing highlight) opens the panel = lazy-loads
+  // the heavy app. Highlights are painted by Stage 1 on load (no React needed);
+  // the on/off toggle + list + composer live in the panel.
+  button.addEventListener("click", () => void openApp());
   display.onClickHighlight((uid) => void openApp(uid));
 
-  let visible = false;
-  button.addEventListener("click", () => {
-    visible = !visible;
-    display.setVisible(visible);
+  void display.refresh().then(() => {
+    display.setVisible(true);
     renderButton();
   });
-
-  void display.refresh().then(renderButton);
 }
 
 mount();
