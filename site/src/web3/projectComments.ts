@@ -1,6 +1,6 @@
 import { project, type Anchor, type Projection } from "../lib/anchoring";
 import { blockHash } from "../lib/hash";
-import { normalizedBlockText } from "./selection";
+import { normalizedBlockText } from "../lib/anchor-dom";
 import type { StoredComment } from "./read";
 
 /** A stored comment as an M3 Anchor. */

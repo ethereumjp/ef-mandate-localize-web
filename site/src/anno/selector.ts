@@ -1,5 +1,5 @@
 import { codePoints, findOccurrences } from "../lib/anchoring";
-import { normalizedBlockText } from "../web3/selection";
+import { normalizedBlockText } from "../lib/anchor-dom";
 
 /** Block-level tags treated as stable comment containers. */
 const BLOCK_TAGS = new Set([

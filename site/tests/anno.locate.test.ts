@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
 import { locate, type StoredAnno } from "../src/anno/locate";
-import { normalizedBlockText } from "../src/web3/selection";
+import { normalizedBlockText } from "../src/lib/anchor-dom";
 import { blockHashFromNormalized } from "../src/lib/hash";
 
 function stored(over: Partial<StoredAnno>): StoredAnno {

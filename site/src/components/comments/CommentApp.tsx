@@ -5,7 +5,7 @@ import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 import { wagmiConfig, ANNO_SCHEMA_UID } from "../../web3/config";
 import { useEthersSigner } from "../../web3/ethers";
-import { anchorFromSelection } from "../../web3/selection";
+import { anchorFromSelection } from "../../lib/anchor-dom";
 // Static imports of the EAS attest path. Safe because Document.astro mounts
 // this island with client:only="react", so it is never SSR-rendered and the
 // EAS SDK (lodash ESM re-export) never enters the SSR module graph. Vite

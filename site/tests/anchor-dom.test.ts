@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { normalizedBlockText, selectionToOffsets } from "../src/web3/selection";
+import { normalizedBlockText, selectionToOffsets } from "../src/lib/anchor-dom";
 import { normalizeBlockText } from "../src/lib/normalize";
 
 function blockEl(text: string) {

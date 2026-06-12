@@ -1,6 +1,6 @@
 import { project, type Anchor, type Projection } from "../lib/anchoring";
 import { blockHashFromNormalized } from "../lib/hash";
-import { normalizedBlockText } from "../web3/selection";
+import { normalizedBlockText } from "../lib/anchor-dom";
 import { resolveContainer } from "./selector";
 import type { AnnoFields } from "./schema";
 

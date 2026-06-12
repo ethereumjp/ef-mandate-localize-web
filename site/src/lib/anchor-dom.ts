@@ -1,6 +1,6 @@
-import { normalizeBlockText, codePointLength } from "../lib/normalize";
-import { blockHash } from "../lib/hash";
-import { makeAnchor, type Anchor } from "../lib/anchoring";
+import { normalizeBlockText, codePointLength } from "./normalize";
+import { blockHash } from "./hash";
+import { makeAnchor, type Anchor } from "./anchoring";
 
 /** The normalized, rendered text of a block element (what the reader selects over). */
 export function normalizedBlockText(blockEl: Element): string {

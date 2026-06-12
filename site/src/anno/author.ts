@@ -1,4 +1,4 @@
-import { anchorFromSelection } from "../web3/selection";
+import { anchorFromSelection } from "../lib/anchor-dom";
 import { nearestContainer, selectorFor } from "./selector";
 import { canonicalizeUrl } from "./canonicalUrl";
 import type { AnnoFields } from "./schema";

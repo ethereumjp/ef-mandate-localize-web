@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
 import { projectComments } from "../src/web3/projectComments";
-import { normalizedBlockText } from "../src/web3/selection";
+import { normalizedBlockText } from "../src/lib/anchor-dom";
 import { blockHash } from "../src/lib/hash";
 import type { StoredComment } from "../src/web3/read";
 
