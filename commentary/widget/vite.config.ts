@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 
 // Embed build: a single ESM `embed.js` (the loader) that lazy-imports a hashed
 // `app` chunk on demand. Included on a host page via
@@ -6,6 +7,7 @@ import { defineConfig } from "vite";
 // ESM + import.meta.url handles chunk-URL resolution natively (no currentScript hack).
 // JSX via esbuild (automatic runtime) — no @vitejs/plugin-react needed for a build.
 export default defineConfig({
+  plugins: [tailwindcss()],
   esbuild: { jsx: "automatic", jsxImportSource: "react" },
   build: {
     outDir: "dist",

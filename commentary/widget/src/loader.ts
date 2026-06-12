@@ -35,9 +35,17 @@ function mount(): void {
   }
 
   let appMod: typeof import("./app") | null = null;
+  let mounted = false;
   async function openApp(focusUid?: string): Promise<void> {
+    if (mounted) return;
+    mounted = true;
     if (!appMod) appMod = await import("./app");
-    appMod.mountApp(shadow, config, display, { focusUid });
+    appMod.mountApp(shadow, config, display, {
+      focusUid,
+      onUnmount: () => {
+        mounted = false;
+      },
+    });
   }
 
   // Clicking the button (or an existing highlight) opens the panel = lazy-loads

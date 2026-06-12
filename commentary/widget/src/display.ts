@@ -22,6 +22,8 @@ export interface Display {
   setVisible(on: boolean): void;
   /** Number of comments scoped to this page's canonical URL. */
   count(): number;
+  /** The projected comments currently anchored on the page (for the panel list). */
+  projected(): LocatedAnno[];
   /** Register a callback for clicks that land on an anchored comment span. */
   onClickHighlight(cb: (uid: string) => void): void;
   dispose(): void;
@@ -125,6 +127,9 @@ export function createDisplay(opts: DisplayOpts): Display {
     },
     count() {
       return pageScoped().length;
+    },
+    projected() {
+      return [...byBlock.values()].flat();
     },
     onClickHighlight(cb) {
       clickCb = cb;
