@@ -1,4 +1,4 @@
-import type { AnchorStatus } from "../../lib/anchoring";
+import type { AnchorStatus } from "@commentary/core/lib/anchoring";
 import { MESSAGES, type Lang } from "../../lib/i18n";
 
 export function AnchorStatusBadge({ status, lang }: { status: AnchorStatus; lang: Lang }) {

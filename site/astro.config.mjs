@@ -7,5 +7,9 @@ export default defineConfig({
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
+    // @commentary/core ships TS source; transform it (don't externalize) and
+    // don't pre-bundle the workspace package.
+    ssr: { noExternal: ["@commentary/core"] },
+    optimizeDeps: { exclude: ["@commentary/core"] },
   },
 });

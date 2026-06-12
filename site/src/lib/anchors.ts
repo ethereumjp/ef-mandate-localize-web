@@ -1,6 +1,6 @@
 import { parseChapter } from "./blocks";
-import { normalizeBlockText } from "./normalize";
-import { blockHashFromNormalized } from "./hash";
+import { normalizeBlockText } from "@commentary/core/lib/normalize";
+import { blockHashFromNormalized } from "@commentary/core/lib/hash";
 
 export interface AnchorEntry {
   blockId: string;

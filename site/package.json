@@ -1,5 +1,5 @@
 {
-  "name": "ef-mandate-translation-site",
+  "name": "@commentary/site",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed",
@@ -23,13 +23,8 @@
     "gen:mock": "tsx scripts/gen-mock-comments.ts",
     "reanchor:demo": "tsx scripts/reanchor-demo.ts"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp"
-    ]
-  },
   "dependencies": {
+    "@commentary/core": "workspace:*",
     "@astrojs/react": "^5.0.7",
     "@base-ui-components/react": "1.0.0-rc.0",
     "@ethereum-attestation-service/eas-sdk": "^2.9.1",

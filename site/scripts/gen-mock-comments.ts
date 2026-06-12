@@ -7,12 +7,12 @@
 // to the running origin so the fixture works on any dev port.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { makeAnchor, codePoints, type Anchor } from "../src/lib/anchoring";
-import { blockHash } from "../src/lib/hash";
-import { normalizeBlockText } from "../src/lib/normalize";
-import type { AnnoFields } from "../src/anno/schema";
-import { annoFieldDefs } from "../src/anno/encode-defs";
-import { ANNO_SCHEMA } from "../src/anno/constants";
+import { makeAnchor, codePoints, type Anchor } from "@commentary/core/lib/anchoring";
+import { blockHash } from "@commentary/core/lib/hash";
+import { normalizeBlockText } from "@commentary/core/lib/normalize";
+import type { AnnoFields } from "@commentary/core/anno/schema";
+import { annoFieldDefs } from "@commentary/core/anno/encode-defs";
+import { ANNO_SCHEMA } from "@commentary/core/anno/constants";
 // Node-side EAS encoder: the SDK's named export isn't available under Node 24
 // strict ESM, so use the default (CJS-interop) import here. anno/schema.ts uses
 // the named import (for Vite/vitest); both share annoFieldDefs (encode-defs).

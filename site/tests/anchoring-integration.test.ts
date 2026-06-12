@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildChapterAnchors } from "../src/lib/anchors";
-import { makeAnchor, project } from "../src/lib/anchoring";
+import { makeAnchor, project } from "@commentary/core/lib/anchoring";
 
 const ORIGINAL =
   "<!-- block: 02-p1 -->\n# II. Our Role\n\n" +

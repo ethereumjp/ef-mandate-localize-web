@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
 import { projectComments } from "../src/web3/projectComments";
-import { normalizedBlockText } from "../src/lib/anchor-dom";
-import { blockHash } from "../src/lib/hash";
+import { normalizedBlockText } from "@commentary/core/lib/anchor-dom";
+import { blockHash } from "@commentary/core/lib/hash";
 import type { StoredComment } from "../src/web3/read";
 
 function stored(over: Partial<StoredComment>): StoredComment {

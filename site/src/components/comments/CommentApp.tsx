@@ -10,15 +10,15 @@ import { useEthersSigner } from "../../web3/ethers";
 // EAS SDK (lodash ESM re-export) never enters the SSR module graph. Vite
 // bundles encodeAnno/attestComment into the client chunk this way; the old
 // dynamic import() was elided from the static build, killing on-chain publish.
-import { encodeAnno, type AnnoFields } from "../../anno/schema";
-import { buildAnnoFields } from "../../anno/author";
-import { nearestContainer } from "../../anno/selector";
+import { encodeAnno, type AnnoFields } from "@commentary/core/anno/schema";
+import { buildAnnoFields } from "@commentary/core/anno/author";
+import { nearestContainer } from "@commentary/core/anno/selector";
 import { attestComment } from "../../web3/eas";
-import { fetchAnno } from "../../anno/read";
-import { projectAnno, commentsForUrl, type StoredAnno, type LocatedAnno } from "../../anno/locate";
-import { canonicalizeUrl } from "../../anno/canonicalUrl";
+import { fetchAnno } from "@commentary/core/anno/read";
+import { projectAnno, commentsForUrl, type StoredAnno, type LocatedAnno } from "@commentary/core/anno/locate";
+import { canonicalizeUrl } from "@commentary/core/anno/canonicalUrl";
 import { rangeForOffsets, applyHighlights } from "../../web3/highlight";
-import { loadMockComments } from "../../anno/mock";
+import { loadMockComments } from "@commentary/core/anno/mock";
 import type { Lang } from "../../lib/i18n";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";

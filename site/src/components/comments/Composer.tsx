@@ -1,6 +1,6 @@
 import { Dialog } from "@base-ui-components/react/dialog";
 import { useEffect, useState } from "react";
-import type { AnnoFields } from "../../anno/schema";
+import type { AnnoFields } from "@commentary/core/anno/schema";
 
 const shortHex = (h: string) => (h.length > 12 ? `${h.slice(0, 6)}…${h.slice(-4)}` : h);
 

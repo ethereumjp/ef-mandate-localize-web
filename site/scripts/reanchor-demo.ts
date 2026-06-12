@@ -1,6 +1,6 @@
 // In-memory demonstration of the four re-anchoring outcomes. No files are touched.
 import { buildChapterAnchors } from "../src/lib/anchors";
-import { makeAnchor, project, type CurrentBlock } from "../src/lib/anchoring";
+import { makeAnchor, project, type CurrentBlock } from "@commentary/core/lib/anchoring";
 
 const base = (p2: string) =>
   `<!-- block: 02-p1 -->\n# II. Our Role\n\n<!-- block: 02-p2 -->\n${p2}`;

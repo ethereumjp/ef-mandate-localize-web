@@ -9,7 +9,7 @@ const { SchemaRegistry } = easSdk as unknown as {
   SchemaRegistry: typeof SchemaRegistryType;
 };
 import { SCHEMA_REGISTRY_ADDRESS } from "../src/web3/constants";
-import { ANNO_SCHEMA } from "../src/anno/constants";
+import { ANNO_SCHEMA } from "@commentary/core/anno/constants";
 
 const pk = process.env.SEPOLIA_PRIVATE_KEY;
 const rpc = process.env.PUBLIC_SEPOLIA_RPC_URL ?? "https://ethereum-sepolia-rpc.publicnode.com";

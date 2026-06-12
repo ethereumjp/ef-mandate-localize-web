@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildChapterAnchors } from "../src/lib/anchors";
-import { blockHashFromNormalized } from "../src/lib/hash";
+import { blockHashFromNormalized } from "@commentary/core/lib/hash";
 
 describe("buildChapterAnchors", () => {
   it("keys entries by blockId with order, text and hash", () => {

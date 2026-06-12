@@ -1,6 +1,6 @@
 import type { CommentNode } from "../../web3/thread";
-import type { StoredAnno } from "../../anno/locate";
-import type { Projection } from "../../lib/anchoring";
+import type { StoredAnno } from "@commentary/core/anno/locate";
+import type { Projection } from "@commentary/core/lib/anchoring";
 import { MESSAGES, type Lang } from "../../lib/i18n";
 import { AnchorStatusBadge } from "./AnchorStatusBadge";
 
