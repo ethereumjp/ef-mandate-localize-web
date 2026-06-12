@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import type { LocatedAnno } from "@commentary/core/anno/locate";
 import { buildThreads } from "../../web3/thread";
-import { MESSAGES, type Lang } from "../../lib/i18n";
+import { ct } from "./i18n";
 import { CommentCard } from "./CommentCard";
 
 interface Props {
   /** All projected comments for the page (document order), threaded by parentUid. */
   comments: LocatedAnno[];
-  lang: Lang;
+  lang: string;
   focusedUid: string | null;
   pendingUids: Set<string>;
   onFocus: (uid: string) => void;
@@ -27,7 +27,6 @@ export function CommentThread({
   onFocus,
   onClose,
 }: Props) {
-  const m = MESSAGES[lang];
   const projByUid = new Map(comments.map((p) => [p.comment.uid, p.projection]));
   const threads = buildThreads(comments.map((p) => p.comment));
   const listRef = useRef<HTMLDivElement>(null);
@@ -43,7 +42,7 @@ export function CommentThread({
     <aside className="fixed right-0 top-0 z-40 flex h-full w-[340px] max-w-[85vw] flex-col border-l border-stone-200 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.05)] dark:border-stone-700 dark:bg-stone-900">
       <div className="flex items-center justify-between border-b border-stone-200 px-4 py-3 dark:border-stone-700">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-          {m.threadTitle}
+          {ct(lang, "threadTitle")}
           {comments.length > 0 ? (
             <span className="ml-1.5 font-normal text-stone-400 dark:text-stone-500">
               {comments.length}
@@ -61,7 +60,7 @@ export function CommentThread({
       </div>
       <div ref={listRef} className="flex-1 overflow-y-auto">
         {comments.length === 0 ? (
-          <p className="px-2 py-6 text-center text-sm text-stone-400">{m.noComments}</p>
+          <p className="px-2 py-6 text-center text-sm text-stone-400">{ct(lang, "noComments")}</p>
         ) : null}
         {threads.map((n) => (
           <CommentCard

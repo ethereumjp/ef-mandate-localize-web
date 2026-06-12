@@ -1,7 +1,7 @@
 import type { CommentNode } from "../../web3/thread";
 import type { StoredAnno } from "@commentary/core/anno/locate";
 import type { Projection } from "@commentary/core/lib/anchoring";
-import { MESSAGES, type Lang } from "../../lib/i18n";
+import { ct } from "./i18n";
 import { AnchorStatusBadge } from "./AnchorStatusBadge";
 
 function short(addr: string) {
@@ -11,7 +11,7 @@ function short(addr: string) {
 interface Props {
   node: CommentNode<StoredAnno>;
   projection?: Projection;
-  lang: Lang;
+  lang: string;
   depth?: number;
   focusedUid?: string | null;
   pendingUids?: Set<string>;
@@ -27,7 +27,6 @@ export function CommentCard({
   pendingUids,
   onFocus,
 }: Props) {
-  const m = MESSAGES[lang];
   const c = node.comment;
   const focused = depth === 0 && focusedUid === c.uid;
   const pending = pendingUids?.has(c.uid) ?? false;
@@ -58,7 +57,7 @@ export function CommentCard({
         {c.time > 0 ? <span>{new Date(c.time * 1000).toLocaleDateString(lang)}</span> : null}
         {projection ? <AnchorStatusBadge status={projection.status} lang={lang} /> : null}
         {projection?.pastVersion ? (
-          <span className="text-amber-600 dark:text-amber-400">{m.pastVersion}</span>
+          <span className="text-amber-600 dark:text-amber-400">{ct(lang, "pastVersion")}</span>
         ) : null}
         {pending ? (
           <span
@@ -72,7 +71,7 @@ export function CommentCard({
           onClick={(e) => e.stopPropagation()}
           className="cursor-not-allowed opacity-50"
         >
-          {m.reply}
+          {ct(lang, "reply")}
         </button>
       </div>
       {node.replies.map((r) => (

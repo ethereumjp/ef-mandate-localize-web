@@ -1,15 +1,14 @@
 import type { AnchorStatus } from "@commentary/core/lib/anchoring";
-import { MESSAGES, type Lang } from "../../lib/i18n";
+import { ct } from "./i18n";
 
-export function AnchorStatusBadge({ status, lang }: { status: AnchorStatus; lang: Lang }) {
+export function AnchorStatusBadge({ status, lang }: { status: AnchorStatus; lang: string }) {
   if (status === "anchored") return null;
-  const m = MESSAGES[lang];
   const label =
     status === "re-anchored"
-      ? m.statusReanchored
+      ? ct(lang, "statusReanchored")
       : status === "needs-review"
-        ? m.statusNeedsReview
-        : m.statusOrphaned;
+        ? ct(lang, "statusNeedsReview")
+        : ct(lang, "statusOrphaned");
   const tone =
     status === "orphaned"
       ? "bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-300"

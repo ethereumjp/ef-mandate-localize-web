@@ -15,11 +15,15 @@ import { buildAnnoFields } from "@commentary/core/anno/author";
 import { nearestContainer } from "@commentary/core/anno/selector";
 import { attestComment } from "../../web3/eas";
 import { fetchAnno } from "@commentary/core/anno/read";
-import { projectAnno, commentsForUrl, type StoredAnno, type LocatedAnno } from "@commentary/core/anno/locate";
+import {
+  projectAnno,
+  commentsForUrl,
+  type StoredAnno,
+  type LocatedAnno,
+} from "@commentary/core/anno/locate";
 import { canonicalizeUrl } from "@commentary/core/anno/canonicalUrl";
 import { rangeForOffsets, applyHighlights } from "../../web3/highlight";
 import { loadMockComments } from "@commentary/core/anno/mock";
-import type { Lang } from "../../lib/i18n";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
 import { Composer } from "./Composer";
@@ -35,7 +39,7 @@ const EMPTY_COMMENTS: StoredAnno[] = [];
 const MOCK = import.meta.env.PUBLIC_MOCK_COMMENTS === "1";
 
 interface Props {
-  lang: Lang;
+  lang: string;
 }
 
 interface SelectionTarget {
