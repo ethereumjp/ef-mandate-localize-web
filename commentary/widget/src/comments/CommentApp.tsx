@@ -10,7 +10,8 @@ import { useEthersSigner } from "../web3/ethers";
 // EAS SDK (lodash ESM re-export) never enters the SSR module graph. Vite
 // bundles encodeAnno/attestComment into the client chunk this way; the old
 // dynamic import() was elided from the static build, killing on-chain publish.
-import { encodeAnno, type AnnoFields } from "@commentary/core/anno/schema";
+import type { AnnoFields } from "@commentary/core/anno/schema";
+import { encodeAnno } from "@commentary/core/anno/encode";
 import { buildAnnoFields } from "@commentary/core/anno/author";
 import { nearestContainer } from "@commentary/core/anno/selector";
 import { attestComment } from "../web3/eas";

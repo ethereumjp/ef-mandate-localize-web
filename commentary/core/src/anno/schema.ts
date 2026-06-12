@@ -1,6 +1,5 @@
-import { SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
-import { ANNO_SCHEMA } from "./constants";
-import { annoFieldDefs } from "./encode-defs";
+import { decodeAbiParameters } from "viem";
+import { ANNO_ABI } from "./encode-defs";
 
 export interface AnnoFields {
   url: string;
@@ -19,29 +18,28 @@ export interface AnnoFields {
   meta: string;
 }
 
-const encoder = () => new SchemaEncoder(ANNO_SCHEMA);
-
-export function encodeAnno(f: AnnoFields): string {
-  return encoder().encodeData(annoFieldDefs(f));
-}
-
+/**
+ * Decode EAS attestation data (ABI-encoded per `ANNO_SCHEMA`) into `AnnoFields`.
+ * Uses viem's ABI decoder rather than the eas-sdk `SchemaEncoder`, so the read
+ * path (Stage 1 of the embed) stays free of eas-sdk/ethers. The write path
+ * (`encodeAnno` in `anno/encode.ts`) keeps eas-sdk.
+ */
 export function decodeAnno(data: string): AnnoFields {
-  const items = encoder().decodeData(data);
-  const get = (name: string) => items.find((i) => i.name === name)?.value.value;
+  const v = decodeAbiParameters(ANNO_ABI, data as `0x${string}`);
   return {
-    url: String(get("url")),
-    urlCanonical: String(get("urlCanonical")),
-    origin: String(get("origin")),
-    lang: String(get("lang")),
-    rootSelector: String(get("rootSelector")),
-    containerHash: String(get("containerHash")),
-    spanStart: Number(get("spanStart")),
-    spanEnd: Number(get("spanEnd")),
-    spanExact: String(get("spanExact")),
-    spanPrefix: String(get("spanPrefix")),
-    spanSuffix: String(get("spanSuffix")),
-    parentUid: String(get("parentUid")),
-    body: String(get("body")),
-    meta: String(get("meta")),
+    url: v[0],
+    urlCanonical: v[1],
+    origin: v[2],
+    lang: v[3],
+    rootSelector: v[4],
+    containerHash: v[5],
+    spanStart: Number(v[6]),
+    spanEnd: Number(v[7]),
+    spanExact: v[8],
+    spanPrefix: v[9],
+    spanSuffix: v[10],
+    parentUid: v[11],
+    body: v[12],
+    meta: v[13],
   };
 }
