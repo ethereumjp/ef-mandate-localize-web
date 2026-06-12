@@ -10,7 +10,7 @@
 
 **Scope note (read first):** This is Plan 1 of a 3-plan decomposition. Out of scope here (separate future plans): Plan 2 = Chrome extension scaffold (manifest v3, content script, background, porting the React comment UI). Plan 3 = migrating the existing translation site onto this generalized schema (re-register schema, dual-read existing comments). Plan 1 ships a self-contained, tested library only.
 
-**Spec:** `docs/superpowers/specs/2026-06-11-generalized-comment-schema-design.md`
+**Spec:** `site/docs/specs/2026-06-11-generalized-comment-schema-design.md`
 
 **Conventions:**
 - All commands run from the `site/` directory.

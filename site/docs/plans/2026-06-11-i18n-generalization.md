@@ -8,7 +8,7 @@
 
 **Tech Stack:** Astro 6 / React 19 / TypeScript 5.6 / vitest 2 / Tailwind 4。全コマンドは `site/` で実行。
 
-**Spec:** `docs/spec/2026-06-11-i18n-generalization-design.md`
+**Spec:** `site/docs/specs/2026-06-11-i18n-generalization-design.md`
 
 ---
 
@@ -701,7 +701,7 @@ Expected: 0 件。
 
 - [ ] **Step 4: 完了**
 
-実装完了。`docs/spec/2026-06-11-i18n-generalization-design.md` §12 の手順で、以降は言語を 1 つ追加して（`Lang`/`LANGS`/`LANG_OPTIONS` に行追加＋`config.json` ソース追加＋md 配置）動的生成を実地確認するとよい。
+実装完了。`site/docs/specs/2026-06-11-i18n-generalization-design.md` §12 の手順で、以降は言語を 1 つ追加して（`Lang`/`LANGS`/`LANG_OPTIONS` に行追加＋`config.json` ソース追加＋md 配置）動的生成を実地確認するとよい。
 
 ---
 
