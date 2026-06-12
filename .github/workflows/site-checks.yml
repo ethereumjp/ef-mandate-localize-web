@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: site
+        working-directory: commentary
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -20,15 +20,15 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-          cache-dependency-path: site/pnpm-lock.yaml
+          cache-dependency-path: commentary/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
-      - run: pnpm run fmt:check
-      - run: pnpm run typecheck
-      - run: pnpm run check:astro
-      - run: pnpm test
-      - run: pnpm run blocks:check
-      - run: pnpm run anchors:build
+      - run: pnpm --filter @commentary/site run lint
+      - run: pnpm --filter @commentary/site run fmt:check
+      - run: pnpm -r run typecheck
+      - run: pnpm --filter @commentary/site run check:astro
+      - run: pnpm -r test
+      - run: pnpm --filter @commentary/site run blocks:check
+      - run: pnpm --filter @commentary/site run anchors:build
       # The on-chain attest path (EAS attestation via a Sepolia wallet) is verified
-      # manually — there is no wallet or Sepolia RPC in CI.  See site/docs/m4-demo-checklist.md.
-      - run: pnpm build
+      # manually — there is no wallet or Sepolia RPC in CI.  See commentary/docs/m4-demo-checklist.md.
+      - run: pnpm --filter @commentary/site build
