@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildThreads } from "../src/web3/thread";
+import { buildThreads } from "@commentary/widget/web3/thread";
 
 const ZERO = "0x" + "00".repeat(32);
 function c(uid: string, parentUid: string) {

@@ -1,7 +1,7 @@
 import { useAccount, useConnect, useDisconnect, useEnsName, useSwitchChain } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { mainnet } from "wagmi/chains";
-import { SEPOLIA_CHAIN_ID } from "../../web3/config";
+import { SEPOLIA_CHAIN_ID } from "../web3/config";
 
 function short(addr: string) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;

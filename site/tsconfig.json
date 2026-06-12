@@ -9,7 +9,9 @@
     "jsxImportSource": "react",
     "baseUrl": ".",
     "paths": {
-      "@commentary/core/*": ["../core/src/*"]
+      "@commentary/core/*": ["../core/src/*"],
+      "@commentary/widget": ["../widget/src/index.ts"],
+      "@commentary/widget/*": ["../widget/src/*"]
     }
   },
   "include": ["src", "scripts", "tests"],

@@ -5,7 +5,7 @@ import SiteMeta from "./SiteMeta.astro";
 import T from "./T.astro";
 import { loadChapters, isPending } from "../lib/content";
 import type { Lang } from "../lib/i18n";
-import CommentApp from "./comments/CommentApp";
+import { CommentApp } from "@commentary/widget";
 interface Props {
     lang: Lang;
 }

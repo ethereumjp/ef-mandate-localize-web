@@ -1,4 +1,4 @@
-import type { CommentNode } from "../../web3/thread";
+import type { CommentNode } from "../web3/thread";
 import type { StoredAnno } from "@commentary/core/anno/locate";
 import type { Projection } from "@commentary/core/lib/anchoring";
 import { ct } from "./i18n";

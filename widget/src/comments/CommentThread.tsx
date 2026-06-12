@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { LocatedAnno } from "@commentary/core/anno/locate";
-import { buildThreads } from "../../web3/thread";
+import { buildThreads } from "../web3/thread";
 import { ct } from "./i18n";
 import { CommentCard } from "./CommentCard";
 

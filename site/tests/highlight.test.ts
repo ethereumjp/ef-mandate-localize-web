@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { rangeForOffsets } from "../src/web3/highlight";
+import { rangeForOffsets } from "@commentary/widget/web3/highlight";
 
 function blockEl(html: string) {
   const el = document.createElement("div");

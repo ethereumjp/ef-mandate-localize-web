@@ -3,8 +3,8 @@ import { createPortal } from "react-dom";
 import { WagmiProvider, useAccount, useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
-import { wagmiConfig, ANNO_SCHEMA_UID } from "../../web3/config";
-import { useEthersSigner } from "../../web3/ethers";
+import { wagmiConfig, ANNO_SCHEMA_UID } from "../web3/config";
+import { useEthersSigner } from "../web3/ethers";
 // Static imports of the EAS attest path. Safe because Document.astro mounts
 // this island with client:only="react", so it is never SSR-rendered and the
 // EAS SDK (lodash ESM re-export) never enters the SSR module graph. Vite
@@ -13,7 +13,7 @@ import { useEthersSigner } from "../../web3/ethers";
 import { encodeAnno, type AnnoFields } from "@commentary/core/anno/schema";
 import { buildAnnoFields } from "@commentary/core/anno/author";
 import { nearestContainer } from "@commentary/core/anno/selector";
-import { attestComment } from "../../web3/eas";
+import { attestComment } from "../web3/eas";
 import { fetchAnno } from "@commentary/core/anno/read";
 import {
   projectAnno,
@@ -22,7 +22,7 @@ import {
   type LocatedAnno,
 } from "@commentary/core/anno/locate";
 import { canonicalizeUrl } from "@commentary/core/anno/canonicalUrl";
-import { rangeForOffsets, applyHighlights } from "../../web3/highlight";
+import { rangeForOffsets, applyHighlights } from "../web3/highlight";
 import { loadMockComments } from "@commentary/core/anno/mock";
 import { ConnectButton } from "./ConnectButton";
 import { SelectionPopover } from "./SelectionPopover";
