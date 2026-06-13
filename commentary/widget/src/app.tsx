@@ -1,7 +1,8 @@
 // Stage 2 (app): the heavy React chunk, lazy-imported by the loader. Mounts the
-// comment controller (list + wallet + select→compose→attest authoring) into the
-// shadow root, with Tailwind injected via adoptedStyleSheets so host CSS doesn't
-// leak in or out. Reuses the Stage-1 `display` for read/paint; adds authoring.
+// comment controller — a Panel with list/compose modes, wallet in the header, and
+// select→compose→attest authoring — into the shadow root, with Tailwind injected
+// via adoptedStyleSheets so host CSS doesn't leak in or out. Reuses the Stage-1
+// `display` for read/paint/focus.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { WagmiProvider, useAccount, useConnect } from "wagmi";
@@ -17,6 +18,7 @@ import { attestComment } from "./web3/eas";
 import { ConnectButton } from "./comments/ConnectButton";
 import { CommentThread } from "./comments/CommentThread";
 import { Composer } from "./comments/Composer";
+import { Panel } from "./comments/Panel";
 import { SelectionPopover } from "./comments/SelectionPopover";
 import type { WidgetConfig } from "./config";
 import type { Display } from "./display";
@@ -43,35 +45,25 @@ interface SelectionTarget {
 interface ControllerProps {
   config: WidgetConfig;
   display: Display;
-  portalContainer: HTMLElement;
   onClose: () => void;
-  /** Comment to focus on mount (opened by clicking its span). */
   initialFocusUid?: string;
-  /** Hand the loader a focus callback so span-clicks route here while the panel is open. */
   onFocusReady?: (fn: (uid: string) => void) => void;
 }
 
-function Controller({
-  config,
-  display,
-  portalContainer,
-  onClose,
-  initialFocusUid,
-  onFocusReady,
-}: ControllerProps) {
+function Controller({ config, display, onClose, initialFocusUid, onFocusReady }: ControllerProps) {
   const signer = useEthersSigner();
   const { isConnected } = useAccount();
   const { connect } = useConnect();
   const [comments, setComments] = useState(display.projected());
   const [focusedUid, setFocusedUid] = useState<string | null>(initialFocusUid ?? null);
   const [selection, setSelection] = useState<SelectionTarget | null>(null);
-  const [composerOpen, setComposerOpen] = useState(false);
+  const [mode, setMode] = useState<"list" | "compose">("list");
   const [composerFields, setComposerFields] = useState<AnnoFields | null>(null);
   const [composerError, setComposerError] = useState<string | null>(null);
   const [composerPending, setComposerPending] = useState(false);
   const captured = useRef<SelectionTarget | null>(null);
 
-  // selectionchange → popover (authoring is independent of the comment list).
+  // selectionchange → popover (only while listing; hidden during compose).
   useEffect(() => {
     function onSelectionChange() {
       const sel = window.getSelection();
@@ -93,8 +85,6 @@ function Controller({
     return () => document.removeEventListener("selectionchange", onSelectionChange);
   }, []);
 
-  // Focus a comment from the list (or a span click routed by the loader): wash its
-  // span + scroll it into view, and mark its card. Clear the wash when the panel closes.
   const handleFocus = useCallback(
     (uid: string) => {
       setFocusedUid(uid);
@@ -116,7 +106,12 @@ function Controller({
     captured.current = selection;
     setComposerError(null);
     setComposerFields(selection ? fieldsFor(selection, "") : null);
-    setComposerOpen(true);
+    setMode("compose");
+  }
+
+  function backToList() {
+    setMode("list");
+    setComposerError(null);
   }
 
   async function handleSubmit(body: string) {
@@ -131,15 +126,14 @@ function Controller({
       setComposerError("Could not anchor the selection. Try selecting within a single block.");
       return;
     }
-    setComposerOpen(false);
     setComposerPending(true);
     try {
       await attestComment(signer, config.schemaUid, encodeAnno(fields));
       await display.refresh();
       setComments(display.projected());
+      setMode("list");
     } catch (err) {
       setComposerError(err instanceof Error ? err.message : String(err));
-      setComposerOpen(true);
     } finally {
       setComposerPending(false);
     }
@@ -147,35 +141,39 @@ function Controller({
 
   return (
     <>
-      <div className="fixed right-[352px] top-3 z-[2147483647]">
-        <ConnectButton />
-      </div>
-      {selection && !composerOpen ? (
+      {selection && mode === "list" ? (
         <SelectionPopover rect={selection.rect} onClick={openComposer} />
       ) : null}
-      <Composer
-        open={composerOpen}
-        onOpenChange={(open) => {
-          setComposerOpen(open);
-          if (!open) setComposerError(null);
-        }}
-        onSubmit={handleSubmit}
-        pending={composerPending}
-        error={composerError}
-        connected={isConnected}
-        onConnect={() => connect({ connector: injected() })}
-        fieldsPreview={composerFields}
-        schemaUid={config.schemaUid}
-        container={portalContainer}
-      />
-      <CommentThread
-        comments={comments}
+      <Panel
         lang={config.lang}
-        focusedUid={focusedUid}
-        pendingUids={NO_PENDING}
-        onFocus={handleFocus}
+        count={comments.length}
+        mode={mode}
+        wallet={<ConnectButton />}
+        onBack={backToList}
         onClose={onClose}
-      />
+      >
+        {mode === "compose" ? (
+          <Composer
+            key={composerFields?.spanExact ?? "compose"}
+            fields={composerFields}
+            lang={config.lang}
+            pending={composerPending}
+            error={composerError}
+            connected={isConnected}
+            onConnect={() => connect({ connector: injected() })}
+            onSubmit={handleSubmit}
+            schemaUid={config.schemaUid}
+          />
+        ) : (
+          <CommentThread
+            comments={comments}
+            lang={config.lang}
+            focusedUid={focusedUid}
+            pendingUids={NO_PENDING}
+            onFocus={handleFocus}
+          />
+        )}
+      </Panel>
     </>
   );
 }
@@ -214,7 +212,6 @@ export function mountApp(
     <App
       config={config}
       display={display}
-      portalContainer={el}
       onClose={close}
       initialFocusUid={opts?.focusUid}
       onFocusReady={opts?.onFocusReady}
