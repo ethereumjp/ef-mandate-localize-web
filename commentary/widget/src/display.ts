@@ -31,6 +31,30 @@ export interface Display {
   dispose(): void;
 }
 
+/**
+ * Group page-scoped comments by rootSelector and project each onto the live DOM.
+ * Pure of visibility/painting, so the list + count work even while highlights are
+ * hidden. Blocks not present on the page are skipped (their comments don't list).
+ */
+export function projectComments(
+  stored: StoredAnno[],
+  urlCanonical: string,
+): Map<string, LocatedAnno[]> {
+  const byBlock = new Map<string, LocatedAnno[]>();
+  const groups = new Map<string, StoredAnno[]>();
+  for (const c of commentsForUrl(stored, urlCanonical)) {
+    const arr = groups.get(c.rootSelector) ?? [];
+    arr.push(c);
+    groups.set(c.rootSelector, arr);
+  }
+  for (const [rootSelector, group] of groups) {
+    const blockEl = document.querySelector(rootSelector);
+    if (!blockEl) continue;
+    byBlock.set(rootSelector, projectAnno(blockEl, group));
+  }
+  return byBlock;
+}
+
 /** The caret (node, offset) under a viewport point — used to hit-test span clicks. */
 function caretFromPoint(x: number, y: number): { node: Node; offset: number } | null {
   const d = document as Document & {
@@ -57,7 +81,7 @@ function caretFromPoint(x: number, y: number): { node: Node; offset: number } | 
  * app loads.
  */
 export function createDisplay(opts: DisplayOpts): Display {
-  const byBlock = new Map<string, LocatedAnno[]>();
+  let byBlock = new Map<string, LocatedAnno[]>();
   let stored: StoredAnno[] = [];
   let visible = false;
   let clickCb: ((uid: string) => void) | null = null;
@@ -66,25 +90,22 @@ export function createDisplay(opts: DisplayOpts): Display {
     return commentsForUrl(stored, canonicalizeUrl(location.href).urlCanonical);
   }
 
-  function paint(): void {
-    byBlock.clear();
+  // Always rebuild the projection (list/count data), regardless of visibility.
+  function project(): void {
+    byBlock = projectComments(stored, canonicalizeUrl(location.href).urlCanonical);
+  }
+
+  // Paint (or clear) the underline markers; gated by `visible` only.
+  function paintHighlights(): void {
     if (!visible) {
       applyHighlights("comment", []);
       applyHighlights("comment-focus", []);
       return;
     }
-    const groups = new Map<string, StoredAnno[]>();
-    for (const c of pageScoped()) {
-      const arr = groups.get(c.rootSelector) ?? [];
-      arr.push(c);
-      groups.set(c.rootSelector, arr);
-    }
     const ranges: Range[] = [];
-    for (const [rootSelector, group] of groups) {
+    for (const [rootSelector, items] of byBlock) {
       const blockEl = document.querySelector(rootSelector);
       if (!blockEl) continue;
-      const items = projectAnno(blockEl, group);
-      byBlock.set(rootSelector, items);
       for (const p of items) {
         const s = p.projection.status;
         if (s !== "anchored" && s !== "re-anchored") continue;
@@ -121,11 +142,12 @@ export function createDisplay(opts: DisplayOpts): Display {
       stored = opts.mock
         ? loadMockComments()
         : await fetchAnno(opts.schemaUid, { endpoint: opts.easGraphql });
-      paint();
+      project();
+      paintHighlights();
     },
     setVisible(on: boolean) {
       visible = on;
-      paint();
+      paintHighlights();
     },
     count() {
       return pageScoped().length;
@@ -159,7 +181,7 @@ export function createDisplay(opts: DisplayOpts): Display {
       document.removeEventListener("click", onDocClick);
       applyHighlights("comment", []);
       applyHighlights("comment-focus", []);
-      byBlock.clear();
+      byBlock = new Map();
     },
   };
 }
