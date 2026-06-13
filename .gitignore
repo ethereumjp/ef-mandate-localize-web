@@ -1,6 +1,4 @@
 dist/
-# Embed bundle copied from @commentary/widget into the site's served public dir
-commentary/site/public/commentary/
 node_modules/
 .astro/
 *.tsbuildinfo
@@ -28,4 +26,3 @@ env/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
-.gstack/
