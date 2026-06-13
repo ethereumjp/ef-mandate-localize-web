@@ -10,6 +10,13 @@ const STRINGS: Record<string, Record<string, string>> = {
     statusReanchored: "Re-anchored",
     statusNeedsReview: "Needs review",
     statusOrphaned: "Block removed",
+    back: "Comments",
+    compose: "New comment",
+    composePlaceholder: "Write a comment…",
+    onchainDetails: "On-chain record (EAS)",
+    publish: "Publish to Sepolia",
+    publishing: "Publishing…",
+    connectToPublish: "Connect to publish",
   },
   ja: {
     threadTitle: "コメント",
@@ -19,6 +26,13 @@ const STRINGS: Record<string, Record<string, string>> = {
     statusReanchored: "再アンカリング",
     statusNeedsReview: "要確認",
     statusOrphaned: "ブロックが削除されました",
+    back: "コメント一覧",
+    compose: "新規コメント",
+    composePlaceholder: "コメントを書く…",
+    onchainDetails: "オンチェーン記録 (EAS)",
+    publish: "Sepolia に公開",
+    publishing: "公開中…",
+    connectToPublish: "接続して公開",
   },
 };
 
