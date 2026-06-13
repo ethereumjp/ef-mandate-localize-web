@@ -26,6 +26,8 @@ export interface Display {
   projected(): LocatedAnno[];
   /** Register a callback for clicks that land on an anchored comment span. */
   onClickHighlight(cb: (uid: string) => void): void;
+  /** Focus a comment: wash its span (comment-focus) + scroll it into view; null clears. */
+  focus(uid: string | null): void;
   dispose(): void;
 }
 
@@ -133,6 +135,25 @@ export function createDisplay(opts: DisplayOpts): Display {
     },
     onClickHighlight(cb) {
       clickCb = cb;
+    },
+    focus(uid: string | null) {
+      if (!uid) {
+        applyHighlights("comment-focus", []);
+        return;
+      }
+      for (const [rootSelector, group] of byBlock) {
+        const located = group.find((p) => p.comment.uid === uid);
+        if (!located) continue;
+        if (located.projection.start === null || located.projection.end === null) return;
+        const blockEl = document.querySelector(rootSelector);
+        if (!blockEl) return;
+        const r = rangeForOffsets(blockEl, located.projection.start, located.projection.end);
+        if (r) {
+          applyHighlights("comment-focus", [r]);
+          blockEl.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+        return;
+      }
     },
     dispose() {
       document.removeEventListener("click", onDocClick);

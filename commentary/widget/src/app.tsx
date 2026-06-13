@@ -2,7 +2,7 @@
 // comment controller (list + wallet + select→compose→attest authoring) into the
 // shadow root, with Tailwind injected via adoptedStyleSheets so host CSS doesn't
 // leak in or out. Reuses the Stage-1 `display` for read/paint; adds authoring.
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { WagmiProvider, useAccount, useConnect } from "wagmi";
 import { injected } from "wagmi/connectors";
@@ -45,13 +45,25 @@ interface ControllerProps {
   display: Display;
   portalContainer: HTMLElement;
   onClose: () => void;
+  /** Comment to focus on mount (opened by clicking its span). */
+  initialFocusUid?: string;
+  /** Hand the loader a focus callback so span-clicks route here while the panel is open. */
+  onFocusReady?: (fn: (uid: string) => void) => void;
 }
 
-function Controller({ config, display, portalContainer, onClose }: ControllerProps) {
+function Controller({
+  config,
+  display,
+  portalContainer,
+  onClose,
+  initialFocusUid,
+  onFocusReady,
+}: ControllerProps) {
   const signer = useEthersSigner();
   const { isConnected } = useAccount();
   const { connect } = useConnect();
   const [comments, setComments] = useState(display.projected());
+  const [focusedUid, setFocusedUid] = useState<string | null>(initialFocusUid ?? null);
   const [selection, setSelection] = useState<SelectionTarget | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerFields, setComposerFields] = useState<AnnoFields | null>(null);
@@ -80,6 +92,21 @@ function Controller({ config, display, portalContainer, onClose }: ControllerPro
     document.addEventListener("selectionchange", onSelectionChange);
     return () => document.removeEventListener("selectionchange", onSelectionChange);
   }, []);
+
+  // Focus a comment from the list (or a span click routed by the loader): wash its
+  // span + scroll it into view, and mark its card. Clear the wash when the panel closes.
+  const handleFocus = useCallback(
+    (uid: string) => {
+      setFocusedUid(uid);
+      display.focus(uid);
+    },
+    [display],
+  );
+  useEffect(() => {
+    if (initialFocusUid) handleFocus(initialFocusUid);
+    onFocusReady?.(handleFocus);
+    return () => display.focus(null);
+  }, [initialFocusUid, onFocusReady, handleFocus, display]);
 
   function fieldsFor(target: SelectionTarget, body: string): AnnoFields | null {
     return buildAnnoFields({ href: location.href, lang: config.lang, range: target.range, body });
@@ -144,9 +171,9 @@ function Controller({ config, display, portalContainer, onClose }: ControllerPro
       <CommentThread
         comments={comments}
         lang={config.lang}
-        focusedUid={null}
+        focusedUid={focusedUid}
         pendingUids={NO_PENDING}
-        onFocus={() => {}}
+        onFocus={handleFocus}
         onClose={onClose}
       />
     </>
@@ -168,7 +195,11 @@ export function mountApp(
   container: ShadowRoot,
   config: WidgetConfig,
   display: Display,
-  opts?: { focusUid?: string; onUnmount?: () => void },
+  opts?: {
+    focusUid?: string;
+    onFocusReady?: (fn: (uid: string) => void) => void;
+    onUnmount?: () => void;
+  },
 ): void {
   injectStyles(container);
   const el = document.createElement("div");
@@ -179,5 +210,14 @@ export function mountApp(
     el.remove();
     opts?.onUnmount?.();
   };
-  root.render(<App config={config} display={display} portalContainer={el} onClose={close} />);
+  root.render(
+    <App
+      config={config}
+      display={display}
+      portalContainer={el}
+      onClose={close}
+      initialFocusUid={opts?.focusUid}
+      onFocusReady={opts?.onFocusReady}
+    />,
+  );
 }

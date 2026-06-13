@@ -36,14 +36,22 @@ function mount(): void {
 
   let appMod: typeof import("./app") | null = null;
   let mounted = false;
+  let focusWhileOpen: ((uid: string) => void) | null = null;
   async function openApp(focusUid?: string): Promise<void> {
-    if (mounted) return;
+    if (mounted) {
+      if (focusUid) focusWhileOpen?.(focusUid); // already open → just focus the span
+      return;
+    }
     mounted = true;
     if (!appMod) appMod = await import("./app");
     appMod.mountApp(shadow, config, display, {
       focusUid,
+      onFocusReady: (fn) => {
+        focusWhileOpen = fn;
+      },
       onUnmount: () => {
         mounted = false;
+        focusWhileOpen = null;
       },
     });
   }
