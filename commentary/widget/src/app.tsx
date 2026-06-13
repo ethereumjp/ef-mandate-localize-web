@@ -45,12 +45,11 @@ interface SelectionTarget {
 interface ControllerProps {
   config: WidgetConfig;
   display: Display;
-  onClose: () => void;
   initialFocusUid?: string;
   onFocusReady?: (fn: (uid: string) => void) => void;
 }
 
-function Controller({ config, display, onClose, initialFocusUid, onFocusReady }: ControllerProps) {
+function Controller({ config, display, initialFocusUid, onFocusReady }: ControllerProps) {
   const signer = useEthersSigner();
   const { isConnected } = useAccount();
   const { connect } = useConnect();
@@ -150,7 +149,6 @@ function Controller({ config, display, onClose, initialFocusUid, onFocusReady }:
         mode={mode}
         wallet={<ConnectButton />}
         onBack={backToList}
-        onClose={onClose}
       >
         {mode === "compose" ? (
           <Composer
@@ -198,7 +196,7 @@ export function mountApp(
     onFocusReady?: (fn: (uid: string) => void) => void;
     onUnmount?: () => void;
   },
-): void {
+): () => void {
   injectStyles(container);
   const el = document.createElement("div");
   container.appendChild(el);
@@ -212,9 +210,9 @@ export function mountApp(
     <App
       config={config}
       display={display}
-      onClose={close}
       initialFocusUid={opts?.focusUid}
       onFocusReady={opts?.onFocusReady}
     />,
   );
+  return close;
 }

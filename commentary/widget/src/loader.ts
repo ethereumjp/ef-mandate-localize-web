@@ -1,7 +1,8 @@
 // Stage 1 (loader): tiny, no React/wallet. Reads config, mounts a host element +
-// shadow root + a 2-cell floating pill — 💬 toggles highlight visibility (persisted,
-// default OFF), the count opens the panel. Runs the framework-free display
-// controller and lazy-imports the heavy React app on interaction.
+// shadow root + a 2-cell floating pill — cell 1 (💬) toggles highlight visibility
+// (persisted, default OFF); cell 2 shows the count + a chevron that opens AND
+// closes the panel (‹ open / › close). Runs the framework-free display controller
+// and lazy-imports the heavy React app on first open.
 import { readConfig } from "./config";
 import { createDisplay } from "./display";
 
@@ -50,9 +51,8 @@ function mount(): void {
 
   const openBtn = document.createElement("button");
   openBtn.type = "button";
-  openBtn.setAttribute("aria-label", "Open comments");
   openBtn.style.cssText =
-    "border:none;background:transparent;cursor:pointer;padding:11px 15px;color:#fff;font:600 14px/1 system-ui";
+    "display:flex;align-items:center;gap:3px;border:none;background:transparent;cursor:pointer;padding:11px 15px;color:#fff";
 
   pill.append(toggleBtn, divider, openBtn);
   shadow.appendChild(pill);
@@ -64,6 +64,10 @@ function mount(): void {
   });
 
   let visible = readVisible();
+  let appMod: typeof import("./app") | null = null;
+  let mounted = false;
+  let appClose: (() => void) | null = null;
+  let focusWhileOpen: ((uid: string) => void) | null = null;
 
   function renderToggle(): void {
     const stroke = visible ? "#fde68a" : "#a8a29e";
@@ -77,21 +81,27 @@ function mount(): void {
     toggleBtn.setAttribute("aria-pressed", String(visible));
     toggleBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.7">${BUBBLE}${slash}</svg>`;
   }
-  function renderCount(): void {
-    openBtn.textContent = String(display.count());
+
+  function renderOpen(): void {
+    // chevron-left ‹ = open (pull the panel out); chevron-right › = close it.
+    const chevron = mounted ? "M9 6l6 6-6 6" : "M15 6l-6 6 6 6";
+    openBtn.innerHTML =
+      `<span style="font:600 14px/1 system-ui">${display.count()}</span>` +
+      `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="${chevron}"/></svg>`;
+    openBtn.title = mounted ? "Close comments" : "Open comments";
+    openBtn.setAttribute("aria-label", mounted ? "Close comments" : "Open comments");
+    openBtn.setAttribute("aria-expanded", String(mounted));
   }
 
-  let appMod: typeof import("./app") | null = null;
-  let mounted = false;
-  let focusWhileOpen: ((uid: string) => void) | null = null;
   async function openApp(focusUid?: string): Promise<void> {
     if (mounted) {
       if (focusUid) focusWhileOpen?.(focusUid); // already open → just focus the span
       return;
     }
     mounted = true;
+    renderOpen();
     if (!appMod) appMod = await import("./app");
-    appMod.mountApp(shadow, config, display, {
+    appClose = appMod.mountApp(shadow, config, display, {
       focusUid,
       onFocusReady: (fn) => {
         focusWhileOpen = fn;
@@ -99,6 +109,8 @@ function mount(): void {
       onUnmount: () => {
         mounted = false;
         focusWhileOpen = null;
+        appClose = null;
+        renderOpen();
       },
     });
   }
@@ -109,13 +121,16 @@ function mount(): void {
     display.setVisible(visible);
     renderToggle();
   });
-  openBtn.addEventListener("click", () => void openApp());
+  openBtn.addEventListener("click", () => {
+    if (mounted) appClose?.(); // chevron › → close
+    else void openApp(); // chevron ‹ → open
+  });
   display.onClickHighlight((uid) => void openApp(uid));
 
   void display.refresh().then(() => {
     display.setVisible(visible); // apply persisted state (paints if ON)
     renderToggle();
-    renderCount();
+    renderOpen();
   });
 }
 
