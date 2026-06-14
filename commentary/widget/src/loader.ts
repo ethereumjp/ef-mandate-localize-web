@@ -40,11 +40,16 @@ function mount(): void {
   let focusWhileOpen: ((uid: string) => void) | null = null;
 
   function renderButton(): void {
-    // Amber bubble when comments are on (sidebar open + highlights), muted when off.
-    const stroke = mounted ? "#fde68a" : "#d6d3d1";
-    button.innerHTML =
-      `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.7">${BUBBLE}</svg>` +
-      `<span style="font:600 14px/1 system-ui">${display.count()}</span>`;
+    if (mounted) {
+      // Open → a clear close (✕) button.
+      button.innerHTML =
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    } else {
+      // Closed → comment bubble + count (invites opening).
+      button.innerHTML =
+        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d6d3d1" stroke-width="1.7">${BUBBLE}</svg>` +
+        `<span style="font:600 14px/1 system-ui">${display.count()}</span>`;
+    }
     const label = mounted ? "Close comments" : "Open comments";
     button.title = label;
     button.setAttribute("aria-label", label);

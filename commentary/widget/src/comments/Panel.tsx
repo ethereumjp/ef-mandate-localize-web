@@ -18,7 +18,7 @@ interface Props {
  */
 export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
   return (
-    <aside className="fixed inset-x-0 bottom-0 z-40 flex max-h-[75dvh] flex-col overflow-hidden rounded-t-2xl border-t border-stone-200 bg-white shadow-[0_-8px_30px_rgba(0,0,0,0.12)] dark:border-stone-700 dark:bg-stone-900 sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:rounded-none sm:border-t-0 sm:border-l sm:shadow-[-10px_0_30px_rgba(0,0,0,0.05)]">
+    <aside className="fixed inset-x-0 bottom-0 z-40 flex max-h-[75dvh] flex-col overflow-hidden rounded-t-2xl border-t border-stone-200 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.25)] dark:border-stone-700 dark:bg-stone-900 sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:rounded-none sm:border-t-0 sm:border-l sm:shadow-[-14px_0_44px_rgba(0,0,0,0.18)]">
       <div className="flex items-center justify-between gap-2 border-b border-stone-200 px-3 py-2.5 dark:border-stone-700">
         {mode === "compose" ? (
           <button
