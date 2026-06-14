@@ -17,12 +17,8 @@
     "lint": "oxlint src scripts tests",
     "fmt": "oxfmt 'src/**/*.ts' 'src/**/*.tsx' 'scripts/*.ts' 'tests/*.ts'",
     "fmt:check": "oxfmt --check 'src/**/*.ts' 'src/**/*.tsx' 'scripts/*.ts' 'tests/*.ts'",
-    "blocks:inject": "tsx scripts/inject-markers.ts",
-    "blocks:check": "tsx scripts/check-markers.ts",
-    "anchors:build": "tsx scripts/build-anchors.ts",
     "anno:schema:register": "tsx scripts/register-anno-schema.ts",
-    "gen:mock": "tsx scripts/gen-mock-comments.ts",
-    "reanchor:demo": "tsx scripts/reanchor-demo.ts"
+    "gen:mock": "tsx scripts/gen-mock-comments.ts"
   },
   "dependencies": {
     "@commentary/core": "workspace:*",
