@@ -55,11 +55,13 @@ function mount(): void {
 
   function renderButton(): void {
     if (mounted) {
-      // Open → a clear close (✕) button.
+      // Open → a clear close (✕) button. Equal padding → square → perfect circle.
+      button.style.padding = "11px";
       button.innerHTML =
         '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     } else {
-      // Closed → comment bubble + count (invites opening).
+      // Closed → comment bubble + count (a pill).
+      button.style.padding = "11px 15px";
       button.innerHTML =
         `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d6d3d1" stroke-width="1.7">${BUBBLE}</svg>` +
         `<span style="font:600 14px/1 system-ui">${display.count()}</span>`;
