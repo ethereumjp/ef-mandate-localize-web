@@ -10,7 +10,7 @@ const { block, lang } = Astro.props;
 const html = blockHtml(block, lang);
 const fallback = isFallback(block, lang);
 ---
-<div class="block relative" data-block-id={block.blockId}>
+<div class="block relative">
   <div
     class="prose prose-stone max-w-none dark:prose-invert"
     data-fallback={fallback ? "en" : undefined}

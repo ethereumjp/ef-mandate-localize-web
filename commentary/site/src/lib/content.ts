@@ -5,7 +5,6 @@ import { loadConfig, listChapters, chaptersDir } from "./sources";
 import { SOURCE_LANG, LANGS, type Lang } from "./i18n";
 
 export interface RenderedBlock {
-  blockId: string;
   order: number;
   sourceHtml: string; // EN source, always present
   translations: Partial<Record<Lang, string>>; // aligned translations only
@@ -40,56 +39,31 @@ export const isFallback = (b: RenderedBlock, lang: Lang): boolean =>
   lang !== SOURCE_LANG && !(lang in b.translations);
 
 /**
- * Merge an EN chapter with its translations, keyed by language. A translation is
- * "aligned" only when it has the same number of blocks as EN, every block is
- * uniquely marked, AND its id set matches EN's exactly. Unaligned translations
- * are omitted (the chapter falls back to EN for that language = "pending").
+ * Merge an EN chapter with its translations by position. A translation is
+ * "aligned" only when it has the same number of blocks as EN (block i ↔ EN
+ * block i); otherwise it's omitted and the chapter falls back to EN ("pending").
  */
 export function mergeChapter(
   number: string,
   enBlocks: Block[],
   translations: Map<Lang, Block[]>,
 ): Chapter {
-  enBlocks.forEach((b, i) => {
-    if (b.id === null) {
-      throw new Error(`EN chapter ${number} block #${i} is unmarked (run blocks:inject)`);
-    }
-  });
-
-  // Per language: a blockId -> content map, only when that language is aligned.
-  const alignedById = new Map<Lang, Map<string, string>>();
+  const aligned = new Map<Lang, Block[]>();
   for (const [lang, blocks] of translations) {
-    const ids = new Set(blocks.map((b) => b.id).filter((x): x is string => x !== null));
-    const aligned =
-      blocks.length === enBlocks.length &&
-      ids.size === blocks.length &&
-      enBlocks.every((b) => b.id !== null && ids.has(b.id));
-    if (!aligned) continue;
-    const byId = new Map<string, string>();
-    for (const b of blocks) byId.set(b.id as string, b.content);
-    alignedById.set(lang, byId);
+    if (blocks.length === enBlocks.length) aligned.set(lang, blocks);
   }
 
   const blocks: RenderedBlock[] = enBlocks.map((b, i) => {
-    const id = b.id as string;
     const blockTranslations: Partial<Record<Lang, string>> = {};
-    for (const [lang, byId] of alignedById) {
-      const content = byId.get(id);
-      if (content !== undefined) blockTranslations[lang] = renderMarkdown(content);
+    for (const [lang, tBlocks] of aligned) {
+      blockTranslations[lang] = renderMarkdown(tBlocks[i].content);
     }
-    return {
-      blockId: id,
-      order: i,
-      sourceHtml: renderMarkdown(b.content),
-      translations: blockTranslations,
-    };
+    return { order: i, sourceHtml: renderMarkdown(b.content), translations: blockTranslations };
   });
 
   const chapterTranslations: Partial<Record<Lang, { title: string }>> = {};
-  for (const [lang, byId] of alignedById) {
-    const firstContent = byId.get(enBlocks[0].id as string);
-    if (firstContent !== undefined)
-      chapterTranslations[lang] = { title: chapterTitle(firstContent) };
+  for (const [lang, tBlocks] of aligned) {
+    chapterTranslations[lang] = { title: chapterTitle(tBlocks[0].content) };
   }
 
   return {
