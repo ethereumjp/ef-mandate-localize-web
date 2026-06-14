@@ -1,7 +1,4 @@
 dist/
-node_modules/
-.astro/
-*.tsbuildinfo
 .DS_Store
 __pycache__/
 *.py[cod]
