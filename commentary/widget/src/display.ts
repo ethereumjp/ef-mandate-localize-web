@@ -7,6 +7,7 @@ import {
   type StoredAnno,
   type LocatedAnno,
 } from "@commentary/core/anno/locate";
+import { resolveContainer } from "@commentary/core/anno/selector";
 import { applyHighlights, rangeForOffsets } from "./web3/highlight";
 
 export interface DisplayOpts {
@@ -32,26 +33,26 @@ export interface Display {
 }
 
 /**
- * Group page-scoped comments by rootSelector and project each onto the live DOM.
- * Pure of visibility/painting, so the list + count work even while highlights are
- * hidden. Blocks not present on the page are skipped (their comments don't list).
+ * Resolve each page-scoped comment to its live container (rootSelector → quote
+ * fallback via resolveContainer) and project its span. Keyed by the resolved
+ * Element so paint/focus/hit-test never re-run a stale stored selector. Pure of
+ * visibility/painting, so the list + count work even while highlights are hidden.
+ * Block-ID-free: a stale or empty rootSelector still anchors by quote.
  */
 export function projectComments(
   stored: StoredAnno[],
   urlCanonical: string,
-): Map<string, LocatedAnno[]> {
-  const byBlock = new Map<string, LocatedAnno[]>();
-  const groups = new Map<string, StoredAnno[]>();
+): Map<Element, LocatedAnno[]> {
+  const groups = new Map<Element, StoredAnno[]>();
   for (const c of commentsForUrl(stored, urlCanonical)) {
-    const arr = groups.get(c.rootSelector) ?? [];
-    arr.push(c);
-    groups.set(c.rootSelector, arr);
+    const el = resolveContainer(document, c.rootSelector, c.spanExact);
+    if (!el) continue;
+    const arr = groups.get(el);
+    if (arr) arr.push(c);
+    else groups.set(el, [c]);
   }
-  for (const [rootSelector, group] of groups) {
-    const blockEl = document.querySelector(rootSelector);
-    if (!blockEl) continue;
-    byBlock.set(rootSelector, projectAnno(blockEl, group));
-  }
+  const byBlock = new Map<Element, LocatedAnno[]>();
+  for (const [el, group] of groups) byBlock.set(el, projectAnno(el, group));
   return byBlock;
 }
 
@@ -81,7 +82,7 @@ function caretFromPoint(x: number, y: number): { node: Node; offset: number } | 
  * app loads.
  */
 export function createDisplay(opts: DisplayOpts): Display {
-  let byBlock = new Map<string, LocatedAnno[]>();
+  let byBlock = new Map<Element, LocatedAnno[]>();
   let stored: StoredAnno[] = [];
   let visible = false;
   let clickCb: ((uid: string) => void) | null = null;
@@ -103,9 +104,7 @@ export function createDisplay(opts: DisplayOpts): Display {
       return;
     }
     const ranges: Range[] = [];
-    for (const [rootSelector, items] of byBlock) {
-      const blockEl = document.querySelector(rootSelector);
-      if (!blockEl) continue;
+    for (const [blockEl, items] of byBlock) {
       for (const p of items) {
         const s = p.projection.status;
         if (s !== "anchored" && s !== "re-anchored") continue;
@@ -121,9 +120,8 @@ export function createDisplay(opts: DisplayOpts): Display {
     if (!visible || !clickCb) return;
     const pos = caretFromPoint(e.clientX, e.clientY);
     if (!pos) return;
-    for (const [rootSelector, group] of byBlock) {
-      const blockEl = document.querySelector(rootSelector);
-      if (!blockEl || !blockEl.contains(pos.node)) continue;
+    for (const [blockEl, group] of byBlock) {
+      if (!blockEl.contains(pos.node)) continue;
       for (const p of group) {
         if (p.projection.start === null || p.projection.end === null) continue;
         const r = rangeForOffsets(blockEl, p.projection.start, p.projection.end);
@@ -163,12 +161,10 @@ export function createDisplay(opts: DisplayOpts): Display {
         applyHighlights("comment-focus", []);
         return;
       }
-      for (const [rootSelector, group] of byBlock) {
+      for (const [blockEl, group] of byBlock) {
         const located = group.find((p) => p.comment.uid === uid);
         if (!located) continue;
         if (located.projection.start === null || located.projection.end === null) return;
-        const blockEl = document.querySelector(rootSelector);
-        if (!blockEl) return;
         const r = rangeForOffsets(blockEl, located.projection.start, located.projection.end);
         if (r) {
           applyHighlights("comment-focus", [r]);

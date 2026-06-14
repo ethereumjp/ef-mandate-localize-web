@@ -46,4 +46,13 @@ describe("projectComments", () => {
     const byBlock = projectComments([stored({ urlCanonical: "https://other/" })], "https://x/");
     expect([...byBlock.values()].flat()).toHaveLength(0);
   });
+
+  it("anchors via findByQuote when rootSelector is empty/stale", () => {
+    document.body.innerHTML = '<p data-block-id="t1">the walkaway test</p>';
+    const byBlock = projectComments([stored({ rootSelector: "" })], "https://x/");
+    const items = [...byBlock.values()].flat();
+    expect(items).toHaveLength(1);
+    expect(items[0].comment.uid).toBe("0x1");
+    expect(items[0].projection.status).not.toBe("orphaned");
+  });
 });
