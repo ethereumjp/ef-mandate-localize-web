@@ -18,7 +18,7 @@ interface Props {
  */
 export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
   return (
-    <aside className="fixed inset-x-0 top-0 z-40 flex max-h-[75dvh] flex-col border-b border-stone-200 bg-white shadow-xl dark:border-stone-700 dark:bg-stone-900 sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:border-b-0 sm:border-l sm:shadow-[-10px_0_30px_rgba(0,0,0,0.05)]">
+    <aside className="fixed inset-x-0 bottom-0 z-40 flex max-h-[75dvh] flex-col overflow-hidden rounded-t-2xl border-t border-stone-200 bg-white shadow-[0_-8px_30px_rgba(0,0,0,0.12)] dark:border-stone-700 dark:bg-stone-900 sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:rounded-none sm:border-t-0 sm:border-l sm:shadow-[-10px_0_30px_rgba(0,0,0,0.05)]">
       <div className="flex items-center justify-between gap-2 border-b border-stone-200 px-3 py-2.5 dark:border-stone-700">
         {mode === "compose" ? (
           <button
@@ -32,13 +32,15 @@ export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
           <h2 className="px-1 text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
             {ct(lang, "threadTitle")}
             {count > 0 ? (
-              <span className="ml-1.5 font-normal text-stone-400 dark:text-stone-500">{count}</span>
+              <span className="ml-1.5 font-normal text-stone-400 dark:text-stone-500">
+                {count}
+              </span>
             ) : null}
           </h2>
         )}
         {wallet}
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto pb-20 sm:pb-0">{children}</div>
     </aside>
   );
 }
