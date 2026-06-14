@@ -39,31 +39,31 @@ export const isFallback = (b: RenderedBlock, lang: Lang): boolean =>
   lang !== SOURCE_LANG && !(lang in b.translations);
 
 /**
- * Merge an EN chapter with its translations by position. A translation is
- * "aligned" only when it has the same number of blocks as EN (block i ↔ EN
- * block i); otherwise it's omitted and the chapter falls back to EN ("pending").
+ * Merge an EN chapter with its translations. A translation FILE existing is
+ * enough — blocks align by position (block i ↔ EN block i): EN blocks with no
+ * translated counterpart fall back to EN, and extra translation blocks (beyond
+ * EN's count, e.g. a translator footnote) are dropped. A chapter is "pending"
+ * for a language only when no translation file exists at all.
  */
 export function mergeChapter(
   number: string,
   enBlocks: Block[],
   translations: Map<Lang, Block[]>,
 ): Chapter {
-  const aligned = new Map<Lang, Block[]>();
-  for (const [lang, blocks] of translations) {
-    if (blocks.length === enBlocks.length) aligned.set(lang, blocks);
-  }
-
   const blocks: RenderedBlock[] = enBlocks.map((b, i) => {
     const blockTranslations: Partial<Record<Lang, string>> = {};
-    for (const [lang, tBlocks] of aligned) {
-      blockTranslations[lang] = renderMarkdown(tBlocks[i].content);
+    for (const [lang, tBlocks] of translations) {
+      const t = tBlocks[i];
+      if (t && t.content.trim().length > 0) blockTranslations[lang] = renderMarkdown(t.content);
     }
     return { order: i, sourceHtml: renderMarkdown(b.content), translations: blockTranslations };
   });
 
   const chapterTranslations: Partial<Record<Lang, { title: string }>> = {};
-  for (const [lang, tBlocks] of aligned) {
-    chapterTranslations[lang] = { title: chapterTitle(tBlocks[0].content) };
+  for (const [lang, tBlocks] of translations) {
+    const first = tBlocks[0];
+    const titleSource = first && first.content.trim().length > 0 ? first.content : enBlocks[0].content;
+    chapterTranslations[lang] = { title: chapterTitle(titleSource) };
   }
 
   return {

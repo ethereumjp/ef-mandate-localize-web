@@ -41,14 +41,16 @@ button {
     scroll-margin-top: 5rem;
 }
 
-/* Fallback (EN shown in JA mode for pending chapters) gets a faint left rule. */
+/* Fallback (EN shown where a translation is missing): muted grey + faded, so
+   untranslated text stays understated rather than calling attention to itself. */
 [data-fallback="en"] {
-    border-left: 2px solid var(--color-amber-200);
+    border-left: 2px solid var(--color-stone-300);
     padding-left: 0.75rem;
+    opacity: 0.6;
 }
 
 [data-theme="dark"] [data-fallback="en"] {
-    border-color: var(--color-amber-700);
+    border-color: var(--color-stone-700);
 }
 
 header {
