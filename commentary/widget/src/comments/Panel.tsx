@@ -18,7 +18,7 @@ interface Props {
  */
 export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
   return (
-    <aside className="fixed right-0 top-0 z-40 flex h-full w-[340px] max-w-[85vw] flex-col border-l border-stone-200 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.05)] dark:border-stone-700 dark:bg-stone-900">
+    <aside className="fixed inset-x-0 top-0 z-40 flex max-h-[75dvh] flex-col border-b border-stone-200 bg-white shadow-xl dark:border-stone-700 dark:bg-stone-900 sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:border-b-0 sm:border-l sm:shadow-[-10px_0_30px_rgba(0,0,0,0.05)]">
       <div className="flex items-center justify-between gap-2 border-b border-stone-200 px-3 py-2.5 dark:border-stone-700">
         {mode === "compose" ? (
           <button
@@ -38,7 +38,7 @@ export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
         )}
         {wallet}
       </div>
-      <div className="flex-1 overflow-y-auto">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
     </aside>
   );
 }
