@@ -16,33 +16,13 @@
     color-scheme: dark;
 }
 
-/* Inline marker for projected (anchored / re-anchored) comment spans: an amber
-   underline ("marker" colour). The underline is the in-text comment affordance. */
-::highlight(comment) {
-    text-decoration-line: underline;
-    text-decoration-color: var(--color-amber-200);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
+::selection {
+    @apply bg-emerald-400/20;
 }
-[data-theme="dark"] ::highlight(comment) {
-    text-decoration-color: var(--color-amber-200);
-}
-/* The currently-focused comment's span (card click / hover): amber wash + underline. */
-::highlight(comment-focus) {
-    background-color: var(--color-amber-100);
-    text-decoration-line: underline;
-    text-decoration-color: var(--color-amber-200);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
-}
-[data-theme="dark"] ::highlight(comment-focus) {
-    background-color: color-mix(
-        in oklab,
-        var(--color-amber-200) 35%,
-        transparent
-    );
-    text-decoration-color: var(--color-amber-200);
-}
+
+/* Comment-span highlights — ::highlight(comment) / ::highlight(comment-focus) —
+   are now injected into document.head by the embedded commentary widget, so the
+   host no longer styles them and the widget works on any page. */
 
 html {
     scroll-behavior: smooth;
@@ -59,17 +39,6 @@ button {
 /* Reading column + block layout. */
 .block {
     scroll-margin-top: 5rem;
-}
-
-/* Comments on/off toggle switch: track colour + knob position follow the state. */
-[data-comments="on"] .comments-switch {
-    @apply bg-emerald-400;
-}
-[data-theme="dark"] [data-comments="on"] .comments-switch {
-    @apply bg-emerald-700;
-}
-[data-comments="on"] .comments-switch-knob {
-    transform: translateX(1rem);
 }
 
 /* Fallback (EN shown in JA mode for pending chapters) gets a faint left rule. */

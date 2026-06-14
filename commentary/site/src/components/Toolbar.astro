@@ -17,7 +17,6 @@ const { lang } = Astro.props;
             >{t("en", "siteTitle")}</a
         >
         <div class="flex items-center gap-3 text-sm">
-            <span id="wallet-slot"></span>
             <select
                 data-lang-select
                 aria-label={t(lang, "language")}
@@ -31,35 +30,6 @@ const { lang } = Astro.props;
                     ))
                 }
             </select>
-            <button
-                data-toggle-comments
-                type="button"
-                role="switch"
-                aria-label={t(lang, "comments")}
-                class="flex items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-stone-100 dark:hover:bg-stone-800 hover:pointer-cursor"
-            >
-                <svg
-                    class="size-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    aria-hidden="true"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 0 1-.923 1.785A5.969 5.969 0 0 0 6 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337Z"
-                    ></path>
-                </svg>
-                <span
-                    class="comments-switch relative inline-block h-5 w-9 shrink-0 rounded-full bg-stone-300 transition-colors dark:bg-stone-600"
-                >
-                    <span
-                        class="comments-switch-knob absolute top-0.5 left-0.5 size-4 rounded-full bg-white shadow transition-transform"
-                    ></span>
-                </span>
-            </button>
             <button
                 data-toggle-theme
                 aria-label="Toggle dark mode"

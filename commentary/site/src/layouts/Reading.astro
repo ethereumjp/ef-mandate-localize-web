@@ -12,7 +12,7 @@ const { title, lang } = Astro.props;
 const langStyle = LANGS.map((l) => `[data-lang="${l}"] .lang:not(.lang-${l}){display:none}`).join("\n");
 ---
 <!doctype html>
-<html lang={lang} data-lang={lang} data-comments="off">
+<html lang={lang} data-lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

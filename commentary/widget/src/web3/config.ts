@@ -4,20 +4,27 @@ import { injected } from "wagmi/connectors";
 
 export { SEPOLIA_CHAIN_ID } from "@commentary/core/chain";
 
-const RPC_URL =
-  import.meta.env.PUBLIC_SEPOLIA_RPC_URL ?? "https://ethereum-sepolia-rpc.publicnode.com";
-// Mainnet is configured read-only so ENS names (whose reverse records live on L1)
-// resolve even though all attestation activity stays on Sepolia.
-const MAINNET_RPC_URL =
-  import.meta.env.PUBLIC_MAINNET_RPC_URL ?? "https://ethereum-rpc.publicnode.com";
+/**
+ * Build a wagmi config from explicit RPC URLs (the embed passes these from its
+ * `data-*` config). Sepolia carries all attestation activity; mainnet is
+ * read-only so ENS names (whose reverse records live on L1) resolve.
+ */
+export function buildWagmiConfig(opts: { rpc?: string; mainnetRpc?: string } = {}) {
+  return createConfig({
+    chains: [sepolia, mainnet],
+    connectors: [injected()],
+    transports: {
+      [sepolia.id]: http(opts.rpc ?? "https://ethereum-sepolia-rpc.publicnode.com"),
+      [mainnet.id]: http(opts.mainnetRpc ?? "https://ethereum-rpc.publicnode.com"),
+    },
+  });
+}
 
-export const wagmiConfig = createConfig({
-  chains: [sepolia, mainnet],
-  connectors: [injected()],
-  transports: {
-    [sepolia.id]: http(RPC_URL),
-    [mainnet.id]: http(MAINNET_RPC_URL),
-  },
+// Default config for the in-site island (reads Vite env). The embed builds its
+// own via `buildWagmiConfig(config)`.
+export const wagmiConfig = buildWagmiConfig({
+  rpc: import.meta.env.PUBLIC_SEPOLIA_RPC_URL,
+  mainnetRpc: import.meta.env.PUBLIC_MAINNET_RPC_URL,
 });
 
 // Read via bracket access so Vite does NOT statically inline this to a falsy

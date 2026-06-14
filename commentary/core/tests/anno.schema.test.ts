@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { encodeAnno, decodeAnno, type AnnoFields } from "../src/anno/schema";
+import { decodeAnno, type AnnoFields } from "../src/anno/schema";
+import { encodeAnno } from "../src/anno/encode";
 
 const fields: AnnoFields = {
   url: "https://example.com/post?id=42",
