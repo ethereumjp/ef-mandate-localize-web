@@ -92,7 +92,7 @@ function fields(o: {
     urlCanonical: o.path,
     origin: o.path,
     lang: o.lang,
-    rootSelector: `[data-block-id="${o.blockId}"]`,
+    rootSelector: "", // block-ID-free: anchor by quote (display findByQuote fallback)
     containerHash: a ? a.blockHash : STALE,
     spanStart: a ? a.start : 0,
     spanEnd: a ? a.end : 0,
@@ -168,6 +168,7 @@ for (const lang of ["en", "ja"] as const) {
   );
 }
 
-const outPath = fileURLToPath(new URL("../src/anno/mock-comments.json", import.meta.url));
+// The fixture lives in core (the loader is @commentary/core/anno/mock); write there.
+const outPath = fileURLToPath(new URL("../../core/src/anno/mock-comments.json", import.meta.url));
 writeFileSync(outPath, JSON.stringify(raws, null, 2) + "\n");
 console.log(`wrote ${raws.length} mock attestations → ${outPath}`);
