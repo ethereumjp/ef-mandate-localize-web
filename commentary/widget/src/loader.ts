@@ -26,7 +26,7 @@ function mount(): void {
   button.type = "button";
   button.style.cssText =
     `position:fixed;bottom:20px;${side};z-index:2147483646;display:inline-flex;align-items:center;gap:6px;` +
-    "padding:11px 15px;background:#1c1917;color:#fff;border:none;border-radius:9999px;cursor:pointer;" +
+    "padding:11px 15px;background:#1c1917;color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:9999px;cursor:pointer;" +
     "box-shadow:0 4px 16px rgba(0,0,0,.2)";
   shadow.appendChild(button);
 
@@ -35,10 +35,9 @@ function mount(): void {
   popover.type = "button";
   popover.style.cssText =
     "position:fixed;z-index:2147483646;display:none;align-items:center;gap:6px;" +
-    "padding:7px 12px;background:#1c1917;color:#fff;border:none;border-radius:9999px;cursor:pointer;" +
+    "padding:7px 12px;background:#1c1917;color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:9999px;cursor:pointer;" +
     "box-shadow:0 4px 16px rgba(0,0,0,.2);font:500 12px/1 system-ui";
-  popover.innerHTML =
-    `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7">${BUBBLE}</svg><span>Comment</span>`;
+  popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7">${BUBBLE}</svg><span>Comment</span>`;
   shadow.appendChild(popover);
 
   const display = createDisplay({
@@ -73,7 +72,9 @@ function mount(): void {
 
   // Open = mount the panel + show highlights. focusUid focuses a span; composeRange
   // opens the composer for that selection. When already open, route to the app.
-  async function openApp(opts: { focusUid?: string; composeRange?: Range } = {}): Promise<void> {
+  async function openApp(
+    opts: { focusUid?: string; composeRange?: Range } = {},
+  ): Promise<void> {
     if (mounted) {
       if (opts.focusUid) focusWhileOpen?.(opts.focusUid);
       if (opts.composeRange) composeWhileOpen?.(opts.composeRange);
@@ -105,7 +106,7 @@ function mount(): void {
 
   // Selection → position + show the Comment popover (capturing the range). Shadow
   // selections (the panel's own text) don't surface in document.getSelection().
-  function onSelectionChange(): void {
+  function updatePopover(): void {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || sel.rangeCount === 0) {
       popover.style.display = "none";
@@ -124,10 +125,20 @@ function mount(): void {
     popover.style.left = `${rect.left}px`;
     popover.style.display = "inline-flex";
   }
-  document.addEventListener("selectionchange", onSelectionChange);
+  // selectionchange fires in bursts (every caret tick during a drag); coalesce to
+  // one rAF so we do a single layout read (getBoundingClientRect) per frame.
+  let rafPending = 0;
+  document.addEventListener("selectionchange", () => {
+    if (rafPending) return;
+    rafPending = requestAnimationFrame(() => {
+      rafPending = 0;
+      updatePopover();
+    });
+  });
 
   button.addEventListener("click", () => {
-    if (mounted) appClose?.(); // on → close (clears highlights via onUnmount)
+    if (mounted)
+      appClose?.(); // on → close (clears highlights via onUnmount)
     else void openApp(); // off → open + show highlights
   });
   popover.addEventListener("mousedown", (e) => e.preventDefault()); // keep the selection alive
