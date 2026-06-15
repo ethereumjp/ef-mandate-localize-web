@@ -35,8 +35,8 @@ function mount(): void {
   button.type = "button";
   button.style.cssText =
     `position:fixed;bottom:20px;${side};z-index:2147483646;display:inline-flex;align-items:center;gap:6px;` +
-    "padding:11px 15px;background:#1c1917;color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:9999px;cursor:pointer;" +
-    "box-shadow:0 4px 16px rgba(0,0,0,.2)";
+    "padding:10px 14px;background:#fff;color:#0c0cff;border:1px solid #0c0cff;border-radius:0;cursor:pointer;" +
+    "font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:4px 4px 0 rgba(12,12,255,.12)";
   shadow.appendChild(button);
 
   // Floating "Comment" popover shown over a text selection (same pill design).
@@ -44,9 +44,9 @@ function mount(): void {
   popover.type = "button";
   popover.style.cssText =
     "position:fixed;z-index:2147483646;display:none;align-items:center;gap:6px;" +
-    "padding:7px 12px;background:#1c1917;color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:9999px;cursor:pointer;" +
-    "box-shadow:0 4px 16px rgba(0,0,0,.2);font:500 12px/1 system-ui";
-  popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL_PLUS}</svg><span>Comment</span>`;
+    "padding:6px 11px;background:#fff;color:#0c0cff;border:1px solid #0c0cff;border-radius:0;cursor:pointer;" +
+    "box-shadow:4px 4px 0 rgba(12,12,255,.12);font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace";
+  popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL_PLUS}</svg><span>Comment</span>`;
   shadow.appendChild(popover);
 
   const display = createDisplay({
@@ -64,16 +64,16 @@ function mount(): void {
 
   function renderButton(): void {
     if (mounted) {
-      // Open → a clear close (✕) button. Equal padding → square → perfect circle.
-      button.style.padding = "11px";
+      // Open → a square close (✕) button. The ✕ svg uses stroke:currentColor → cobalt.
+      button.style.padding = "10px";
       button.innerHTML =
-        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     } else {
-      // Closed → comment bubble + count (a pill).
-      button.style.padding = "11px 15px";
+      // Closed → pencil icon + a bracketed count, all cobalt (count dimmed).
+      button.style.padding = "10px 14px";
       button.innerHTML =
-        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d6d3d1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL}</svg>` +
-        `<span style="font:500 11px/1 system-ui;color:#a8a29e">${display.count()}</span>`;
+        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0c0cff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL}</svg>` +
+        `<span style="font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#0c0cff;opacity:.6">[${display.count()}]</span>`;
     }
     const label = mounted ? "Close comments" : "Open comments";
     button.title = label;
