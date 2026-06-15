@@ -31,16 +31,13 @@ export function Composer({
   const [body, setBody] = useState("");
   return (
     <div className="p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-cobalt/50">
-        {ct(lang, "compose")}
-      </p>
       {fields ? (
-        <blockquote className="mt-2 border-l-2 border-cobalt/40 pl-2 text-xs italic leading-snug text-cobalt/65">
+        <blockquote className="border-l-2 border-cobalt/40 pl-2 text-xs italic leading-snug text-cobalt/65">
           “{fields.spanExact}”
         </blockquote>
       ) : null}
       <textarea
-        className="mt-3 h-28 w-full border border-cobalt/40 bg-surface p-2 text-sm text-cobalt placeholder:text-cobalt/40 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-3 h-28 w-full border border-cobalt/40 bg-white p-2 text-sm text-cobalt placeholder:text-cobalt/40 focus:rounded-none focus:border-cobalt focus:outline-none disabled:cursor-not-allowed disabled:bg-surface disabled:opacity-50"
         value={body}
         onChange={(e) => setBody(e.target.value)}
         disabled={!connected}
@@ -99,7 +96,7 @@ export function Composer({
         {connected ? (
           <button
             type="button"
-            className="w-full border border-cobalt bg-white px-3 py-1.5 text-sm font-semibold uppercase tracking-wider text-cobalt hover:bg-surface disabled:opacity-50"
+            className="w-full cursor-pointer border border-cobalt bg-white px-3 py-1.5 font-mono text-sm font-semibold uppercase tracking-wider text-cobalt hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
             disabled={pending || body.trim() === ""}
             onClick={() => onSubmit(body.trim())}
           >
@@ -108,7 +105,7 @@ export function Composer({
         ) : (
           <button
             type="button"
-            className="w-full border border-cobalt bg-white px-3 py-1.5 text-sm font-semibold uppercase tracking-wider text-cobalt hover:bg-surface"
+            className="w-full cursor-pointer border border-cobalt bg-white px-3 py-1.5 font-mono text-sm font-semibold uppercase tracking-wider text-cobalt hover:bg-surface"
             onClick={onConnect}
           >
             {ct(lang, "connectToPublish")}

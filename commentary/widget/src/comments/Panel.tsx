@@ -24,7 +24,7 @@ export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1 px-1.5 py-1 text-xs font-medium text-cobalt hover:bg-surface"
+            className="flex cursor-pointer items-center gap-1 px-1.5 py-1 text-xs font-medium text-cobalt hover:bg-surface"
           >
             <span aria-hidden="true">←</span> {ct(lang, "back")}
           </button>
@@ -33,13 +33,17 @@ export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
             <span aria-hidden="true">▸ </span>
             {ct(lang, "threadTitle")}
             {count > 0 ? (
-              <span className="ml-1.5 font-normal text-cobalt/60">[{count}]</span>
+              <span className="ml-1.5 font-normal text-cobalt/60">
+                [{count}]
+              </span>
             ) : null}
           </h2>
         )}
         {wallet}
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto pb-20 sm:pb-0">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto pb-20 sm:pb-0">
+        {children}
+      </div>
     </aside>
   );
 }

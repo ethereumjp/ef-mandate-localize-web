@@ -1,4 +1,10 @@
-import { useAccount, useConnect, useDisconnect, useEnsName, useSwitchChain } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useEnsName,
+  useSwitchChain,
+} from "wagmi";
 import { injected } from "wagmi/connectors";
 import { mainnet } from "wagmi/chains";
 import { SEPOLIA_CHAIN_ID } from "../web3/config";
@@ -10,7 +16,7 @@ function short(addr: string) {
 // Outline cobalt, square. Action states (connect/switch) are uppercased; the
 // connected state shows an address/ENS name, which must NOT be uppercased.
 const base =
-  "h-8 max-w-[12rem] truncate border border-cobalt px-2 py-1 text-sm text-cobalt hover:bg-surface";
+  "h-8 max-w-[12rem] cursor-pointer truncate border border-cobalt px-2 py-1 font-mono text-xs text-cobalt hover:bg-surface disabled:cursor-not-allowed";
 const action = `${base} uppercase tracking-wider`;
 
 export function ConnectButton() {
@@ -35,7 +41,10 @@ export function ConnectButton() {
   }
   if (chainId !== SEPOLIA_CHAIN_ID) {
     return (
-      <button className={action} onClick={() => switchChain({ chainId: SEPOLIA_CHAIN_ID })}>
+      <button
+        className={action}
+        onClick={() => switchChain({ chainId: SEPOLIA_CHAIN_ID })}
+      >
         Switch to Sepolia
       </button>
     );
