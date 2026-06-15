@@ -49,14 +49,13 @@ export function rangeForOffsets(blockEl: Element, start: number, end: number): R
 
 // Comment-span highlight styling. The Custom Highlight API registry AND its
 // ::highlight() rules are DOCUMENT-global — a shadow-root stylesheet can't reach
-// highlighted ranges — so the rule must live in document.head. Literal colours
-// (Tailwind amber-100/200), not CSS vars, so highlights render on any host page;
-// the dark-mode focus wash still honours a host's [data-theme="dark"] if present.
+// highlighted ranges — so the rule must live in document.head. Literal cobalt
+// (#0c0cff), not CSS vars, so highlights render identically on any host page.
+// Light-only: the focus wash is a faint cobalt tint regardless of host theme.
 const HIGHLIGHT_STYLE_ID = "commentary-highlight-styles";
 const HIGHLIGHT_CSS = `
-::highlight(comment){text-decoration-line:underline;text-decoration-color:#fde68a;text-decoration-thickness:2px;text-underline-offset:3px}
-::highlight(comment-focus){background-color:#fef3c7;text-decoration-line:underline;text-decoration-color:#fde68a;text-decoration-thickness:2px;text-underline-offset:3px}
-[data-theme="dark"] ::highlight(comment-focus){background-color:color-mix(in oklab,#fde68a 35%,transparent);text-decoration-color:#fde68a}
+::highlight(comment){text-decoration-line:underline;text-decoration-color:#0c0cff;text-decoration-thickness:2px;text-underline-offset:3px}
+::highlight(comment-focus){background-color:rgba(12,12,255,.10);text-decoration-line:underline;text-decoration-color:#0c0cff;text-decoration-thickness:2px;text-underline-offset:3px}
 `;
 
 /** Inject the document-global ::highlight() rules once (idempotent, browser only). */
