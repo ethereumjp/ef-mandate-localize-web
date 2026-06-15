@@ -11,7 +11,7 @@ export function AnchorStatusBadge({ status, lang }: { status: AnchorStatus; lang
         : ct(lang, "statusOrphaned");
   const tone =
     status === "orphaned"
-      ? "bg-stone-200 text-stone-600 dark:bg-stone-700 dark:text-stone-300"
-      : "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
-  return <span className={`rounded px-1.5 py-0.5 text-xs ${tone}`}>{label}</span>;
+      ? "border border-cobalt/30 text-cobalt/60"
+      : "border border-cobalt text-cobalt";
+  return <span className={`px-1.5 py-0.5 text-xs ${tone}`}>{label}</span>;
 }

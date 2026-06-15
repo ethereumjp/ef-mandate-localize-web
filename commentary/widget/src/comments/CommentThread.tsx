@@ -28,7 +28,7 @@ export function CommentThread({ comments, lang, focusedUid, pendingUids, onFocus
   return (
     <div ref={listRef}>
       {comments.length === 0 ? (
-        <p className="px-2 py-6 text-center text-sm text-stone-400">{ct(lang, "noComments")}</p>
+        <p className="px-2 py-6 text-center text-sm text-cobalt/45">{ct(lang, "noComments")}</p>
       ) : null}
       {threads.map((n) => (
         <CommentCard
