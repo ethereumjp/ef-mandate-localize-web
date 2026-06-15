@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* Terminal Cobalt theme — one accent color + one recessed surface gray. */
+@theme {
+  --color-cobalt: #0c0cff;
+  --color-surface: #eef0f3;
+}
