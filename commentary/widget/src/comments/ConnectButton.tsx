@@ -8,7 +8,7 @@ function short(addr: string) {
 }
 
 const cls =
-  "rounded h-8 max-w-[12rem] truncate border border-stone-300 px-2 py-1 text-sm hover:bg-stone-100 dark:border-stone-700 dark:hover:bg-stone-800";
+  "rounded h-8 max-w-[12rem] truncate border border-stone-300 px-2 py-1 text-sm text-stone-700 hover:bg-stone-100 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800";
 
 export function ConnectButton() {
   const { address, isConnected, chainId } = useAccount();

@@ -8,11 +8,18 @@ import { readConfig } from "./config";
 import { createDisplay } from "./display";
 import { nearestContainer } from "@commentary/core/anno/selector";
 
-// Tabler "pencil-bolt" icon paths (the "add annotation" affordance).
+// Tabler "pencil-bolt" icon paths (the launcher pill).
 const PENCIL =
   '<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/>' +
   '<path d="M13.5 6.5l4 4"/>' +
   '<path d="M19 16l-2 3h4l-2 3"/>';
+
+// Tabler "pencil-plus" icon paths (the selection "add a comment here" popover).
+const PENCIL_PLUS =
+  '<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/>' +
+  '<path d="M13.5 6.5l4 4"/>' +
+  '<path d="M16 19h6"/>' +
+  '<path d="M19 16v6"/>';
 
 function mount(): void {
   if (document.getElementById("commentary-widget")) return; // singleton guard
@@ -39,7 +46,7 @@ function mount(): void {
     "position:fixed;z-index:2147483646;display:none;align-items:center;gap:6px;" +
     "padding:7px 12px;background:#1c1917;color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:9999px;cursor:pointer;" +
     "box-shadow:0 4px 16px rgba(0,0,0,.2);font:500 12px/1 system-ui";
-  popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL}</svg><span>Comment</span>`;
+  popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL_PLUS}</svg><span>Comment</span>`;
   shadow.appendChild(popover);
 
   const display = createDisplay({
@@ -66,7 +73,7 @@ function mount(): void {
       button.style.padding = "11px 15px";
       button.innerHTML =
         `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d6d3d1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL}</svg>` +
-        `<span style="font:600 14px/1 system-ui">${display.count()}</span>`;
+        `<span style="font:500 11px/1 system-ui;color:#a8a29e">${display.count()}</span>`;
     }
     const label = mounted ? "Close comments" : "Open comments";
     button.title = label;

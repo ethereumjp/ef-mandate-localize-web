@@ -2,7 +2,8 @@ import { useState } from "react";
 import type { AnnoFields } from "@commentary/core/anno/schema";
 import { ct } from "./i18n";
 
-const shortHex = (h: string) => (h.length > 12 ? `${h.slice(0, 6)}…${h.slice(-4)}` : h);
+const shortHex = (h: string) =>
+  h.length > 12 ? `${h.slice(0, 6)}…${h.slice(-4)}` : h;
 
 interface Props {
   /** The anchored fields for the current selection (quote + on-chain preview). */
@@ -49,14 +50,18 @@ export function Composer({
       {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
       {fields ? (
         <details className="mt-3 text-xs text-stone-400 dark:text-stone-500">
-          <summary className="cursor-pointer select-none">{ct(lang, "onchainDetails")}</summary>
+          <summary className="cursor-pointer select-none">
+            {ct(lang, "onchainDetails")}
+          </summary>
           <dl className="mt-2 grid grid-cols-[7rem_1fr] gap-x-2 border-t border-stone-100 pt-2 font-mono dark:border-stone-800">
-            <dt>lang</dt>
-            <dd>{fields.lang}</dd>
+            <dt>url</dt>
+            <dd className="truncate">{fields.url}</dd>
+            <dt>urlCanonical</dt>
+            <dd className="truncate">{fields.urlCanonical}</dd>
             <dt>origin</dt>
             <dd className="truncate">{fields.origin}</dd>
-            <dt>url</dt>
-            <dd className="truncate">{fields.urlCanonical}</dd>
+            <dt>lang</dt>
+            <dd>{fields.lang}</dd>
             <dt>rootSelector</dt>
             <dd className="truncate">{fields.rootSelector}</dd>
             <dt>containerHash</dt>
@@ -94,7 +99,7 @@ export function Composer({
         {connected ? (
           <button
             type="button"
-            className="rounded bg-stone-900 px-3 py-1 text-sm text-white disabled:opacity-50 dark:bg-stone-100 dark:text-stone-900"
+            className="rounded-full w-full bg-stone-900 px-3 py-1 text-sm text-white disabled:opacity-50 dark:bg-stone-100 dark:text-stone-900"
             disabled={pending || body.trim() === ""}
             onClick={() => onSubmit(body.trim())}
           >
@@ -103,7 +108,7 @@ export function Composer({
         ) : (
           <button
             type="button"
-            className="rounded bg-stone-900 px-3 py-1 text-sm text-white dark:bg-stone-100 dark:text-stone-900"
+            className="rounded-full w-full bg-stone-900 px-3 py-1 text-sm text-white dark:bg-stone-100 dark:text-stone-900"
             onClick={onConnect}
           >
             {ct(lang, "connectToPublish")}

@@ -14,7 +14,7 @@ const STRINGS: Record<string, Record<string, string>> = {
     compose: "New comment",
     composePlaceholder: "Write a comment…",
     onchainDetails: "On-chain record (EAS)",
-    publish: "Publish to Sepolia",
+    publish: "Publish",
     publishing: "Publishing…",
     connectToPublish: "Connect to publish",
   },

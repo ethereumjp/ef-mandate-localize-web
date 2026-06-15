@@ -390,7 +390,7 @@ In the `en` object, after `statusOrphaned: "Block removed",` add:
     compose: "New comment",
     composePlaceholder: "Write a comment…",
     onchainDetails: "On-chain record (EAS)",
-    publish: "Publish to Sepolia",
+    publish: "Publish",
     publishing: "Publishing…",
     connectToPublish: "Connect to publish",
 ```
@@ -402,7 +402,7 @@ In the `ja` object, after `statusOrphaned: "ブロックが削除されました
     compose: "新規コメント",
     composePlaceholder: "コメントを書く…",
     onchainDetails: "オンチェーン記録 (EAS)",
-    publish: "Sepolia に公開",
+    publish: "公開",
     publishing: "公開中…",
     connectToPublish: "接続して公開",
 ```
@@ -647,7 +647,7 @@ export function Composer({
         {connected ? (
           <button
             type="button"
-            className="rounded bg-stone-900 px-3 py-1 text-sm text-white disabled:opacity-50 dark:bg-stone-100 dark:text-stone-900"
+            className="rounded-full w-full bg-stone-900 px-3 py-1 text-sm text-white disabled:opacity-50 dark:bg-stone-100 dark:text-stone-900"
             disabled={pending || body.trim() === ""}
             onClick={() => onSubmit(body.trim())}
           >
@@ -656,7 +656,7 @@ export function Composer({
         ) : (
           <button
             type="button"
-            className="rounded bg-stone-900 px-3 py-1 text-sm text-white dark:bg-stone-100 dark:text-stone-900"
+            className="rounded-full w-full bg-stone-900 px-3 py-1 text-sm text-white dark:bg-stone-100 dark:text-stone-900"
             onClick={onConnect}
           >
             {ct(lang, "connectToPublish")}
