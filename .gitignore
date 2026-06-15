@@ -23,3 +23,6 @@ env/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+
+# superpowers visual companion
+.superpowers/
