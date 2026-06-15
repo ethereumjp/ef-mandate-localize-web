@@ -8,9 +8,11 @@ import { readConfig } from "./config";
 import { createDisplay } from "./display";
 import { nearestContainer } from "@commentary/core/anno/selector";
 
-// Heroicons chat-bubble path.
-const BUBBLE =
-  '<path d="M12 20.25c4.97 0 9-3.69 9-8.25s-4.03-8.25-9-8.25S3 7.44 3 12c0 2.1.86 4.02 2.27 5.48.43.45.74 1.04.59 1.64a4.5 4.5 0 0 1-.92 1.79A5.97 5.97 0 0 0 6 21c1.28 0 2.47-.4 3.45-1.09.81.22 1.67.34 2.55.34Z"/>';
+// Tabler "pencil-bolt" icon paths (the "add annotation" affordance).
+const PENCIL =
+  '<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/>' +
+  '<path d="M13.5 6.5l4 4"/>' +
+  '<path d="M19 16l-2 3h4l-2 3"/>';
 
 function mount(): void {
   if (document.getElementById("commentary-widget")) return; // singleton guard
@@ -37,7 +39,7 @@ function mount(): void {
     "position:fixed;z-index:2147483646;display:none;align-items:center;gap:6px;" +
     "padding:7px 12px;background:#1c1917;color:#fff;border:1px solid rgba(255,255,255,0.1);border-radius:9999px;cursor:pointer;" +
     "box-shadow:0 4px 16px rgba(0,0,0,.2);font:500 12px/1 system-ui";
-  popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7">${BUBBLE}</svg><span>Comment</span>`;
+  popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL}</svg><span>Comment</span>`;
   shadow.appendChild(popover);
 
   const display = createDisplay({
@@ -63,7 +65,7 @@ function mount(): void {
       // Closed → comment bubble + count (a pill).
       button.style.padding = "11px 15px";
       button.innerHTML =
-        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d6d3d1" stroke-width="1.7">${BUBBLE}</svg>` +
+        `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d6d3d1" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL}</svg>` +
         `<span style="font:600 14px/1 system-ui">${display.count()}</span>`;
     }
     const label = mounted ? "Close comments" : "Open comments";
