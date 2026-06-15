@@ -36,33 +36,33 @@ export function CommentCard({
       onClick={depth === 0 ? () => onFocus?.(c.uid) : undefined}
       className={
         depth > 0
-          ? "mt-3 border-l border-stone-200 pl-3 dark:border-stone-700"
-          : `cursor-pointer rounded-r border-l-3 px-3.5 py-4 transition-colors ${
+          ? "mt-3 border-l border-cobalt/30 pl-3"
+          : `cursor-pointer border-l-3 px-3.5 py-4 transition-colors ${
               focused
-                ? "border-stone-400 bg-stone-100/70 dark:border-stone-500 dark:bg-stone-800/60"
-                : "border-transparent hover:bg-stone-50 dark:hover:bg-stone-800/40"
+                ? "border-cobalt bg-surface"
+                : "border-cobalt/40 hover:bg-surface"
             }`
       }
     >
       {depth === 0 ? (
-        <blockquote className="line-clamp-1 border-l border-amber-300/80 pl-2 text-xs leading-snug text-stone-400 dark:border-amber-500/50 dark:text-stone-500">
+        <blockquote className="line-clamp-1 border-l border-cobalt/40 pl-2 text-xs leading-snug text-cobalt/45">
           {c.spanExact}
         </blockquote>
       ) : null}
-      <p className="mt-1.5 whitespace-pre-wrap text-[13.5px] leading-relaxed text-stone-700 dark:text-stone-200">
+      <p className="mt-1.5 whitespace-pre-wrap text-[13.5px] leading-relaxed text-cobalt">
         {c.body}
       </p>
-      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-stone-400">
+      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-cobalt/45">
         <span className="font-mono">{short(c.attester)}</span>
         {c.time > 0 ? <span>{new Date(c.time * 1000).toLocaleDateString(lang)}</span> : null}
         {projection ? <AnchorStatusBadge status={projection.status} lang={lang} /> : null}
         {projection?.pastVersion ? (
-          <span className="text-amber-600 dark:text-amber-400">{ct(lang, "pastVersion")}</span>
+          <span className="text-cobalt/70">{ct(lang, "pastVersion")}</span>
         ) : null}
         {pending ? (
           <span
             aria-hidden
-            className="inline-block size-1.5 animate-pulse rounded-full bg-amber-500"
+            className="inline-block size-1.5 animate-pulse bg-cobalt"
           />
         ) : null}
         <button
