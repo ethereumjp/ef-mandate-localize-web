@@ -7,8 +7,11 @@ function short(addr: string) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-const cls =
-  "rounded h-8 max-w-[12rem] truncate border border-stone-300 px-2 py-1 text-sm text-stone-700 hover:bg-stone-100 dark:border-stone-700 dark:text-stone-200 dark:hover:bg-stone-800";
+// Outline cobalt, square. Action states (connect/switch) are uppercased; the
+// connected state shows an address/ENS name, which must NOT be uppercased.
+const base =
+  "h-8 max-w-[12rem] truncate border border-cobalt px-2 py-1 text-sm text-cobalt hover:bg-surface";
+const action = `${base} uppercase tracking-wider`;
 
 export function ConnectButton() {
   const { address, isConnected, chainId } = useAccount();
@@ -22,7 +25,7 @@ export function ConnectButton() {
   if (!isConnected) {
     return (
       <button
-        className={cls}
+        className={action}
         disabled={isPending}
         onClick={() => connect({ connector: injected() })}
       >
@@ -32,13 +35,13 @@ export function ConnectButton() {
   }
   if (chainId !== SEPOLIA_CHAIN_ID) {
     return (
-      <button className={cls} onClick={() => switchChain({ chainId: SEPOLIA_CHAIN_ID })}>
+      <button className={action} onClick={() => switchChain({ chainId: SEPOLIA_CHAIN_ID })}>
         Switch to Sepolia
       </button>
     );
   }
   return (
-    <button className={cls} title="Disconnect" onClick={() => disconnect()}>
+    <button className={base} title="Disconnect" onClick={() => disconnect()}>
       {ensName ?? (address ? short(address) : "Connected")}
     </button>
   );
