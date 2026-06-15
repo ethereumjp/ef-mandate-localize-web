@@ -1,3 +1,6 @@
+import { useEnsAvatar, useEnsName } from "wagmi";
+import { mainnet } from "wagmi/chains";
+import { normalize } from "viem/ens";
 import type { CommentNode } from "../web3/thread";
 import type { StoredAnno } from "@commentary/core/anno/locate";
 import type { Projection } from "@commentary/core/lib/anchoring";
@@ -30,6 +33,17 @@ export function CommentCard({
   const c = node.comment;
   const focused = depth === 0 && focusedUid === c.uid;
   const pending = pendingUids?.has(c.uid) ?? false;
+  // ENS reverse records live on mainnet; resolve there and fall back to the
+  // shortened address when the attester has no name.
+  const { data: ensName } = useEnsName({
+    address: c.attester as `0x${string}`,
+    chainId: mainnet.id,
+  });
+  // Show the attester's ENS avatar when they have one (resolved on mainnet).
+  const { data: ensAvatar } = useEnsAvatar({
+    name: ensName ? normalize(ensName) : undefined,
+    chainId: mainnet.id,
+  });
   return (
     <div
       data-uid={depth === 0 ? c.uid : undefined}
@@ -53,7 +67,14 @@ export function CommentCard({
         {c.body}
       </p>
       <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-cobalt/45">
-        <span className="font-mono">{short(c.attester)}</span>
+        {ensAvatar ? (
+          <img
+            src={ensAvatar}
+            alt=""
+            className="size-4 shrink-0 rounded-full border border-cobalt/30 object-cover"
+          />
+        ) : null}
+        <span className="font-mono">{ensName ?? short(c.attester)}</span>
         {c.time > 0 ? <span>{new Date(c.time * 1000).toLocaleDateString(lang)}</span> : null}
         {projection ? <AnchorStatusBadge status={projection.status} lang={lang} /> : null}
         {projection?.pastVersion ? (
