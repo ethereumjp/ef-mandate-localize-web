@@ -18,23 +18,22 @@ interface Props {
  */
 export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
   return (
-    <aside className="fixed inset-x-0 bottom-0 z-40 flex max-h-[75dvh] flex-col overflow-hidden rounded-t-2xl border-t border-stone-200 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.25)] dark:border-stone-700 dark:bg-stone-900 sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:rounded-none sm:border-t-0 sm:border-l sm:shadow-[-14px_0_44px_rgba(0,0,0,0.18)]">
-      <div className="flex items-center justify-between gap-2 border-b border-stone-200 px-3 py-2.5 dark:border-stone-700">
+    <aside className="fixed inset-x-0 bottom-0 z-40 flex max-h-[75dvh] flex-col overflow-hidden border-t border-cobalt/40 bg-white font-mono shadow-[0_-8px_30px_rgba(12,12,255,0.12)] sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:border-t-0 sm:border-l sm:shadow-[-6px_0_0_rgba(12,12,255,0.10)]">
+      <div className="flex items-center justify-between gap-2 border-b border-cobalt/30 px-3 py-2.5">
         {mode === "compose" ? (
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1 rounded px-1.5 py-1 text-xs font-medium text-stone-500 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-400 dark:hover:bg-stone-800"
+            className="flex items-center gap-1 px-1.5 py-1 text-xs font-medium text-cobalt hover:bg-surface"
           >
             <span aria-hidden="true">←</span> {ct(lang, "back")}
           </button>
         ) : (
-          <h2 className="px-1 text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+          <h2 className="px-1 text-xs font-semibold uppercase tracking-wider text-cobalt">
+            <span aria-hidden="true">▸ </span>
             {ct(lang, "threadTitle")}
             {count > 0 ? (
-              <span className="ml-1.5 font-normal text-stone-400 dark:text-stone-500">
-                {count}
-              </span>
+              <span className="ml-1.5 font-normal text-cobalt/60">[{count}]</span>
             ) : null}
           </h2>
         )}
