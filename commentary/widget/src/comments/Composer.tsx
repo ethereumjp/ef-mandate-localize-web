@@ -31,29 +31,29 @@ export function Composer({
   const [body, setBody] = useState("");
   return (
     <div className="p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+      <p className="text-xs font-semibold uppercase tracking-wider text-cobalt/50">
         {ct(lang, "compose")}
       </p>
       {fields ? (
-        <blockquote className="mt-2 border-l-2 border-amber-300 pl-2 text-xs italic leading-snug text-stone-500 dark:border-amber-500/60 dark:text-stone-400">
+        <blockquote className="mt-2 border-l-2 border-cobalt/40 pl-2 text-xs italic leading-snug text-cobalt/65">
           “{fields.spanExact}”
         </blockquote>
       ) : null}
       <textarea
-        className="mt-3 h-28 w-full rounded border border-stone-300 bg-transparent p-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-700"
+        className="mt-3 h-28 w-full border border-cobalt/40 bg-surface p-2 text-sm text-cobalt placeholder:text-cobalt/40 disabled:cursor-not-allowed disabled:opacity-50"
         value={body}
         onChange={(e) => setBody(e.target.value)}
         disabled={!connected}
         aria-label="Comment"
         placeholder={connected ? ct(lang, "composePlaceholder") : ""}
       />
-      {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs font-semibold text-cobalt">! {error}</p> : null}
       {fields ? (
-        <details className="mt-3 text-xs text-stone-400 dark:text-stone-500">
+        <details className="mt-3 text-xs text-cobalt/50">
           <summary className="cursor-pointer select-none">
             {ct(lang, "onchainDetails")}
           </summary>
-          <dl className="mt-2 grid grid-cols-[7rem_1fr] gap-x-2 border-t border-stone-100 pt-2 font-mono dark:border-stone-800">
+          <dl className="mt-2 grid grid-cols-[7rem_1fr] gap-x-2 border-t border-cobalt/15 pt-2 font-mono">
             <dt>url</dt>
             <dd className="truncate">{fields.url}</dd>
             <dt>urlCanonical</dt>
@@ -88,7 +88,7 @@ export function Composer({
               href={`https://sepolia.easscan.org/schema/view/${schemaUid}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-block underline hover:text-stone-600 dark:hover:text-stone-300"
+              className="mt-1 inline-block underline hover:text-cobalt"
             >
               EAS schema ↗
             </a>
@@ -99,7 +99,7 @@ export function Composer({
         {connected ? (
           <button
             type="button"
-            className="rounded-full w-full bg-stone-900 px-3 py-1 text-sm text-white disabled:opacity-50 dark:bg-stone-100 dark:text-stone-900"
+            className="w-full border border-cobalt bg-white px-3 py-1.5 text-sm font-semibold uppercase tracking-wider text-cobalt hover:bg-surface disabled:opacity-50"
             disabled={pending || body.trim() === ""}
             onClick={() => onSubmit(body.trim())}
           >
@@ -108,7 +108,7 @@ export function Composer({
         ) : (
           <button
             type="button"
-            className="rounded-full w-full bg-stone-900 px-3 py-1 text-sm text-white dark:bg-stone-100 dark:text-stone-900"
+            className="w-full border border-cobalt bg-white px-3 py-1.5 text-sm font-semibold uppercase tracking-wider text-cobalt hover:bg-surface"
             onClick={onConnect}
           >
             {ct(lang, "connectToPublish")}
