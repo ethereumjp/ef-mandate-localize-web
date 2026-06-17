@@ -1,7 +1,13 @@
 import type { AnchorStatus } from "@commentary/core/lib/anchoring";
 import { ct } from "./i18n";
 
-export function AnchorStatusBadge({ status, lang }: { status: AnchorStatus; lang: string }) {
+export function AnchorStatusBadge({
+  status,
+  lang,
+}: {
+  status: AnchorStatus;
+  lang: string;
+}) {
   if (status === "anchored") return null;
   const label =
     status === "re-anchored"
@@ -15,7 +21,7 @@ export function AnchorStatusBadge({ status, lang }: { status: AnchorStatus; lang
     status === "re-anchored"
       ? "text-[10px] text-cobalt/40"
       : status === "orphaned"
-        ? "border border-cobalt/30 px-1.5 py-0.5 text-xs text-cobalt/60"
+        ? "border border-cobalt/40 px-1.5 py-0.5 text-xs text-cobalt/70"
         : "border border-cobalt px-1.5 py-0.5 text-xs text-cobalt";
   return <span className={cls}>{label}</span>;
 }

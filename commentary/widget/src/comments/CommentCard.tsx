@@ -50,7 +50,7 @@ export function CommentCard({
       onClick={depth === 0 ? () => onFocus?.(c.uid) : undefined}
       className={
         depth > 0
-          ? "mt-3 border-l border-cobalt/30 pl-3"
+          ? "mt-3 border-l border-cobalt/40 pl-3"
           : `cursor-pointer border-l-3 px-3.5 py-4 transition-colors ${
               focused
                 ? "border-cobalt bg-surface"
@@ -59,8 +59,8 @@ export function CommentCard({
       }
     >
       {depth === 0 ? (
-        <blockquote className="line-clamp-1 border-l border-cobalt/40 pl-2 text-xs leading-snug text-cobalt/45">
-          {c.spanExact}
+        <blockquote className="line-clamp-1 text-xs italic leading-snug text-cobalt/70">
+          “{c.spanExact}”
         </blockquote>
       ) : null}
       <p className="mt-1.5 whitespace-pre-wrap text-[13.5px] leading-relaxed text-cobalt">
@@ -71,12 +71,16 @@ export function CommentCard({
           <img
             src={ensAvatar}
             alt=""
-            className="size-4 shrink-0 rounded-full border border-cobalt/30 object-cover"
+            className="size-4 shrink-0 rounded-full border border-cobalt/40 object-cover"
           />
         ) : null}
         <span className="font-mono">{ensName ?? short(c.attester)}</span>
-        {c.time > 0 ? <span>{new Date(c.time * 1000).toLocaleDateString(lang)}</span> : null}
-        {projection ? <AnchorStatusBadge status={projection.status} lang={lang} /> : null}
+        {c.time > 0 ? (
+          <span>{new Date(c.time * 1000).toLocaleDateString(lang)}</span>
+        ) : null}
+        {projection ? (
+          <AnchorStatusBadge status={projection.status} lang={lang} />
+        ) : null}
         {projection?.pastVersion ? (
           <span className="text-cobalt/70">{ct(lang, "pastVersion")}</span>
         ) : null}

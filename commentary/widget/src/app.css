@@ -5,3 +5,17 @@
   --color-cobalt: #0c0cff;
   --color-surface: #eef0f3;
 }
+
+/* Panel shadow as plain CSS. Tailwind v4's shadow utilities compose a chain of
+   --tw-* custom properties that don't initialize inside our shadow-root
+   adoptedStyleSheet, so `shadow-[...]` renders as a no-op here (borders/colors
+   work because they don't use that chain). Authoring box-shadow directly avoids
+   it. Mobile = bottom sheet (shadow up); desktop = right sidebar (shadow left). */
+.commentary-panel-shadow {
+  box-shadow: 0 -10px 34px 2px rgba(165, 165, 255, 0.2);
+}
+@media (min-width: 640px) {
+  .commentary-panel-shadow {
+    box-shadow: -12px 0 34px 2px rgba(165, 165, 255, 0.2);
+  }
+}

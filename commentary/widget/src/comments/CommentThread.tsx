@@ -14,14 +14,22 @@ interface Props {
 }
 
 /** The comment list body (rendered inside Panel). Scrolls a card into view on focus. */
-export function CommentThread({ comments, lang, focusedUid, pendingUids, onFocus }: Props) {
+export function CommentThread({
+  comments,
+  lang,
+  focusedUid,
+  pendingUids,
+  onFocus,
+}: Props) {
   const projByUid = new Map(comments.map((p) => [p.comment.uid, p.projection]));
   const threads = buildThreads(comments.map((p) => p.comment));
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!focusedUid || !listRef.current) return;
-    const el = listRef.current.querySelector(`[data-uid="${CSS.escape(focusedUid)}"]`);
+    const el = listRef.current.querySelector(
+      `[data-uid="${CSS.escape(focusedUid)}"]`,
+    );
     el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [focusedUid]);
 
@@ -50,12 +58,14 @@ export function CommentThread({ comments, lang, focusedUid, pendingUids, onFocus
   return (
     <div ref={listRef}>
       {comments.length === 0 ? (
-        <p className="px-2 py-6 text-center text-sm text-cobalt/45">{ct(lang, "noComments")}</p>
+        <p className="px-2 py-6 text-center text-sm text-cobalt/45">
+          {ct(lang, "noComments")}
+        </p>
       ) : null}
       {placed.map(card)}
       {unplaced.length > 0 ? (
         <>
-          <p className="mt-2 border-t border-cobalt/30 px-3.5 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-cobalt/45">
+          <p className="mt-2 border-t border-cobalt/40 px-3.5 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-cobalt/45">
             <span aria-hidden="true">▸ </span>
             {ct(lang, "unplacedSection")}
           </p>

@@ -36,7 +36,7 @@ function mount(): void {
   button.style.cssText =
     `position:fixed;bottom:20px;${side};z-index:2147483646;display:inline-flex;align-items:center;gap:6px;` +
     "padding:7px 11px;background:#0c0cff;color:#fff;border:1px solid #0c0cff;border-radius:0;cursor:pointer;" +
-    "font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:4px 4px 0 rgba(12,12,255,.12)";
+    "font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:3px 3px 0 rgba(165,165,255,.5)";
   shadow.appendChild(button);
 
   // Floating "Comment" popover shown over a text selection (same pill design).
@@ -45,7 +45,7 @@ function mount(): void {
   popover.style.cssText =
     "position:fixed;z-index:2147483646;display:none;align-items:center;gap:6px;" +
     "padding:6px 11px;background:#0c0cff;color:#fff;border:1px solid #0c0cff;border-radius:0;cursor:pointer;" +
-    "box-shadow:4px 4px 0 rgba(12,12,255,.12);font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace";
+    "box-shadow:3px 3px 0 rgba(165,165,255,.5);font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace";
   popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL_PLUS}</svg><span>Comment</span>`;
   shadow.appendChild(popover);
 

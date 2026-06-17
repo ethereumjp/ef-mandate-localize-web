@@ -32,7 +32,7 @@ export function Composer({
   return (
     <div className="p-4">
       {fields ? (
-        <blockquote className="border-l-2 border-cobalt/40 pl-2 text-xs italic leading-snug text-cobalt/65">
+        <blockquote className="text-xs italic leading-snug text-cobalt">
           “{fields.spanExact}”
         </blockquote>
       ) : null}
@@ -44,7 +44,9 @@ export function Composer({
         aria-label="Comment"
         placeholder={connected ? ct(lang, "composePlaceholder") : ""}
       />
-      {error ? <p className="mt-2 text-xs font-semibold text-cobalt">! {error}</p> : null}
+      {error ? (
+        <p className="mt-2 text-xs font-semibold text-cobalt">! {error}</p>
+      ) : null}
       {fields ? (
         <details className="mt-3 text-xs text-cobalt/50">
           <summary className="cursor-pointer select-none">

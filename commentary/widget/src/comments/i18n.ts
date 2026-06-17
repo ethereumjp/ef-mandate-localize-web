@@ -5,6 +5,7 @@ const STRINGS: Record<string, Record<string, string>> = {
   en: {
     threadTitle: "Comments",
     noComments: "No comments on this block yet.",
+    selectToComment: "Select text on the page to comment",
     pastVersion: "Comment for past version",
     unplacedSection: "Couldn’t place in current text",
     reply: "Reply",
@@ -22,6 +23,7 @@ const STRINGS: Record<string, Record<string, string>> = {
   ja: {
     threadTitle: "コメント",
     noComments: "このブロックにはまだコメントがありません。",
+    selectToComment: "ページ内のテキストを選択してコメント",
     pastVersion: "過去のバージョンに対するコメント",
     unplacedSection: "現在のテキストに配置できないコメント",
     reply: "返信",
