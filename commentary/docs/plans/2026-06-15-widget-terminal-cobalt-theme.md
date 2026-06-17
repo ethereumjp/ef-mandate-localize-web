@@ -60,7 +60,7 @@ with:
 }
 ```
 
-This registers `cobalt` and `surface` as Tailwind colors, so `text-cobalt`, `border-cobalt/30`, `bg-surface`, etc. (with opacity modifiers) all generate.
+This registers `cobalt` and `surface` as Tailwind colors, so `text-cobalt`, `border-cobalt/40`, `bg-surface`, etc. (with opacity modifiers) all generate.
 
 - [ ] **Step 2: Verify the build accepts the token**
 
@@ -519,7 +519,7 @@ with:
 ```tsx
       className={
         depth > 0
-          ? "mt-3 border-l border-cobalt/30 pl-3"
+          ? "mt-3 border-l border-cobalt/40 pl-3"
           : `cursor-pointer border-l-3 px-3.5 py-4 transition-colors ${
               focused
                 ? "border-cobalt bg-surface"
@@ -644,7 +644,7 @@ Replace Panel.tsx:22:
 with:
 
 ```tsx
-      <div className="flex items-center justify-between gap-2 border-b border-cobalt/30 px-3 py-2.5">
+      <div className="flex items-center justify-between gap-2 border-b border-cobalt/40 px-3 py-2.5">
 ```
 
 - [ ] **Step 3: Recolor the back button**
@@ -683,7 +683,7 @@ with:
             <span aria-hidden="true">▸ </span>
             {ct(lang, "threadTitle")}
             {count > 0 ? (
-              <span className="ml-1.5 font-normal text-cobalt/60">[{count}]</span>
+              <span className="ml-1.5 font-normal text-cobalt/70">[{count}]</span>
             ) : null}
           </h2>
 ```
@@ -809,7 +809,7 @@ with:
 ```tsx
   const tone =
     status === "orphaned"
-      ? "border border-cobalt/30 text-cobalt/60"
+      ? "border border-cobalt/40 text-cobalt/70"
       : "border border-cobalt text-cobalt";
   return <span className={`px-1.5 py-0.5 text-xs ${tone}`}>{label}</span>;
 ```
