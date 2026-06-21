@@ -4,6 +4,7 @@ import Index from "./Index.astro";
 import SiteMeta from "./SiteMeta.astro";
 import T from "./T.astro";
 import { loadChapters, isPending } from "../lib/content";
+import { withBase } from "../lib/i18n";
 import type { Lang } from "../lib/i18n";
 interface Props {
     lang: Lang;
@@ -100,7 +101,7 @@ const commentaryEnabled = Boolean(schemaUid) || Boolean(mock);
         <script
             is:inline
             type="module"
-            src="/commentary/embed.js"
+            src={withBase("commentary/embed.js")}
             data-schema-uid={schemaUid}
             data-network="sepolia"
             data-lang={lang}

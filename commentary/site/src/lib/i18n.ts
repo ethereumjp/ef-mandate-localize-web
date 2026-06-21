@@ -5,9 +5,23 @@ export const LANGS: Lang[] = ["en", "ja"];
 /** The authoritative source language. All others are translations of it. */
 export const SOURCE_LANG: Lang = "en";
 
-/** Route for a language: the source language lives at "/", others at "/<code>". */
+/**
+ * Prefix a root-relative path with the site's base path. Astro's BASE_URL may or
+ * may not carry a trailing slash depending on config, so normalize both sides and
+ * always join with exactly one "/". `withBase("")` → the site root.
+ */
+export function withBase(path: string): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  return `${base}/${path.replace(/^\//, "")}`;
+}
+
+/**
+ * Route for a language: the source language lives at the site root, others at
+ * "<base>/<code>". Base-prefixed so links work under a GitHub Pages project
+ * subpath as well as at domain root.
+ */
 export function langRoute(code: Lang): string {
-  return code === SOURCE_LANG ? "/" : `/${code}`;
+  return code === SOURCE_LANG ? withBase("") : withBase(code);
 }
 
 /** Language switcher options (endonym label). Add a row per new language. */
