@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { buildAnnoFields } from "@commentary/core/anno/author";
 import { encodeAnno } from "@commentary/core/anno/encode";
 import type { AnnoFields } from "@commentary/core/anno/schema";
+import type { StoredAnno } from "@commentary/core/anno/locate";
 import { buildWagmiConfig } from "./web3/config";
 import { useEthersSigner } from "./web3/ethers";
 import { attestComment } from "./web3/eas";
@@ -26,6 +27,28 @@ import css from "./app.css?inline";
 const queryClient = new QueryClient();
 const NO_PENDING = new Set<string>();
 const styled = new WeakSet<ShadowRoot>();
+
+const short = (a: string) => (a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a);
+
+/** A reply inherits the parent's anchor (same span); only body + parentUid change. */
+function replyFields(parent: StoredAnno, body: string): AnnoFields {
+  return {
+    url: parent.url,
+    urlCanonical: parent.urlCanonical,
+    origin: parent.origin,
+    lang: parent.lang,
+    rootSelector: parent.rootSelector,
+    containerHash: parent.containerHash,
+    spanStart: parent.spanStart,
+    spanEnd: parent.spanEnd,
+    spanExact: parent.spanExact,
+    spanPrefix: parent.spanPrefix,
+    spanSuffix: parent.spanSuffix,
+    parentUid: parent.uid,
+    body,
+    meta: "",
+  };
+}
 
 function injectStyles(shadow: ShadowRoot): void {
   if (styled.has(shadow)) return;
@@ -63,7 +86,9 @@ function Controller({
   const [composerFields, setComposerFields] = useState<AnnoFields | null>(null);
   const [composerError, setComposerError] = useState<string | null>(null);
   const [composerPending, setComposerPending] = useState(false);
+  const [replyTo, setReplyTo] = useState<string | null>(null);
   const composeRange = useRef<Range | null>(null);
+  const replyParent = useRef<StoredAnno | null>(null);
 
   const handleFocus = useCallback(
     (uid: string) => {
@@ -89,6 +114,8 @@ function Controller({
   const openComposer = useCallback(
     (range: Range) => {
       composeRange.current = range;
+      replyParent.current = null; // a fresh selection is a new top-level comment
+      setReplyTo(null);
       setComposerError(null);
       setComposerFields(fieldsFor(range, ""));
       setMode("compose");
@@ -100,28 +127,49 @@ function Controller({
     onComposeReady?.(openComposer);
   }, [initialComposeRange, onComposeReady, openComposer]);
 
+  // Reply: inherit the parent's span; the composer previews that quote and the
+  // new comment links to the parent via parentUid. No text selection involved.
+  const handleReply = useCallback((parent: StoredAnno) => {
+    composeRange.current = null;
+    replyParent.current = parent;
+    setReplyTo(short(parent.attester));
+    setComposerError(null);
+    setComposerFields(replyFields(parent, ""));
+    setMode("compose");
+  }, []);
+
   function backToList() {
+    replyParent.current = null;
+    setReplyTo(null);
     setMode("list");
     setComposerError(null);
   }
 
   async function handleSubmit(body: string) {
-    const range = composeRange.current;
-    if (!range) return;
     if (!signer || !config.schemaUid) {
       setComposerError("Connect a wallet on Sepolia to publish.");
       return;
     }
-    const fields = fieldsFor(range, body);
-    if (!fields) {
-      setComposerError("Could not anchor the selection. Try selecting within a single block.");
-      return;
+    let fields: AnnoFields | null;
+    const parent = replyParent.current;
+    if (parent) {
+      fields = replyFields(parent, body);
+    } else {
+      const range = composeRange.current;
+      if (!range) return;
+      fields = fieldsFor(range, body);
+      if (!fields) {
+        setComposerError("Could not anchor the selection. Try selecting within a single block.");
+        return;
+      }
     }
     setComposerPending(true);
     try {
       await attestComment(signer, config.schemaUid, encodeAnno(fields));
       await display.refresh();
       setComments(display.projected());
+      replyParent.current = null;
+      setReplyTo(null);
       setMode("list");
     } catch (err) {
       setComposerError(err instanceof Error ? err.message : String(err));
@@ -140,7 +188,7 @@ function Controller({
     >
       {mode === "compose" ? (
         <Composer
-          key={composerFields?.spanExact ?? "compose"}
+          key={`${composerFields?.parentUid ?? ""}:${composerFields?.spanExact ?? "compose"}`}
           fields={composerFields}
           lang={config.lang}
           pending={composerPending}
@@ -149,6 +197,7 @@ function Controller({
           onConnect={() => connect({ connector: injected() })}
           onSubmit={handleSubmit}
           schemaUid={config.schemaUid}
+          replyTo={replyTo ?? undefined}
         />
       ) : (
         <CommentThread
@@ -157,6 +206,7 @@ function Controller({
           focusedUid={focusedUid}
           pendingUids={NO_PENDING}
           onFocus={handleFocus}
+          onReply={handleReply}
         />
       )}
     </Panel>

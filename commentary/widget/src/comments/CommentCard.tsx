@@ -19,6 +19,7 @@ interface Props {
   focusedUid?: string | null;
   pendingUids?: Set<string>;
   onFocus?: (uid: string) => void;
+  onReply?: (parent: StoredAnno) => void;
 }
 
 export function CommentCard({
@@ -29,6 +30,7 @@ export function CommentCard({
   focusedUid,
   pendingUids,
   onFocus,
+  onReply,
 }: Props) {
   const c = node.comment;
   const focused = depth === 0 && focusedUid === c.uid;
@@ -92,9 +94,11 @@ export function CommentCard({
         ) : null}
         <button
           type="button"
-          disabled
-          onClick={(e) => e.stopPropagation()}
-          className="cursor-not-allowed opacity-50"
+          onClick={(e) => {
+            e.stopPropagation();
+            onReply?.(c);
+          }}
+          className="cursor-pointer underline-offset-2 hover:underline"
         >
           {ct(lang, "reply")}
         </button>
@@ -108,6 +112,7 @@ export function CommentCard({
           focusedUid={focusedUid}
           pendingUids={pendingUids}
           onFocus={onFocus}
+          onReply={onReply}
         />
       ))}
     </div>

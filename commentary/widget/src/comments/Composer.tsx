@@ -15,6 +15,8 @@ interface Props {
   onConnect?: () => void;
   onSubmit: (body: string) => void;
   schemaUid?: string;
+  /** When set, this composer is a reply (inherits the parent's span); shows whom. */
+  replyTo?: string;
 }
 
 /** Inline composer rendered in the Panel body when mode === "compose". */
@@ -27,10 +29,17 @@ export function Composer({
   onConnect,
   onSubmit,
   schemaUid,
+  replyTo,
 }: Props) {
   const [body, setBody] = useState("");
   return (
     <div className="p-4">
+      {replyTo ? (
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-cobalt/60">
+          <span aria-hidden="true">↳ </span>
+          {ct(lang, "replyingTo")} {replyTo}
+        </p>
+      ) : null}
       {fields ? (
         <blockquote className="text-xs italic leading-snug text-cobalt">
           “{fields.spanExact}”

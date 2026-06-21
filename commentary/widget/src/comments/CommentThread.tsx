@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { LocatedAnno } from "@commentary/core/anno/locate";
+import type { LocatedAnno, StoredAnno } from "@commentary/core/anno/locate";
 import { buildThreads } from "../web3/thread";
 import { ct } from "./i18n";
 import { CommentCard } from "./CommentCard";
@@ -11,6 +11,7 @@ interface Props {
   focusedUid: string | null;
   pendingUids: Set<string>;
   onFocus: (uid: string) => void;
+  onReply: (parent: StoredAnno) => void;
 }
 
 /** The comment list body (rendered inside Panel). Scrolls a card into view on focus. */
@@ -20,6 +21,7 @@ export function CommentThread({
   focusedUid,
   pendingUids,
   onFocus,
+  onReply,
 }: Props) {
   const projByUid = new Map(comments.map((p) => [p.comment.uid, p.projection]));
   const threads = buildThreads(comments.map((p) => p.comment));
@@ -52,6 +54,7 @@ export function CommentThread({
       focusedUid={focusedUid}
       pendingUids={pendingUids}
       onFocus={onFocus}
+      onReply={onReply}
     />
   );
 
