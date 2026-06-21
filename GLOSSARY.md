@@ -8,7 +8,8 @@ Add entries in this format:
 
 - `English term` -> `Japanese term` - notes
 
-- `Ethereum Foundation` -> `イーサリアム財団`
+- `Ethereum` -> `Ethereum`
+- `Ethereum Foundation` -> `Ethereum 財団 (EF)`
 - `EF Mandate` -> `EF Mandate`
 - `censorship resistant` -> `検閲耐性`
 - `open source` -> `オープンソース`
@@ -16,3 +17,5 @@ Add entries in this format:
 - `money` -> `貨幣`
 - `free` -> `フリー`
 - `walkaway test` -> `立ち去りテスト`
+- `resilience` -> `レジリエンス`
+- `agents` -> `エージェント`
