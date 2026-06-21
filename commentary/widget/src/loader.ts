@@ -57,6 +57,7 @@ function mount(): void {
 
   let appMod: typeof import("./app") | null = null;
   let mounted = false;
+  let loaded = false; // false until the first refresh resolves → show a [...] placeholder
   let appClose: (() => void) | null = null;
   let focusWhileOpen: ((uid: string) => void) | null = null;
   let composeWhileOpen: ((range: Range) => void) | null = null;
@@ -70,10 +71,13 @@ function mount(): void {
         '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     } else {
       // Closed → pencil icon + a bracketed count, white on the cobalt fill.
+      // Until the first refresh resolves, show a [...] placeholder so the button
+      // never flashes an empty/zero state during initial load.
       button.style.padding = "7px 11px";
+      const count = loaded ? `[${display.count()}]` : "[...]";
       button.innerHTML =
         `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL}</svg>` +
-        `<span style="font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#fff;opacity:.7">[${display.count()}]</span>`;
+        `<span style="font:600 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#fff;opacity:.7">${count}</span>`;
     }
     const label = mounted ? "Close comments" : "Open comments";
     button.title = label;
@@ -161,7 +165,11 @@ function mount(): void {
   });
   display.onClickHighlight((uid) => void openApp({ focusUid: uid }));
 
-  void display.refresh().then(renderButton);
+  renderButton(); // paint the icon + [...] placeholder immediately (pre-load)
+  void display.refresh().then(() => {
+    loaded = true;
+    renderButton();
+  });
 }
 
 mount();
