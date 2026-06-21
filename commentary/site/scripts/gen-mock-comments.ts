@@ -24,41 +24,53 @@ const encodeAnno = (f: AnnoFields) => enc.encodeData(annoFieldDefs(f));
 
 const AUTHOR = "0x1234567890abcdef1234567890abcdef12345678";
 const TIME = 1717000000; // fixed → shown as 2024/5/30 in the card
-const STALE = ("0x" + "ee".repeat(32)) as `0x${string}`; // mismatched hash → re-anchored
 const ZERO_UID = "0x" + "00".repeat(32);
 /** A bytes32 mock attestation id from a small seed byte. */
 const id = (seed: number) => "0x" + seed.toString(16).padStart(2, "0").repeat(32);
 
-// Captured block textContent (pre-normalization). Re-capture + re-run if the
-// essay content changes. Block ids are shared across languages; text differs.
-const BLOCKS: Record<"en" | "ja", Record<string, string>> = {
+// Captured block textContent (post-render, pre-normalization). Re-capture + re-run
+// if the essay content changes. The `closing` block is the Dante line in ch. VIII,
+// which is Italian in both languages (the ja chapter is untranslated → the page
+// renders the en/Italian text as a muted fallback, so the same quote anchors).
+const BLOCKS: Record<"en" | "ja", Record<"dream" | "role" | "closing", string>> = {
   en: {
-    "01-p2": " Ethereum was born out of a dream. A dream for freedom. ",
-    "01-p3":
-      " Not just for one, not just for many, but for all who are ready to grasp it with their own hands. ",
+    dream: "Ethereum was born out of a dream. A dream for freedom.",
+    role: "The Foundation is not the parent, owner, or ruler of Ethereum. We are not “the system” itself.",
+    closing: "E quindi uscimmo a riveder le stelle.",
   },
   ja: {
-    "01-p2": " イーサリアムは、ある夢から生まれた。それは「自由」への夢である。 ",
-    "01-p3":
-      " それは、たった一人や、一部の人のためではなく、自らの手でそれを掴む覚悟のあるすべての人々のためのものだ。 ",
+    dream: "イーサリアムは、ある夢から生まれた。それは「自由」への夢である。",
+    role: "EFは、イーサリアムの親組織でも、所有者でも、支配者でもない。EFは「システム」そのものではない。",
+    closing: "E quindi uscimmo a riveder le stelle.",
   },
 };
 
-const BODIES = {
-  en: {
-    a1: "Strong opening. Is “mandate” the EF’s remit specifically, or Ethereum’s?",
-    a1r: "The Foundation’s remit — see ch. III “Our Mandate”.",
-    a2: "Translation note: rendering “mandate” as a duty vs. an authority is still open.",
-    b1: "Re-anchored: the source changed since this was written, quote relocated.",
-    c1: "The text I quoted is gone — flagged for review.",
-  },
-  ja: {
-    a1: "力強い書き出し。「mandate(使命)」は EF 固有の話か、イーサリアム全体のことか?",
-    a1r: "財団の使命のこと — 第 III 章「我々の使命」を参照。",
-    a2: "訳語メモ:「mandate」を「使命」と訳すか「権限」とするか検討中。",
-    b1: "再アンカリング:執筆後に原文が変わり、引用位置を再特定した。",
-    c1: "引用していた箇所が消えている — 要確認としてフラグ。",
-  },
+// One comment per block. `quote` must be a verbatim substring of the rendered
+// (normalized) block text — it's the anchored span the card shows.
+const COMMENTS: Record<
+  "en" | "ja",
+  { block: "dream" | "role" | "closing"; quote: string; body: string }[]
+> = {
+  en: [
+    { block: "dream", quote: "Ethereum was born out of a dream.", body: "Great!" },
+    {
+      block: "role",
+      quote:
+        "The Foundation is not the parent, owner, or ruler of Ethereum. We are not “the system” itself.",
+      body: "👍",
+    },
+    { block: "closing", quote: "E quindi uscimmo a riveder le stelle.", body: "I like this closing." },
+  ],
+  ja: [
+    { block: "dream", quote: "イーサリアムは、ある夢から生まれた。", body: "素晴らしい！" },
+    {
+      block: "role",
+      quote:
+        "EFは、イーサリアムの親組織でも、所有者でも、支配者でもない。EFは「システム」そのものではない。",
+      body: "👍",
+    },
+    { block: "closing", quote: "E quindi uscimmo a riveder le stelle.", body: "この結びが好き。" },
+  ],
 };
 
 interface Raw {
@@ -69,23 +81,25 @@ interface Raw {
   data: string;
 }
 
-/** Anchor [from, from+span) of normalized block text, clamped to fit. */
-function anchorOf(norm: string, hash: `0x${string}`, from: number, span: number): Anchor {
-  const len = codePoints(norm).length;
-  const start = Math.max(0, Math.min(from, len - 1));
-  const end = Math.min(start + span, len);
-  return makeAnchor(hash, norm, start, end);
+/** Find the code-point index of `quote` within `normCps`, or -1. */
+function cpIndexOf(normCps: string[], quoteCps: string[]): number {
+  outer: for (let i = 0; i + quoteCps.length <= normCps.length; i++) {
+    for (let j = 0; j < quoteCps.length; j++) {
+      if (normCps[i + j] !== quoteCps[j]) continue outer;
+    }
+    return i;
+  }
+  return -1;
 }
 
-function fields(o: {
-  lang: "en" | "ja";
-  path: string;
-  blockId: string;
-  body: string;
-  parentUid?: string;
-  anchor?: Anchor;
-  orphanQuote?: string;
-}): AnnoFields {
+/** Anchor the verbatim `quote` within normalized block text (status: anchored). */
+function anchorQuote(norm: string, hash: `0x${string}`, quote: string): Anchor {
+  const idx = cpIndexOf(codePoints(norm), codePoints(quote));
+  if (idx < 0) throw new Error(`quote not found in block text: ${JSON.stringify(quote)}`);
+  return makeAnchor(hash, norm, idx, idx + codePoints(quote).length);
+}
+
+function fields(o: { lang: "en" | "ja"; path: string; body: string; anchor: Anchor }): AnnoFields {
   const a = o.anchor;
   return {
     url: o.path,
@@ -93,13 +107,13 @@ function fields(o: {
     origin: o.path,
     lang: o.lang,
     rootSelector: "", // block-ID-free: anchor by quote (display findByQuote fallback)
-    containerHash: a ? a.blockHash : STALE,
-    spanStart: a ? a.start : 0,
-    spanEnd: a ? a.end : 0,
-    spanExact: a ? a.exact : (o.orphanQuote ?? ""),
-    spanPrefix: a ? a.prefix : "",
-    spanSuffix: a ? a.suffix : "",
-    parentUid: o.parentUid ?? ZERO_UID,
+    containerHash: a.blockHash,
+    spanStart: a.start,
+    spanEnd: a.end,
+    spanExact: a.exact,
+    spanPrefix: a.prefix,
+    spanSuffix: a.suffix,
+    parentUid: ZERO_UID,
     body: o.body,
     meta: "",
   };
@@ -111,61 +125,11 @@ const add = (uid: string, f: AnnoFields) =>
 
 for (const lang of ["en", "ja"] as const) {
   const path = lang === "ja" ? "/ja" : "/";
-  const p2 = normalizeBlockText(BLOCKS[lang]["01-p2"]);
-  const p3 = normalizeBlockText(BLOCKS[lang]["01-p3"]);
-  const B = BODIES[lang];
   const k = lang === "ja" ? 0xd0 : 0xa0;
-  const A1 = id(k + 1);
-
-  // anchored thread on 01-p2 (comment + reply on the same span)
-  add(
-    A1,
-    fields({
-      lang,
-      path,
-      blockId: "01-p2",
-      body: B.a1,
-      anchor: anchorOf(p2, blockHash(p2), 0, 16),
-    }),
-  );
-  add(
-    id(k + 2),
-    fields({
-      lang,
-      path,
-      blockId: "01-p2",
-      body: B.a1r,
-      parentUid: A1,
-      anchor: anchorOf(p2, blockHash(p2), 0, 16),
-    }),
-  );
-  // a second anchored comment, different span
-  add(
-    id(k + 3),
-    fields({
-      lang,
-      path,
-      blockId: "01-p2",
-      body: B.a2,
-      anchor: anchorOf(p2, blockHash(p2), 18, 14),
-    }),
-  );
-  // re-anchored: real quote from 01-p3 but a stale containerHash
-  add(
-    id(k + 4),
-    fields({ lang, path, blockId: "01-p3", body: B.b1, anchor: anchorOf(p3, STALE, 0, 14) }),
-  );
-  // needs-review: a quote that no longer exists in 01-p4
-  add(
-    id(k + 5),
-    fields({
-      lang,
-      path,
-      blockId: "01-p4",
-      body: B.c1,
-      orphanQuote: "⟪a phrase that no longer exists⟫",
-    }),
-  );
+  COMMENTS[lang].forEach((c, i) => {
+    const norm = normalizeBlockText(BLOCKS[lang][c.block]);
+    add(id(k + 1 + i), fields({ lang, path, body: c.body, anchor: anchorQuote(norm, blockHash(norm), c.quote) }));
+  });
 }
 
 // The fixture lives in core (the loader is @commentary/core/anno/mock); write there.
