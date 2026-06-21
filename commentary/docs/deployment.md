@@ -45,7 +45,7 @@ script builds the site and force-pushes the static output to an output-only
 branch (`gh-pages` by default) on a remote (`fork` by default).
 
 ```
-PUBLIC_EAS_ANNO_SCHEMA_UID=0x… pnpm --filter @commentary/site deploy
+PUBLIC_EAS_ANNO_SCHEMA_UID=0x… pnpm --filter @commentary/site deploy:pages
 ```
 
 `scripts/deploy-pages.sh` builds (`pnpm build`, which also rebuilds the widget
