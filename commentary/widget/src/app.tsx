@@ -12,6 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { buildAnnoFields } from "@commentary/core/anno/author";
 import { encodeAnno } from "@commentary/core/anno/encode";
 import { pageKey } from "@commentary/core/anno/pageKey";
+import { EMPTY_UID } from "@commentary/core/anno/constants";
 import type { AnnoFields } from "@commentary/core/anno/schema";
 import type { StoredAnno } from "@commentary/core/anno/locate";
 import { buildWagmiConfig } from "./web3/config";
@@ -31,7 +32,7 @@ const styled = new WeakSet<ShadowRoot>();
 
 const short = (a: string) => (a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a);
 
-/** A reply inherits the parent's anchor (same span); only body + parentUid change. */
+/** A reply inherits the parent's anchor (same span); only body changes; refUID wired on submit. */
 function replyFields(parent: StoredAnno, body: string): AnnoFields {
   return {
     url: parent.url,
@@ -45,7 +46,6 @@ function replyFields(parent: StoredAnno, body: string): AnnoFields {
     spanExact: parent.spanExact,
     spanPrefix: parent.spanPrefix,
     spanSuffix: parent.spanSuffix,
-    parentUid: parent.uid,
     body,
     meta: "",
   };
@@ -168,6 +168,7 @@ function Controller({
     try {
       await attestComment(signer, config.schemaUid, encodeAnno(fields), {
         recipient: pageKey(fields.urlCanonical),
+        refUID: parent ? parent.uid : EMPTY_UID,
       });
       await display.refresh();
       setComments(display.projected());
@@ -191,7 +192,7 @@ function Controller({
     >
       {mode === "compose" ? (
         <Composer
-          key={`${composerFields?.parentUid ?? ""}:${composerFields?.spanExact ?? "compose"}`}
+          key={`${replyTo ?? ""}:${composerFields?.spanExact ?? "compose"}`}
           fields={composerFields}
           lang={config.lang}
           pending={composerPending}

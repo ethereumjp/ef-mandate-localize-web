@@ -3,8 +3,6 @@ import { nearestContainer, selectorFor } from "./selector";
 import { canonicalizeUrl } from "./canonicalUrl";
 import type { AnnoFields } from "./schema";
 
-const ZERO_UID = "0x" + "00".repeat(32);
-
 export interface DraftInput {
   /** The page URL at authoring time (e.g. location.href). */
   href: string;
@@ -14,8 +12,6 @@ export interface DraftInput {
   range: Range;
   /** The comment body. */
   body: string;
-  /** Parent attestation UID for a reply (default: zero = top-level). */
-  parentUid?: string;
   /** JSON escape-hatch (default: ""). */
   meta?: string;
 }
@@ -43,7 +39,6 @@ export function buildAnnoFields(input: DraftInput): AnnoFields | null {
     spanExact: anchor.exact,
     spanPrefix: anchor.prefix,
     spanSuffix: anchor.suffix,
-    parentUid: input.parentUid ?? ZERO_UID,
     body: input.body,
     meta: input.meta ?? "",
   };

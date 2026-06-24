@@ -11,7 +11,7 @@ function buildQuery(scoped: boolean): string {
       scoped ? ", recipient: { equals: $recipient }" : ""
     } }
     orderBy: { time: asc }
-  ) { id attester time revoked data }
+  ) { id attester time revoked refUID data }
 }`;
 }
 
@@ -20,13 +20,20 @@ export interface RawAttestation {
   attester: string;
   time: number;
   revoked: boolean;
+  refUID: string;
   data: string;
 }
 
 /** Map a raw EAS attestation (GraphQL shape) to a decoded StoredAnno. Shared by
  *  `fetchAnno` and the dev mock so both decode identically. */
 export function decodeAttestation(a: RawAttestation): StoredAnno {
-  return { uid: a.id, attester: a.attester, time: Number(a.time), ...decodeAnno(a.data) };
+  return {
+    uid: a.id,
+    attester: a.attester,
+    time: Number(a.time),
+    parentUid: a.refUID,
+    ...decodeAnno(a.data),
+  };
 }
 
 /** Fetch + decode non-revoked anno attestations, scoped to a page when `pageKey` is set. */

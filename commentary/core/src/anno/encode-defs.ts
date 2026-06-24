@@ -18,7 +18,6 @@ export const ANNO_ABI = [
   { name: "spanExact", type: "string" },
   { name: "spanPrefix", type: "string" },
   { name: "spanSuffix", type: "string" },
-  { name: "parentUid", type: "bytes32" },
   { name: "body", type: "string" },
   { name: "meta", type: "string" },
 ] as const;

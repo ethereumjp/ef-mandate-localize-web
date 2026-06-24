@@ -84,8 +84,6 @@ export function Composer({
             <dd className="truncate">{fields.spanPrefix}</dd>
             <dt>spanSuffix</dt>
             <dd className="truncate">{fields.spanSuffix}</dd>
-            <dt>parentUid</dt>
-            <dd className="truncate">{shortHex(fields.parentUid)}</dd>
             <dt>meta</dt>
             <dd className="truncate">{fields.meta || "—"}</dd>
             <dt>body</dt>

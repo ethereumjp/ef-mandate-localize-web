@@ -13,7 +13,6 @@ export interface AnnoFields {
   spanExact: string;
   spanPrefix: string;
   spanSuffix: string;
-  parentUid: string;
   body: string;
   meta: string;
 }
@@ -38,8 +37,7 @@ export function decodeAnno(data: string): AnnoFields {
     spanExact: v[8],
     spanPrefix: v[9],
     spanSuffix: v[10],
-    parentUid: v[11],
-    body: v[12],
-    meta: v[13],
+    body: v[11],
+    meta: v[12],
   };
 }

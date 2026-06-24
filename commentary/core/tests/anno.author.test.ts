@@ -37,7 +37,6 @@ describe("buildAnnoFields", () => {
     expect(fields.spanStart).toBe(4);
     expect(fields.spanEnd).toBe(12);
     expect(fields.containerHash).toMatch(/^0x[0-9a-f]{64}$/);
-    expect(fields.parentUid).toBe("0x" + "00".repeat(32));
     expect(fields.meta).toBe("");
   });
 

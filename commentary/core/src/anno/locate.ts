@@ -12,6 +12,7 @@ export interface StoredAnno extends AnnoFields {
   uid: string;
   attester: string;
   time: number; // unix seconds
+  parentUid: string; // on-chain refUID; EMPTY_UID = top-level
 }
 
 export interface LocatedAnno {

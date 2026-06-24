@@ -14,7 +14,6 @@ const fields: AnnoFields = {
   spanExact: "walkaway",
   spanPrefix: "the ",
   spanSuffix: " test",
-  parentUid: "0x" + "00".repeat(32),
   body: "なるほど。",
   meta: "",
 };
