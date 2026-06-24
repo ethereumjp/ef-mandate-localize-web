@@ -11,6 +11,7 @@ import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { buildAnnoFields } from "@commentary/core/anno/author";
 import { encodeAnno } from "@commentary/core/anno/encode";
+import { pageKey } from "@commentary/core/anno/pageKey";
 import type { AnnoFields } from "@commentary/core/anno/schema";
 import type { StoredAnno } from "@commentary/core/anno/locate";
 import { buildWagmiConfig } from "./web3/config";
@@ -165,7 +166,9 @@ function Controller({
     }
     setComposerPending(true);
     try {
-      await attestComment(signer, config.schemaUid, encodeAnno(fields));
+      await attestComment(signer, config.schemaUid, encodeAnno(fields), {
+        recipient: pageKey(fields.urlCanonical),
+      });
       await display.refresh();
       setComments(display.projected());
       replyParent.current = null;

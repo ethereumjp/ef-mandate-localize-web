@@ -1,6 +1,7 @@
 import { fetchAnno } from "@commentary/core/anno/read";
 import { loadMockComments } from "@commentary/core/anno/mock";
 import { canonicalizeUrl } from "@commentary/core/anno/canonicalUrl";
+import { pageKey } from "@commentary/core/anno/pageKey";
 import {
   commentsForUrl,
   projectAnno,
@@ -137,9 +138,15 @@ export function createDisplay(opts: DisplayOpts): Display {
 
   return {
     async refresh() {
-      stored = opts.mock
-        ? loadMockComments()
-        : await fetchAnno(opts.schemaUid, { endpoint: opts.easGraphql });
+      if (opts.mock) {
+        stored = loadMockComments();
+      } else {
+        const { urlCanonical } = canonicalizeUrl(location.href);
+        stored = await fetchAnno(opts.schemaUid, {
+          pageKey: pageKey(urlCanonical),
+          endpoint: opts.easGraphql,
+        });
+      }
       project();
       paintHighlights();
     },
