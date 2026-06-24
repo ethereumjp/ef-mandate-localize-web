@@ -78,6 +78,7 @@ interface Raw {
   attester: string;
   time: number;
   revoked: boolean;
+  refUID: string;
   data: string;
 }
 
@@ -113,7 +114,6 @@ function fields(o: { lang: "en" | "ja"; path: string; body: string; anchor: Anch
     spanExact: a.exact,
     spanPrefix: a.prefix,
     spanSuffix: a.suffix,
-    parentUid: ZERO_UID,
     body: o.body,
     meta: "",
   };
@@ -121,7 +121,7 @@ function fields(o: { lang: "en" | "ja"; path: string; body: string; anchor: Anch
 
 const raws: Raw[] = [];
 const add = (uid: string, f: AnnoFields) =>
-  raws.push({ id: uid, attester: AUTHOR, time: TIME, revoked: false, data: encodeAnno(f) });
+  raws.push({ id: uid, attester: AUTHOR, time: TIME, revoked: false, refUID: ZERO_UID, data: encodeAnno(f) });
 
 for (const lang of ["en", "ja"] as const) {
   const path = lang === "ja" ? "/ja" : "/";
