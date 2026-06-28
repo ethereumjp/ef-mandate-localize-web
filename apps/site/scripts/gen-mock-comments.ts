@@ -133,6 +133,6 @@ for (const lang of ["en", "ja"] as const) {
 }
 
 // The fixture lives in core (the loader is @anno/core/anno/mock); write there.
-const outPath = fileURLToPath(new URL("../../core/src/anno/mock-comments.json", import.meta.url));
+const outPath = fileURLToPath(new URL("../../../packages/core/src/anno/mock-comments.json", import.meta.url));
 writeFileSync(outPath, JSON.stringify(raws, null, 2) + "\n");
 console.log(`wrote ${raws.length} mock attestations → ${outPath}`);

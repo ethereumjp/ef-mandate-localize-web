@@ -1,7 +1,0 @@
-node_modules/
-.astro/
-*.tsbuildinfo
-.gstack/
-.superpowers/
-# Embed bundle copied from @commentary/widget into the site's served public dir
-site/public/commentary/

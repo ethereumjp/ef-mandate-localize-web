@@ -9,7 +9,7 @@
     "jsxImportSource": "react",
     "baseUrl": ".",
     "paths": {
-      "@anno/core/*": ["../core/src/*"]
+      "@anno/core/*": ["../../packages/core/src/*"]
     }
   },
   "include": ["src", "scripts", "tests"],
