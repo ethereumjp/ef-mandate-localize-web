@@ -44,7 +44,7 @@ grep -rl '@commentary' \
   --include='*.ts' --include='*.tsx' --include='*.astro' \
   --include='*.json' --include='*.mjs' --include='*.sh' --include='*.html' . \
   | grep -vE 'node_modules|/dist/' \
-  | xargs perl -pi -e 's#\@commentary/site#ef-mandate-localize-site#g; s#\@commentary/core#\@anno/core#g; s#\@commentary/widget#\@anno/widget#g'
+  | xargs perl -pi -e 's#\@commentary/site#ef-mandate-localize-site#g; s#\@commentary/core#\@anno/core#g; s#\@commentary/widget#\@anno/widget#g; s#\@commentary/monorepo#\@anno/monorepo#g'
 ```
 
 - [ ] **Step 2: Verify no `@commentary/` references remain**
