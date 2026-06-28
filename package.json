@@ -9,13 +9,5 @@
     "dev:site:mock": "pnpm --filter ef-mandate-localize-site run dev:mock",
     "build:site": "pnpm --filter ef-mandate-localize-site build",
     "build:widget": "pnpm --filter @anno/widget build"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "keccak",
-      "secp256k1",
-      "sharp"
-    ]
   }
 }
