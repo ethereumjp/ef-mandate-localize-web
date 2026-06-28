@@ -6,7 +6,7 @@
 // React app on first open.
 import { readConfig } from "./config";
 import { createDisplay } from "./display";
-import { nearestContainer } from "@commentary/core/anno/selector";
+import { nearestContainer } from "@anno/core/anno/selector";
 
 // Tabler "pencil-bolt" icon paths (the launcher pill).
 const PENCIL =

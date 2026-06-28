@@ -1,4 +1,4 @@
-import { normalizeBlockText } from "@commentary/core/lib/normalize";
+import { normalizeBlockText } from "@anno/core/lib/normalize";
 
 // Offsets are compensated for normalization's LEADING trim only. Per-line trailing
 // whitespace stripping (rare in browser-rendered prose) can misplace a span — the

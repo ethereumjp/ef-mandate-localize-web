@@ -1,13 +1,13 @@
 {
-  "name": "@commentary/monorepo",
+  "name": "@anno/monorepo",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "dev:site:mock": "pnpm --filter @commentary/site run dev:mock",
-    "build:site": "pnpm --filter @commentary/site build",
-    "build:widget": "pnpm --filter @commentary/widget build"
+    "dev:site:mock": "pnpm --filter ef-mandate-localize-site run dev:mock",
+    "build:site": "pnpm --filter ef-mandate-localize-site build",
+    "build:widget": "pnpm --filter @anno/widget build"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

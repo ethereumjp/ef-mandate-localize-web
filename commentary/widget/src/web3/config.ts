@@ -2,7 +2,7 @@ import { http, createConfig } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
 
-export { SEPOLIA_CHAIN_ID } from "@commentary/core/chain";
+export { SEPOLIA_CHAIN_ID } from "@anno/core/chain";
 
 /**
  * Build a wagmi config from explicit RPC URLs (the embed passes these from its

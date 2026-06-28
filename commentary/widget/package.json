@@ -1,5 +1,5 @@
 {
-  "name": "@commentary/widget",
+  "name": "@anno/widget",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",
-    "@commentary/core": "workspace:*",
+    "@anno/core": "workspace:*",
     "@ethereum-attestation-service/eas-sdk": "^2.9.1",
     "@tanstack/react-query": "^5.101.0",
     "ethers": "^6.16.0",

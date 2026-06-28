@@ -1,5 +1,5 @@
 {
-  "name": "@commentary/site",
+  "name": "ef-mandate-localize-site",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed",
@@ -22,7 +22,7 @@
     "deploy:pages": "bash scripts/deploy-pages.sh"
   },
   "dependencies": {
-    "@commentary/core": "workspace:*",
+    "@anno/core": "workspace:*",
     "@ethereum-attestation-service/eas-sdk": "^2.9.1",
     "astro": "^7.0.0",
     "ethers": "^6.16.0",

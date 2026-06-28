@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { AnnoFields } from "@commentary/core/anno/schema";
+import type { AnnoFields } from "@anno/core/anno/schema";
 import { ct } from "./i18n";
 
 const shortHex = (h: string) =>

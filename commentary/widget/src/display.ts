@@ -1,14 +1,14 @@
-import { fetchAnno } from "@commentary/core/anno/read";
-import { loadMockComments } from "@commentary/core/anno/mock";
-import { canonicalizeUrl } from "@commentary/core/anno/canonicalUrl";
-import { pageKey } from "@commentary/core/anno/pageKey";
+import { fetchAnno } from "@anno/core/anno/read";
+import { loadMockComments } from "@anno/core/anno/mock";
+import { canonicalizeUrl } from "@anno/core/anno/canonicalUrl";
+import { pageKey } from "@anno/core/anno/pageKey";
 import {
   commentsForUrl,
   projectAnno,
   type StoredAnno,
   type LocatedAnno,
-} from "@commentary/core/anno/locate";
-import { resolveContainer } from "@commentary/core/anno/selector";
+} from "@anno/core/anno/locate";
+import { resolveContainer } from "@anno/core/anno/selector";
 import { applyHighlights, rangeForOffsets } from "./web3/highlight";
 
 export interface DisplayOpts {

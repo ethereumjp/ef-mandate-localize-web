@@ -8,8 +8,8 @@ import easSdk from "@ethereum-attestation-service/eas-sdk";
 const { SchemaRegistry } = easSdk as unknown as {
   SchemaRegistry: typeof SchemaRegistryType;
 };
-import { SCHEMA_REGISTRY_ADDRESS } from "@commentary/core/chain";
-import { ANNO_SCHEMA } from "@commentary/core/anno/constants";
+import { SCHEMA_REGISTRY_ADDRESS } from "@anno/core/chain";
+import { ANNO_SCHEMA } from "@anno/core/anno/constants";
 
 const pk = process.env.SEPOLIA_PRIVATE_KEY;
 const rpc = process.env.PUBLIC_SEPOLIA_RPC_URL ?? "https://ethereum-sepolia-rpc.publicnode.com";

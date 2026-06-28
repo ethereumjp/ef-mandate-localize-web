@@ -10,9 +10,9 @@ export default defineConfig({
   base: process.env.BASE_PATH ?? "/ef-mandate-localize-jp",
   vite: {
     plugins: [tailwindcss()],
-    // @commentary/core ships TS source; transform it (don't externalize) and
+    // @anno/core ships TS source; transform it (don't externalize) and
     // don't pre-bundle the workspace package.
-    ssr: { noExternal: ["@commentary/core"] },
-    optimizeDeps: { exclude: ["@commentary/core"] },
+    ssr: { noExternal: ["@anno/core"] },
+    optimizeDeps: { exclude: ["@anno/core"] },
   },
 });

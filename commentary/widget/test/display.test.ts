@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
 import { projectComments } from "../src/display";
-import { blockHash } from "@commentary/core/lib/hash";
-import { normalizeBlockText } from "@commentary/core/lib/normalize";
-import type { StoredAnno } from "@commentary/core/anno/locate";
+import { blockHash } from "@anno/core/lib/hash";
+import { normalizeBlockText } from "@anno/core/lib/normalize";
+import type { StoredAnno } from "@anno/core/anno/locate";
 
 const ZERO = "0x" + "00".repeat(32);
 

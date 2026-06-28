@@ -7,12 +7,12 @@
 // to the running origin so the fixture works on any dev port.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { makeAnchor, codePoints, type Anchor } from "@commentary/core/lib/anchoring";
-import { blockHash } from "@commentary/core/lib/hash";
-import { normalizeBlockText } from "@commentary/core/lib/normalize";
-import type { AnnoFields } from "@commentary/core/anno/schema";
-import { annoFieldDefs } from "@commentary/core/anno/encode-defs";
-import { ANNO_SCHEMA } from "@commentary/core/anno/constants";
+import { makeAnchor, codePoints, type Anchor } from "@anno/core/lib/anchoring";
+import { blockHash } from "@anno/core/lib/hash";
+import { normalizeBlockText } from "@anno/core/lib/normalize";
+import type { AnnoFields } from "@anno/core/anno/schema";
+import { annoFieldDefs } from "@anno/core/anno/encode-defs";
+import { ANNO_SCHEMA } from "@anno/core/anno/constants";
 // Node-side EAS encoder: the SDK's named export isn't available under Node 24
 // strict ESM, so use the default (CJS-interop) import here. anno/schema.ts uses
 // the named import (for Vite/vitest); both share annoFieldDefs (encode-defs).
@@ -132,7 +132,7 @@ for (const lang of ["en", "ja"] as const) {
   });
 }
 
-// The fixture lives in core (the loader is @commentary/core/anno/mock); write there.
+// The fixture lives in core (the loader is @anno/core/anno/mock); write there.
 const outPath = fileURLToPath(new URL("../../core/src/anno/mock-comments.json", import.meta.url));
 writeFileSync(outPath, JSON.stringify(raws, null, 2) + "\n");
 console.log(`wrote ${raws.length} mock attestations → ${outPath}`);

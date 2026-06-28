@@ -9,7 +9,7 @@
     "jsxImportSource": "react",
     "baseUrl": ".",
     "paths": {
-      "@commentary/core/*": ["../core/src/*"]
+      "@anno/core/*": ["../core/src/*"]
     }
   },
   "include": ["src", "scripts", "tests"],

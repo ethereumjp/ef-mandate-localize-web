@@ -1,4 +1,4 @@
-import type { AnchorStatus } from "@commentary/core/lib/anchoring";
+import type { AnchorStatus } from "@anno/core/lib/anchoring";
 import { ct } from "./i18n";
 
 export function AnchorStatusBadge({

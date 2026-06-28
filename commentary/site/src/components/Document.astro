@@ -13,7 +13,7 @@ const { lang } = Astro.props;
 const chapters = loadChapters();
 
 // The commentary widget is now an embedded <script> (built separately as
-// @commentary/widget → public/commentary/embed.js), so this site is "just
+// @anno/widget → public/commentary/embed.js), so this site is "just
 // another host". Inject it only when there's something to show: a registered
 // ANNO schema, or mock mode for local preview.
 const schemaUid = import.meta.env.PUBLIC_EAS_ANNO_SCHEMA_UID ?? "";

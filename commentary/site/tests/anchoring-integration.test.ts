@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { makeAnchor, project } from "@commentary/core/lib/anchoring";
-import { normalizeBlockText } from "@commentary/core/lib/normalize";
-import { blockHashFromNormalized } from "@commentary/core/lib/hash";
+import { makeAnchor, project } from "@anno/core/lib/anchoring";
+import { normalizeBlockText } from "@anno/core/lib/normalize";
+import { blockHashFromNormalized } from "@anno/core/lib/hash";
 
 /** A live block's {text, blockHash} from plain paragraph text (no markers). */
 function blockOf(text: string) {

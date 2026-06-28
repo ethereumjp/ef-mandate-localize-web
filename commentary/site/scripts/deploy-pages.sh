@@ -13,7 +13,7 @@
 # commentary/site/.env (gitignored) as PUBLIC_EAS_ANNO_SCHEMA_UID=0x… or export
 # it before running. Astro bakes PUBLIC_* into the static build.
 #
-# Usage:   pnpm --filter @commentary/site deploy:pages
+# Usage:   pnpm --filter ef-mandate-localize-site deploy:pages
 # Config:  PAGES_REMOTE (default: fork)   PAGES_BRANCH (default: gh-pages)
 set -euo pipefail
 

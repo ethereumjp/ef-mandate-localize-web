@@ -1,7 +1,7 @@
 import { EAS } from "@ethereum-attestation-service/eas-sdk";
 import type { TransactionSigner } from "@ethereum-attestation-service/eas-sdk";
-import { EAS_ADDRESS } from "@commentary/core/chain";
-import { EMPTY_UID } from "@commentary/core/anno/constants";
+import { EAS_ADDRESS } from "@anno/core/chain";
+import { EMPTY_UID } from "@anno/core/anno/constants";
 
 /** Submit a comment attestation; resolves to the new attestation UID. */
 export async function attestComment(
