@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Publish the built site to a GitHub Pages "Deploy from a branch" target.
 #
-# Builds commentary/site, then force-pushes the static output (dist/) as a
+# Builds apps/site, then force-pushes the static output (dist/) as a
 # single-commit, output-only branch (default: gh-pages) on a remote (default:
-# fork). No GitHub Actions workflow and nothing outside commentary/ is involved —
+# fork). No GitHub Actions workflow and nothing outside apps/site/ is involved —
 # the publish branch holds build output only and never merges into your work.
 #
 # One-time GitHub setup: repo Settings → Pages → Build and deployment →
 #   Source: "Deploy from a branch" → Branch: gh-pages / (root).
 #
 # Real (on-chain) comments need the schema UID at build time. Put it in
-# commentary/site/.env (gitignored) as PUBLIC_EAS_ANNO_SCHEMA_UID=0x… or export
+# apps/site/.env (gitignored) as PUBLIC_EAS_ANNO_SCHEMA_UID=0x… or export
 # it before running. Astro bakes PUBLIC_* into the static build.
 #
 # Usage:   pnpm --filter ef-mandate-localize-site deploy:pages

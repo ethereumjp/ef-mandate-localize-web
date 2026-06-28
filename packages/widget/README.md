@@ -39,7 +39,8 @@ a shadow root (no style bleed into the host page).
 ```bash
 pnpm --filter @anno/widget build       # Vite → dist/embed.js + lazy app chunk
 pnpm --filter @anno/widget test        # Vitest unit tests
-pnpm --filter @anno/widget serve:test  # static server on :5180
+pnpm --filter @anno/widget typecheck   # tsc --noEmit
+pnpm --filter @anno/widget serve:test  # static server on :5180 (requires python3)
 # then open http://localhost:5180/test/  (dogfoods the built embed.js on a plain page)
 ```
 
