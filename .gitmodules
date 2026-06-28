@@ -1,0 +1,3 @@
+[submodule "localize"]
+	path = localize
+	url = https://github.com/ethereumjp/ef-mandate-localize-jp

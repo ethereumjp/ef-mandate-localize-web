@@ -2,11 +2,11 @@
   "sources": [
     {
       "lang": "en",
-      "path": "../../source/en/chapters"
+      "path": "../../localize/source/en/chapters"
     },
     {
       "lang": "ja",
-      "path": "../../source/ja/chapters"
+      "path": "../../localize/source/ja/chapters"
     }
   ]
 }
