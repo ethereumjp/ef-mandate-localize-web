@@ -1,56 +1,44 @@
-# ef-mandate-localize-jp
+# ef-mandate-localize-site
 
-Japanese localization of the [EF Mandate PDF](https://ethereum.foundation/ef-mandate.pdf).
+Monorepo for the **EF Mandate reading site** and its **embeddable on-chain commentary
+widget**. The English/Japanese localization markdown is consumed from the upstream content
+repo [`ethereumjp/ef-mandate-localize-jp`](https://github.com/ethereumjp/ef-mandate-localize-jp)
+as the `localize/` git submodule (source of truth — translations are edited upstream).
 
-## Repository layout
+## Layout
 
-- `source/en/chapters/` - frozen English chapter snapshots
-- `source/ja/chapters/` - Japanese translation chapters
-- `dist/` - generated merged markdown and PDF
-- `scripts/build.py` - merge/export entrypoint
+- `apps/site` — `ef-mandate-localize-site`: the Astro reading site with an on-chain
+  commentary layer.
+- `packages/core` — `@anno/core`: shared anchoring, EAS, and schema logic.
+- `packages/widget` — `@anno/widget`: the standalone embeddable annotation widget
+  ([README](packages/widget/README.md)).
+- `localize/` — git submodule: upstream localization markdown.
+- `docs/` — design specs, implementation plans, demo checklists.
 
-## Prerequisites 
+## Setup
 
-### For translating and localizing
-
-This repository has no prerequisite softwares, as it only requires editing markdown files in `source/ja/chapters/*.md`.
-
-Only for exporting the merged markdown and PDF into `/dist`, the following dependencies are needed:
-- [`python3`](https://www.python.org/)
-- [`pandoc`](https://pandoc.org/)
-- [`lualatex`](https://www.luatex.org/)
-
-## Workflow
-
-1. Add or update chapter files under `source/en/chapters/` and `source/ja/chapters/`.
-2. Keep terminology aligned with `GLOSSARY.md`.
-3. Run the build script to merge chapters and export the final document.
-
-The canonical source text is the official PDF at \
-https://ethereum.foundation/ef-mandate.pdf.
-The English and Japanese chapter sets must match by two-digit chapter number.
-
-## Build
-
-For merged markdown & pdf:
 ```bash
-# exports a merged markdown and pdf to /dist
-# requires python3, pandoc and lualatex
-python3 scripts/build.py
-
-#also works
-make pdf
+git clone --recursive https://github.com/<owner>/ef-mandate-localize-site
+# or, in an existing clone:
+git submodule update --init
+pnpm install
 ```
 
-For merged markdown only:
-``` bash
-# exports a merged markdown without pdf
-# requires only python3, no pandoc needed
-python3 scripts/build.py --no-pdf
+## Develop
 
-# also works
-make markdown
+```bash
+pnpm run dev:site:mock   # site with bundled mock comments
+pnpm run build:site      # static site → apps/site/dist
+pnpm run build:widget    # embed bundle → packages/widget/dist/embed.js
+pnpm -r test
+pnpm -r typecheck
 ```
-The script validates that the English and Japanese chapter numbers line up, writes a merged markdown manuscript to `dist/ef-mandate-ja.md`, and renders `dist/ef-mandate-ja.pdf` when `pandoc` and the LaTeX toolchain are installed.
 
-For markdown-only work, pass `--no-pdf`.
+## Updating the localization
+
+Localization is pinned via the `localize/` submodule. To pull the latest upstream content:
+
+```bash
+git -C localize pull origin main
+git add localize && git commit -m "chore: bump localize submodule"
+```
