@@ -52,7 +52,7 @@ export function rangeForOffsets(blockEl: Element, start: number, end: number): R
 // highlighted ranges — so the rule must live in document.head. Literal cobalt
 // (#0c0cff), not CSS vars, so highlights render identically on any host page.
 // Light-only: the focus wash is a faint cobalt tint regardless of host theme.
-const HIGHLIGHT_STYLE_ID = "commentary-highlight-styles";
+const HIGHLIGHT_STYLE_ID = "annotation-highlight-styles";
 const HIGHLIGHT_CSS = `
 ::highlight(comment){text-decoration-line:underline;text-decoration-color:#0c0cff;text-decoration-thickness:2px;text-underline-offset:3px}
 ::highlight(comment-focus){background-color:rgba(12,12,255,.10);text-decoration-line:underline;text-decoration-color:#0c0cff;text-decoration-thickness:2px;text-underline-offset:3px}

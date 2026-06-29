@@ -13,7 +13,7 @@ first use. Drop it on any page:
 ```html
 <script
   type="module"
-  src="https://your.cdn/commentary/embed.js"
+  src="https://your.cdn/annotation/embed.js"
   data-schema-uid="0x…"
 ></script>
 ```
@@ -55,6 +55,6 @@ pnpm --filter @anno/widget serve:test  # static server on :5180 (requires python
 
 ## Standalone build
 
-`@anno/widget` builds and ships independently of `apps/site`. The site simply copies the
-built `dist/` into its served `public/commentary/` (see the site's `embed:build` script),
+`@anno/widget` builds and ships independently of `apps/web`. The web app simply copies the
+built `dist/` into its served `public/annotation/` (see the web app's `embed:build` script),
 but any static host can serve `embed.js` the same way.

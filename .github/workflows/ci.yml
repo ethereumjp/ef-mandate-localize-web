@@ -37,5 +37,5 @@ jobs:
       - name: Build widget
         run: pnpm run build:widget
 
-      - name: Build site
-        run: pnpm run build:site
+      - name: Build web
+        run: pnpm run build:web

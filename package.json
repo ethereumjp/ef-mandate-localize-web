@@ -6,8 +6,8 @@
   "scripts": {
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "dev:site:mock": "pnpm --filter ef-mandate-localize-site run dev:mock",
-    "build:site": "pnpm --filter ef-mandate-localize-site build",
+    "dev:web:mock": "pnpm --filter ef-mandate-localize-web run dev:mock",
+    "build:web": "pnpm --filter ef-mandate-localize-web build",
     "build:widget": "pnpm --filter @anno/widget build"
   }
 }

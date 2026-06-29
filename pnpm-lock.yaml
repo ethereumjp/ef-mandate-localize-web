@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  apps/site:
+  apps/web:
     dependencies:
       '@anno/core':
         specifier: workspace:*

@@ -1,13 +1,13 @@
 # Deployment
 
-The reading site (`@commentary/site`) is a static Astro build. Two targets:
+The web app (`ef-mandate-localize-web`) is a static Astro build. Two targets:
 a GitHub Pages **preview** (live today) and an **IPFS** destination (designed,
-not yet implemented). Everything required lives under `commentary/` — no
+not yet implemented). Everything required lives under `apps/web/` — no
 repo-root workflow or `.gitignore` changes are involved.
 
 ## Base path
 
-The site's base path is environment-driven (`commentary/site/astro.config.mjs`):
+The site's base path is environment-driven (`apps/web/astro.config.mjs`):
 
 ```js
 base: process.env.BASE_PATH ?? "/ef-mandate-localize-jp",
@@ -15,7 +15,7 @@ base: process.env.BASE_PATH ?? "/ef-mandate-localize-jp",
 
 All internal links go through `withBase()` (`src/lib/i18n.ts`), which normalizes
 the trailing slash, so the language switcher, the brand link, and the embedded
-widget script (`/commentary/embed.js`) all resolve correctly under any base.
+widget script (`/annotation/embed.js`) all resolve correctly under any base.
 
 | Target | `BASE_PATH` | Why |
 |---|---|---|
@@ -34,18 +34,18 @@ PUBLIC_SEPOLIA_RPC_URL=…         # optional; only wallet writes use it (public
 PUBLIC_MOCK_COMMENTS=1           # dev preview only — bundled mock fixtures instead of on-chain
 ```
 
-Put these in `commentary/site/.env` (gitignored); Astro bakes `PUBLIC_*` into the
+Put these in `apps/web/.env` (gitignored); Astro bakes `PUBLIC_*` into the
 static build. Reading comments needs neither a wallet nor a custom RPC — only the
 schema UID. Writing (publishing a comment) needs a wallet connected to Sepolia.
 
 ## GitHub Pages (preview)
 
-"Deploy from a branch" mode — no GitHub Actions workflow. A commentary-scoped
+"Deploy from a branch" mode — no GitHub Actions workflow. A deploy
 script builds the site and force-pushes the static output to an output-only
 branch (`gh-pages` by default) on a remote (`fork` by default).
 
 ```
-PUBLIC_EAS_ANNO_SCHEMA_UID=0x… pnpm --filter @commentary/site deploy:pages
+PUBLIC_EAS_ANNO_SCHEMA_UID=0x… pnpm --filter ef-mandate-localize-web deploy:pages
 ```
 
 `scripts/deploy-pages.sh` builds (`pnpm build`, which also rebuilds the widget
@@ -65,7 +65,7 @@ This is a manual deploy — re-run the script to publish updates (no push-to-dep
 
 The build is already IPFS-portable. When we move to IPFS:
 
-1. **Build for root:** `BASE_PATH=/ pnpm --filter @commentary/site build`.
+1. **Build for root:** `BASE_PATH=/ pnpm --filter ef-mandate-localize-web build`.
 2. **Access via root-served gateways only:**
    - ✅ ENS (`name.eth.limo`), subdomain gateway (`<cid>.ipfs.dweb.link`),
      DNSLink domain root — the site sits at origin root, so the root-base
@@ -73,7 +73,7 @@ The build is already IPFS-portable. When we move to IPFS:
    - ❌ Path gateways (`https://gateway/ipfs/<cid>/…`) — absolute paths break.
      Not supported; use a root-served access method instead.
 3. **Pinning:** undecided (Storacha/web3.storage, Pinata, or a local `ipfs`
-   node). Once chosen, add a `deploy:ipfs` script under `commentary/` — its body
+   node). Once chosen, add a `deploy:ipfs` script under `apps/web/` — its body
    depends on the service (e.g. `w3 up dist`, a Pinata upload, or `ipfs add -r
    dist`). Capture the resulting CID and point an ENS/DNSLink record at it.
 

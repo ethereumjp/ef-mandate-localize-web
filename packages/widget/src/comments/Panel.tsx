@@ -18,7 +18,7 @@ interface Props {
  */
 export function Panel({ lang, count, mode, wallet, onBack, children }: Props) {
   return (
-    <aside className="commentary-panel-shadow fixed inset-x-0 bottom-0 z-40 flex max-h-[75dvh] flex-col overflow-hidden border-t border-cobalt bg-white font-mono sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:border-t-0 sm:border-l">
+    <aside className="annotation-panel-shadow fixed inset-x-0 bottom-0 z-40 flex max-h-[75dvh] flex-col overflow-hidden border-t border-cobalt bg-white font-mono sm:inset-x-auto sm:right-0 sm:h-full sm:max-h-none sm:w-[340px] sm:border-t-0 sm:border-l">
       <div className="flex items-center justify-between gap-2 border-b border-cobalt/40 px-3 py-2.5">
         {mode === "compose" ? (
           <button

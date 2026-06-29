@@ -22,11 +22,11 @@ const PENCIL_PLUS =
   '<path d="M19 16v6"/>';
 
 function mount(): void {
-  if (document.getElementById("commentary-widget")) return; // singleton guard
+  if (document.getElementById("annotation-widget")) return; // singleton guard
   const config = readConfig();
 
   const host = document.createElement("div");
-  host.id = "commentary-widget";
+  host.id = "annotation-widget";
   document.body.appendChild(host);
   const shadow = host.attachShadow({ mode: "open" });
 

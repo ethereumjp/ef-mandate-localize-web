@@ -1,5 +1,5 @@
 {
-  "name": "ef-mandate-localize-site",
+  "name": "ef-mandate-localize-web",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed",
@@ -9,7 +9,7 @@
     "build": "pnpm run embed:build && astro build",
     "preview": "astro preview",
     "embed:build": "pnpm --filter @anno/widget run build && pnpm run embed:copy",
-    "embed:copy": "rm -rf public/commentary && mkdir -p public/commentary && cp -R ../../packages/widget/dist/. public/commentary/",
+    "embed:copy": "rm -rf public/annotation && mkdir -p public/annotation && cp -R ../../packages/widget/dist/. public/annotation/",
     "typecheck": "tsc --noEmit",
     "check:astro": "astro check",
     "test": "vitest run",

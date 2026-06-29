@@ -12,14 +12,14 @@ interface Props {
 const { lang } = Astro.props;
 const chapters = loadChapters();
 
-// The commentary widget is now an embedded <script> (built separately as
-// @anno/widget → public/commentary/embed.js), so this site is "just
+// The annotation widget is now an embedded <script> (built separately as
+// @anno/widget → public/annotation/embed.js), so this site is "just
 // another host". Inject it only when there's something to show: a registered
 // ANNO schema, or mock mode for local preview.
 const schemaUid = import.meta.env.PUBLIC_EAS_ANNO_SCHEMA_UID ?? "";
 const mock = import.meta.env.PUBLIC_MOCK_COMMENTS ? "1" : undefined;
 const rpc = import.meta.env.PUBLIC_SEPOLIA_RPC_URL;
-const commentaryEnabled = Boolean(schemaUid) || Boolean(mock);
+const annotationEnabled = Boolean(schemaUid) || Boolean(mock);
 ---
 
 <div
@@ -97,11 +97,11 @@ const commentaryEnabled = Boolean(schemaUid) || Boolean(mock);
     <SiteMeta lang={lang} />
 </footer>
 {
-    commentaryEnabled && (
+    annotationEnabled && (
         <script
             is:inline
             type="module"
-            src={withBase("commentary/embed.js")}
+            src={withBase("annotation/embed.js")}
             data-schema-uid={schemaUid}
             data-network="sepolia"
             data-lang={lang}

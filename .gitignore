@@ -6,5 +6,5 @@ dist/
 .DS_Store
 .gstack/
 .superpowers/
-# Embed bundle copied from @anno/widget into the site's served public dir
-apps/site/public/commentary/
+# Embed bundle copied from @anno/widget into the web app's served public dir
+apps/web/public/annotation/

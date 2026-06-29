@@ -1,4 +1,4 @@
-// Client-only: theme toggle + keep-your-place language links. (Commentary
+// Client-only: theme toggle + keep-your-place language links. (Annotation
 // visibility is now owned by the embedded widget, not the site toolbar.)
 const root = document.documentElement;
 

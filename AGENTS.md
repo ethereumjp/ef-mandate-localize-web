@@ -9,13 +9,13 @@ A **pnpm monorepo for the EF Mandate localize web and a reusable, embeddable on-
 - The **localization markdown** (the Japanese/English EF Mandate translation) is NOT in this repo — it lives upstream in `ethereumjp/ef-mandate-localize-jp` and is consumed here as the `localize/` **git submodule**.
 - The **site + widget** are this repo's product. The widget (`@anno/`-scoped) is generic ("anno" = annotate any site); the site is one specific consumer.
 
-Eventual home is `ethereumjp/ef-mandate-localize-site` (pending owner approval); the structure is named with that in mind.
+Eventual home is `ethereumjp/ef-mandate-localize-web` (pending owner approval); the structure is named with that in mind.
 
 ## Layout
 
 | Path | Package | Role |
 |---|---|---|
-| `apps/site` | `ef-mandate-localize-site` (unscoped) | Astro reading site with the commentary layer |
+| `apps/web` | `ef-mandate-localize-web` (unscoped) | Astro reading site with the annotation layer |
 | `packages/core` | `@anno/core` | Anchoring engine + EAS/anno attestation layer (framework-free) |
 | `packages/widget` | `@anno/widget` | Standalone embeddable widget (Vite → `embed.js`); has its own README |
 | `localize/` | — | git submodule: upstream localization markdown (source of truth) |
@@ -34,8 +34,8 @@ pnpm install                       # Node 22, pnpm 11.5.3 (pinned via packageMan
 From the repo root:
 
 ```bash
-pnpm run dev:site:mock   # Astro dev server with bundled MOCK comments (no chain/wallet)
-pnpm run build:site      # static site → apps/site/dist
+pnpm run dev:web:mock   # Astro dev server with bundled MOCK comments (no chain/wallet)
+pnpm run build:web      # static site → apps/web/dist
 pnpm run build:widget    # embed bundle → packages/widget/dist/embed.js
 pnpm -r test             # all packages (Vitest)
 pnpm -r typecheck        # all packages (tsc --noEmit)
@@ -47,19 +47,19 @@ Per-package / focused:
 pnpm --filter @anno/core test                       # one package's suite
 pnpm --filter @anno/core exec vitest run tests/anno.schema.test.ts   # one test file
 pnpm --filter @anno/core exec vitest run -t "decodes"               # by test-name pattern
-pnpm --filter ef-mandate-localize-site lint         # oxlint (site only)
-pnpm --filter ef-mandate-localize-site fmt          # oxfmt (site only)
+pnpm --filter ef-mandate-localize-web lint         # oxlint (site only)
+pnpm --filter ef-mandate-localize-web fmt          # oxfmt (site only)
 pnpm --filter @anno/widget serve:test               # static server on :5180 for test/index.html (needs python3)
 ```
 
-Site operational scripts (from `apps/site`): `anno:schema:register` (one-time EAS schema registration), `gen:mock` (regenerate mock comments), `deploy:pages` (publish `dist/` to a `gh-pages` branch).
+Site operational scripts (from `apps/web`): `anno:schema:register` (one-time EAS schema registration), `gen:mock` (regenerate mock comments), `deploy:pages` (publish `dist/` to a `gh-pages` branch).
 
 ## Architecture (the parts that span files)
 
 ### Content flow: submodule → site, widget → site
 
-- `apps/site/config.json` points at `../../localize/source/{en,ja}/chapters`. `src/lib/sources.ts` resolves those relative to `config.json`; `src/lib/content.ts` loads and aligns EN/JA chapters **by position** (no in-text markers — the pipeline is marker-free). Routes: `src/pages/index.astro` (English at `/`) and `[lang].astro` (translations at `/<lang>`, falling back to English).
-- The site **embeds the widget as a built bundle**, not as a source import: `build`/`dev` run `embed:build`, which builds `@anno/widget` and copies its `dist/` into `apps/site/public/commentary/`. So the widget is a build-time dependency of the site, and `public/commentary/` is generated (gitignored). The host page loads it via `<script type="module" src=".../commentary/embed.js" data-schema-uid=…>`.
+- `apps/web/config.json` points at `../../localize/source/{en,ja}/chapters`. `src/lib/sources.ts` resolves those relative to `config.json`; `src/lib/content.ts` loads and aligns EN/JA chapters **by position** (no in-text markers — the pipeline is marker-free). Routes: `src/pages/index.astro` (English at `/`) and `[lang].astro` (translations at `/<lang>`, falling back to English).
+- The site **embeds the widget as a built bundle**, not as a source import: `build`/`dev` run `embed:build`, which builds `@anno/widget` and copies its `dist/` into `apps/web/public/annotation/`. So the widget is a build-time dependency of the site, and `public/annotation/` is generated (gitignored). The host page loads it via `<script type="module" src=".../annotation/embed.js" data-schema-uid=…>`.
 
 ### `@anno/core` — anchoring engine + EAS layer
 
@@ -78,9 +78,9 @@ Comments are **EAS attestations anchored to an exact text span** so they survive
 ## Gotchas that aren't obvious from a single file
 
 - **`localize/` submodule must be initialized** before any site build/test, or content loading fails. CI checks out with `submodules: recursive`.
-- **`PUBLIC_EAS_ANNO_SCHEMA_UID` is baked at build time** (Astro static build / `apps/site/.env`). Set it before `pnpm build`; rebuild after changing `.env`. Without it the read/attest paths are inert. `.env` lives at `apps/site/.env` (gitignored; see `.env.example`).
-- **Mock mode** (`PUBLIC_MOCK_COMMENTS=1`, what `dev:site:mock` sets, or widget `data-mock`) shows bundled comments with no wallet/chain — use it for UI work.
+- **`PUBLIC_EAS_ANNO_SCHEMA_UID` is baked at build time** (Astro static build / `apps/web/.env`). Set it before `pnpm build`; rebuild after changing `.env`. Without it the read/attest paths are inert. `.env` lives at `apps/web/.env` (gitignored; see `.env.example`).
+- **Mock mode** (`PUBLIC_MOCK_COMMENTS=1`, what `dev:web:mock` sets, or widget `data-mock`) shows bundled comments with no wallet/chain — use it for UI work.
 - **Network:** Sepolia for the demo, Ethereum mainnet for production. Reads go through the EAS GraphQL API; the write path needs a wallet (MetaMask/Rabby).
 - **pnpm build-script approvals** live in `pnpm-workspace.yaml` under `allowBuilds:` (esbuild/keccak/secp256k1/sharp). pnpm 11 **ignores** the old `pnpm.onlyBuiltDependencies` in `package.json` and warns — keep the config in the workspace file.
-- **GitHub Pages base path:** `apps/site/astro.config.mjs` defaults `base` to `/ef-mandate-localize-jp` (the repo path); override with the `BASE_PATH`/`SITE_URL` env vars for other deploys (custom domain → `base: "/"`). Update this when the repo is renamed/moved.
-- The widget bundle under `apps/site/public/commentary/` is **generated** by `embed:build` — don't hand-edit it; change `packages/widget` and rebuild.
+- **GitHub Pages base path:** `apps/web/astro.config.mjs` defaults `base` to `/ef-mandate-localize-jp` (the repo path); override with the `BASE_PATH`/`SITE_URL` env vars for other deploys (custom domain → `base: "/"`). Update this when the repo is renamed/moved.
+- The widget bundle under `apps/web/public/annotation/` is **generated** by `embed:build` — don't hand-edit it; change `packages/widget` and rebuild.

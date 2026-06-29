@@ -21,7 +21,7 @@
 }
 
 /* Comment-span highlights — ::highlight(comment) / ::highlight(comment-focus) —
-   are now injected into document.head by the embedded commentary widget, so the
+   are now injected into document.head by the embedded annotation widget, so the
    host no longer styles them and the widget works on any page. */
 
 html {
