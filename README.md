@@ -1,13 +1,13 @@
-# ef-mandate-localize-site
+# EF Mandate localize web
 
-Monorepo for the **EF Mandate reading site** and its **embeddable on-chain commentary
+Monorepo for the **EF Mandate localize web** and its **embeddable on-chain commentary
 widget**. The English/Japanese localization markdown is consumed from the upstream content
 repo [`ethereumjp/ef-mandate-localize-jp`](https://github.com/ethereumjp/ef-mandate-localize-jp)
 as the `localize/` git submodule (source of truth — translations are edited upstream).
 
 ## Layout
 
-- `apps/site` — `ef-mandate-localize-site`: the Astro reading site with an on-chain
+- `apps/site` — `ef-mandate-localize-web`: the Astro reading site with an on-chain
   commentary layer.
 - `packages/core` — `@anno/core`: shared anchoring, EAS, and schema logic.
 - `packages/widget` — `@anno/widget`: the standalone embeddable annotation widget
