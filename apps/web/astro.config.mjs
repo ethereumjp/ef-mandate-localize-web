@@ -2,12 +2,12 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
-// Published as a GitHub Pages project site on the fork:
-// https://yujiym.github.io/ef-mandate-localize-jp/  → base is the repo path.
-// Override both via env in other deploys (custom domain → base "/").
+// Static build, always served at root (IPNS subdomain / ENS gateways, DNSLink).
+// Path gateways (…/ipns/<name>/…) are not supported — the site uses absolute paths.
+// SITE_URL sets the canonical origin for absolute URLs (sitemap / canonical / OG).
 export default defineConfig({
-  site: process.env.SITE_URL ?? "https://yujiym.github.io",
-  base: process.env.BASE_PATH ?? "/ef-mandate-localize-jp",
+  site: process.env.SITE_URL,
+  base: "/",
   vite: {
     plugins: [tailwindcss()],
     // @anno/core ships TS source; transform it (don't externalize) and

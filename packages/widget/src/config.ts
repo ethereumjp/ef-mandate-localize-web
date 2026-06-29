@@ -2,11 +2,22 @@ export interface WidgetConfig {
   schemaUid: string;
   network: string;
   rpc?: string;
+  mainnetRpc?: string;
   easGraphql?: string;
   position: string;
   lang: string;
   theme: string;
   mock: boolean;
+}
+
+/**
+ * Resolve the target network. `?mode=testnet` in the URL forces Sepolia (for the
+ * demo / local dev); otherwise an explicit `data-network` wins, falling back to
+ * mainnet — the production default.
+ */
+export function resolveNetworkName(dataNetwork: string | undefined, search: string): string {
+  if (new URLSearchParams(search).get("mode") === "testnet") return "sepolia";
+  return dataNetwork ?? "mainnet";
 }
 
 /**
@@ -26,8 +37,9 @@ export function readConfig(): WidgetConfig {
   const d = findScript()?.dataset ?? {};
   return {
     schemaUid: d.schemaUid ?? "",
-    network: d.network ?? "sepolia",
+    network: resolveNetworkName(d.network, location.search),
     rpc: d.rpc,
+    mainnetRpc: d.mainnetRpc,
     easGraphql: d.easGraphql,
     position: d.position ?? "bottom-right",
     lang: d.lang ?? document.documentElement.lang ?? "en",

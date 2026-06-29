@@ -17,8 +17,8 @@ export function withBase(path: string): string {
 
 /**
  * Route for a language: the source language lives at the site root, others at
- * "<base>/<code>". Base-prefixed so links work under a GitHub Pages project
- * subpath as well as at domain root.
+ * "<base>/<code>". Base-prefixed so links work under a subpath deploy as well
+ * as at domain root.
  */
 export function langRoute(code: Lang): string {
   return code === SOURCE_LANG ? withBase("") : withBase(code);

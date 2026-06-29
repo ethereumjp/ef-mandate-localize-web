@@ -15,6 +15,8 @@ interface Props {
   onConnect?: () => void;
   onSubmit: (body: string) => void;
   schemaUid?: string;
+  /** easscan base URL for the schema link (network-dependent). */
+  easscan: string;
   /** When set, this composer is a reply (inherits the parent's span); shows whom. */
   replyTo?: string;
 }
@@ -29,6 +31,7 @@ export function Composer({
   onConnect,
   onSubmit,
   schemaUid,
+  easscan,
   replyTo,
 }: Props) {
   const [body, setBody] = useState("");
@@ -91,7 +94,7 @@ export function Composer({
           </dl>
           {schemaUid ? (
             <a
-              href={`https://sepolia.easscan.org/schema/view/${schemaUid}`}
+              href={`${easscan}/schema/view/${schemaUid}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-1 inline-block underline hover:text-cobalt"

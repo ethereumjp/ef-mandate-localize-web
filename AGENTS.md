@@ -52,7 +52,7 @@ pnpm --filter ef-mandate-localize-web fmt          # oxfmt (site only)
 pnpm --filter @anno/widget serve:test               # static server on :5180 for test/index.html (needs python3)
 ```
 
-Site operational scripts (from `apps/web`): `anno:schema:register` (one-time EAS schema registration), `gen:mock` (regenerate mock comments), `deploy:pages` (publish `dist/` to a `gh-pages` branch).
+Site operational scripts (from `apps/web`): `anno:schema:register` (one-time EAS schema registration, per network), `gen:mock` (regenerate mock comments).
 
 ## Architecture (the parts that span files)
 
@@ -66,21 +66,21 @@ Site operational scripts (from `apps/web`): `anno:schema:register` (one-time EAS
 Comments are **EAS attestations anchored to an exact text span** so they survive edits to the source/translation. Two cooperating halves:
 
 - **Re-anchoring** (`src/lib/anchoring.ts`): `makeAnchor()` records a span as `{exact quote, prefix/suffix context (CONTEXT_LEN=32), code-point offsets, blockHash}`. `project(anchor, currentBlock)` classifies it against the live text into one of `AnchorStatus = "anchored" | "re-anchored" | "needs-review" | "orphaned"` (every status except `anchored` sets `pastVersion: true` → the "Comment for past version" tag). Attestations are immutable; this is the derived current-version view. `lib/normalize.ts` (deterministic text normalization) and `lib/hash.ts` (keccak block hashing) feed it.
-- **anno attestation layer** (`src/anno/*`): `schema.ts` (`AnnoFields` codec, `decodeAnno`), `read.ts` (`decodeAttestation` → `StoredAnno`), `selector.ts` (CSS selector + `nearestContainer`), `canonicalUrl.ts` + `pageKey.ts` (deterministic URL canonicalization → `pageKey()` 32-byte bucket), `locate.ts` (`locate`/`projectAnno`/`commentsForUrl`), `author.ts`. `chain.ts` holds EAS constants (Sepolia EAS + SchemaRegistry addresses, chain id 11155111).
+- **anno attestation layer** (`src/anno/*`): `schema.ts` (`AnnoFields` codec, `decodeAnno`), `read.ts` (`decodeAttestation` → `StoredAnno`), `selector.ts` (CSS selector + `nearestContainer`), `canonicalUrl.ts` + `pageKey.ts` (deterministic URL canonicalization → `pageKey()` 32-byte bucket), `locate.ts` (`locate`/`projectAnno`/`commentsForUrl`), `author.ts`. `chain.ts` holds the `NETWORKS` registry (mainnet + Sepolia EAS/SchemaRegistry addresses, chain ids, GraphQL + easscan endpoints) and `resolveNetwork(name)`.
 - **Page-scoping & replies (recent design):** attestations are fetched per page via the **recipient = `pageKey(canonicalUrl)`** (not by language), and threaded replies link to their parent via the on-chain **`refUID`** (the older `parentUid` field was dropped).
 
 ### `@anno/widget` — two-stage embed
 
 - **Stage 1 — `src/loader.ts`** (tiny, no React/wallet): reads config from the embed `<script data-*>` (`src/config.ts`), mounts a host element + **shadow root** (no style bleed), paints a floating launcher pill + a selection "Comment" popover, and runs the framework-free `display.ts` controller (read/project/paint/hit-test). It **lazy-imports `./app`** only on first open.
 - **Stage 2 — `src/app.tsx`** (`mountApp(shadow, config, display, …)`): the React 19 island — wagmi/viem + ethers v6 for wallet/chain, EAS SDK for attest, `src/comments/*` (Composer, CommentThread, CommentCard, ConnectButton, …), `src/web3/*` (eas, config, ethers, highlight, thread). Built by Vite (`vite.config.ts`) into a single ESM `dist/embed.js` loader + a hashed lazy `app` chunk.
-- Config attributes are documented in `packages/widget/README.md`; defaults live in `src/config.ts` (`data-schema-uid` required; `data-network` default `sepolia`; `data-mock` for the bundled demo comments; etc.).
+- Config attributes are documented in `packages/widget/README.md`; defaults live in `src/config.ts` (`data-schema-uid` required; network is chosen at runtime — `mainnet` by default, `?mode=testnet` URL flag → Sepolia; `data-mock` for the bundled demo comments; etc.).
 
 ## Gotchas that aren't obvious from a single file
 
 - **`localize/` submodule must be initialized** before any site build/test, or content loading fails. CI checks out with `submodules: recursive`.
 - **`PUBLIC_EAS_ANNO_SCHEMA_UID` is baked at build time** (Astro static build / `apps/web/.env`). Set it before `pnpm build`; rebuild after changing `.env`. Without it the read/attest paths are inert. `.env` lives at `apps/web/.env` (gitignored; see `.env.example`).
 - **Mock mode** (`PUBLIC_MOCK_COMMENTS=1`, what `dev:web:mock` sets, or widget `data-mock`) shows bundled comments with no wallet/chain — use it for UI work.
-- **Network:** Sepolia for the demo, Ethereum mainnet for production. Reads go through the EAS GraphQL API; the write path needs a wallet (MetaMask/Rabby).
+- **Network:** **mainnet by default**; append `?mode=testnet` to a page URL → Sepolia (demo / local dev). `resolveNetwork()` (`@anno/core/chain`) maps the name to EAS addresses + GraphQL endpoint. Reads go through the EAS GraphQL API; the write path needs a wallet (MetaMask/Rabby). Register the schema once per network (same string → same UID).
 - **pnpm build-script approvals** live in `pnpm-workspace.yaml` under `allowBuilds:` (esbuild/keccak/secp256k1/sharp). pnpm 11 **ignores** the old `pnpm.onlyBuiltDependencies` in `package.json` and warns — keep the config in the workspace file.
-- **GitHub Pages base path:** `apps/web/astro.config.mjs` defaults `base` to `/ef-mandate-localize-jp` (the repo path); override with the `BASE_PATH`/`SITE_URL` env vars for other deploys (custom domain → `base: "/"`). Update this when the repo is renamed/moved.
+- **Base path:** the site is served at root (`base: "/"`, hardcoded) — IPNS subdomain / ENS gateways. Path gateways (`…/ipns/<name>/…`) aren't supported (absolute paths). `SITE_URL` sets the canonical origin (sitemap / canonical / OG).
 - The widget bundle under `apps/web/public/annotation/` is **generated** by `embed:build` — don't hand-edit it; change `packages/widget` and rebuild.

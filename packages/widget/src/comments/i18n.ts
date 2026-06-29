@@ -36,7 +36,7 @@ const STRINGS: Record<string, Record<string, string>> = {
     compose: "新規コメント",
     composePlaceholder: "コメントを書く…",
     onchainDetails: "オンチェーン記録 (EAS)",
-    publish: "Sepolia に公開",
+    publish: "公開",
     publishing: "公開中…",
     connectToPublish: "接続して公開",
   },

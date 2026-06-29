@@ -18,7 +18,10 @@ const chapters = loadChapters();
 // ANNO schema, or mock mode for local preview.
 const schemaUid = import.meta.env.PUBLIC_EAS_ANNO_SCHEMA_UID ?? "";
 const mock = import.meta.env.PUBLIC_MOCK_COMMENTS ? "1" : undefined;
+// Network is chosen at runtime by the widget (mainnet by default; `?mode=testnet`
+// → Sepolia), so we don't pin data-network here — just pass both optional RPCs.
 const rpc = import.meta.env.PUBLIC_SEPOLIA_RPC_URL;
+const mainnetRpc = import.meta.env.PUBLIC_MAINNET_RPC_URL;
 const annotationEnabled = Boolean(schemaUid) || Boolean(mock);
 ---
 
@@ -103,10 +106,10 @@ const annotationEnabled = Boolean(schemaUid) || Boolean(mock);
             type="module"
             src={withBase("annotation/embed.js")}
             data-schema-uid={schemaUid}
-            data-network="sepolia"
             data-lang={lang}
             data-mock={mock}
             data-rpc={rpc}
+            data-mainnet-rpc={mainnetRpc}
         />
     )
 }

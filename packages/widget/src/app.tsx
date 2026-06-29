@@ -15,6 +15,7 @@ import { pageKey } from "@anno/core/anno/pageKey";
 import { EMPTY_UID } from "@anno/core/anno/constants";
 import type { AnnoFields } from "@anno/core/anno/schema";
 import type { StoredAnno } from "@anno/core/anno/locate";
+import { resolveNetwork } from "@anno/core/chain";
 import { buildWagmiConfig } from "./web3/config";
 import { useEthersSigner } from "./web3/ethers";
 import { attestComment } from "./web3/eas";
@@ -79,6 +80,7 @@ function Controller({
   onComposeReady,
 }: ControllerProps) {
   const signer = useEthersSigner();
+  const net = resolveNetwork(config.network);
   const { isConnected } = useAccount();
   const { connect } = useConnect();
   const [comments, setComments] = useState(display.projected());
@@ -148,7 +150,7 @@ function Controller({
 
   async function handleSubmit(body: string) {
     if (!signer || !config.schemaUid) {
-      setComposerError("Connect a wallet on Sepolia to publish.");
+      setComposerError(`Connect a wallet on ${net.label} to publish.`);
       return;
     }
     let fields: AnnoFields | null;
@@ -169,6 +171,7 @@ function Controller({
       await attestComment(signer, config.schemaUid, encodeAnno(fields), {
         recipient: pageKey(fields.urlCanonical),
         refUID: parent ? parent.uid : EMPTY_UID,
+        eas: net.eas,
       });
       await display.refresh();
       setComments(display.projected());
@@ -187,7 +190,7 @@ function Controller({
       lang={config.lang}
       count={comments.length}
       mode={mode}
-      wallet={<ConnectButton />}
+      wallet={<ConnectButton net={net} />}
       onBack={backToList}
     >
       {mode === "compose" ? (
@@ -201,6 +204,7 @@ function Controller({
           onConnect={() => connect({ connector: injected() })}
           onSubmit={handleSubmit}
           schemaUid={config.schemaUid}
+          easscan={net.easscan}
           replyTo={replyTo ?? undefined}
         />
       ) : (
@@ -218,7 +222,9 @@ function Controller({
 }
 
 function App(props: ControllerProps) {
-  const [wagmiConfig] = useState(() => buildWagmiConfig({ rpc: props.config.rpc }));
+  const [wagmiConfig] = useState(() =>
+    buildWagmiConfig({ rpc: props.config.rpc, mainnetRpc: props.config.mainnetRpc }),
+  );
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>

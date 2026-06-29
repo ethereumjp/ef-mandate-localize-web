@@ -1,7 +1,9 @@
 import { decodeAnno } from "./schema";
 import type { StoredAnno } from "./locate";
 
-const EAS_GRAPHQL = "https://sepolia.easscan.org/graphql";
+// Fallback endpoint when a caller omits one; the widget always passes the
+// resolved network's endpoint (see chain.ts NETWORKS). Defaults to mainnet.
+const EAS_GRAPHQL = "https://easscan.org/graphql";
 
 /** GraphQL query; scoped by `recipient` (the page key) when one is supplied. */
 function buildQuery(scoped: boolean): string {

@@ -42,10 +42,10 @@ rebuild).
 
 ## Operational scripts
 
-- `anno:schema:register` — one-time EAS schema registration.
+- `anno:schema:register` — one-time EAS schema registration (per network).
 - `gen:mock` — regenerate the bundled mock comments.
-- `deploy:pages` — publish `dist/` to a `gh-pages` branch. See
-  [`docs/deployment.md`](../../docs/deployment.md).
+
+Deploy: see [`docs/deployment.md`](../../docs/deployment.md).
 
 ## Stack
 

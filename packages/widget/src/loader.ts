@@ -7,6 +7,7 @@
 import { readConfig } from "./config";
 import { createDisplay } from "./display";
 import { nearestContainer } from "@anno/core/anno/selector";
+import { resolveNetwork } from "@anno/core/chain";
 
 // Tabler "pencil-bolt" icon paths (the launcher pill).
 const PENCIL =
@@ -49,9 +50,10 @@ function mount(): void {
   popover.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${PENCIL_PLUS}</svg><span>Comment</span>`;
   shadow.appendChild(popover);
 
+  const net = resolveNetwork(config.network);
   const display = createDisplay({
     schemaUid: config.schemaUid,
-    easGraphql: config.easGraphql,
+    easGraphql: config.easGraphql ?? net.graphql,
     mock: config.mock,
   });
 

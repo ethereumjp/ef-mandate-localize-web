@@ -8,15 +8,18 @@ backend, no build step on the host site.
 ## Embed
 
 Build produces a single ESM loader (`dist/embed.js`) that lazy-loads the React app on
-first use. Drop it on any page:
+first use. Drop it on any page — e.g. from the CDN (pin an exact version):
 
 ```html
 <script
   type="module"
-  src="https://your.cdn/annotation/embed.js"
+  src="https://cdn.jsdelivr.net/npm/@anno/widget@0.1.0/dist/embed.js"
   data-schema-uid="0x…"
 ></script>
 ```
+
+Any static host works the same way (same-origin, CDN, or IPFS/ENS) as long as `dist/`'s
+files stay co-located — see [Deployment & distribution, Part 2](../../docs/deployment.md#part-2--the-widget).
 
 The loader injects a floating launcher pill plus a selection "Comment" popover, both inside
 a shadow root (no style bleed into the host page).
@@ -26,9 +29,10 @@ a shadow root (no style bleed into the host page).
 | Attribute          | Required | Default                          | Notes |
 |--------------------|----------|----------------------------------|-------|
 | `data-schema-uid`  | Yes      | —                                | EAS schema UID the widget reads/writes. |
-| `data-network`     | No       | `sepolia`                        | Target network. |
-| `data-rpc`         | No       | public node                      | JSON-RPC endpoint for the write path. |
-| `data-eas-graphql` | No       | network default                  | EAS GraphQL endpoint for the read path. |
+| `data-network`     | No       | `mainnet`                        | Target network (`mainnet` or `sepolia`). `?mode=testnet` in the URL forces `sepolia`. |
+| `data-rpc`         | No       | public node                      | Sepolia JSON-RPC endpoint (write path). |
+| `data-mainnet-rpc` | No       | public node                      | Mainnet JSON-RPC endpoint (write path / ENS). |
+| `data-eas-graphql` | No       | network default                  | EAS GraphQL read endpoint (defaults to the network's endpoint). |
 | `data-position`    | No       | `bottom-right`                   | Launcher corner: `bottom-right` or `bottom-left`. |
 | `data-lang`        | No       | `<html lang>` then `en`          | UI language. |
 | `data-theme`       | No       | `auto`                           | Color theme. |

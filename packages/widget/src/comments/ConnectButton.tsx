@@ -7,7 +7,7 @@ import {
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { mainnet } from "wagmi/chains";
-import { SEPOLIA_CHAIN_ID } from "../web3/config";
+import type { NetworkConfig } from "@anno/core/chain";
 
 function short(addr: string) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -19,7 +19,7 @@ const base =
   "h-8 max-w-[12rem] cursor-pointer truncate border border-cobalt px-2 py-1 font-mono text-xs text-cobalt hover:bg-surface disabled:cursor-not-allowed";
 const action = `${base} uppercase tracking-wider`;
 
-export function ConnectButton() {
+export function ConnectButton({ net }: { net: NetworkConfig }) {
   const { address, isConnected, chainId } = useAccount();
   const { connect, isPending } = useConnect();
   const { disconnect } = useDisconnect();
@@ -39,13 +39,13 @@ export function ConnectButton() {
       </button>
     );
   }
-  if (chainId !== SEPOLIA_CHAIN_ID) {
+  if (chainId !== net.chainId) {
     return (
       <button
         className={action}
-        onClick={() => switchChain({ chainId: SEPOLIA_CHAIN_ID })}
+        onClick={() => switchChain({ chainId: net.chainId })}
       >
-        Switch to Sepolia
+        Switch to {net.label}
       </button>
     );
   }
