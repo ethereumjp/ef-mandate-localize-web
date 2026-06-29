@@ -59,6 +59,15 @@ NETWORK=mainnet EAS_PRIVATE_KEY=0x… pnpm --filter ef-mandate-localize-web anno
 NETWORK=sepolia EAS_PRIVATE_KEY=0x… pnpm --filter ef-mandate-localize-web anno:schema:register
 ```
 
+To register from a **Safe multisig** instead, run `anno:schema:calldata` (no key, no RPC) —
+it prints the deterministic UID and the `register(...)` call (`to` / `data`) to submit from
+the Safe's Transaction Builder. The UID is identical either way (EAS schema registration is
+caller-independent, so the registrant address doesn't affect it):
+
+```bash
+NETWORK=mainnet pnpm --filter ef-mandate-localize-web anno:schema:calldata
+```
+
 Set the resulting UID as `PUBLIC_EAS_ANNO_SCHEMA_UID` before building. Reads go through the
 network's EAS GraphQL endpoint (no wallet/RPC needed); publishing a comment needs a wallet on
 the active network. Custom RPCs are optional (`PUBLIC_MAINNET_RPC_URL`,

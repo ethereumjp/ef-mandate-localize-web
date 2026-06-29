@@ -18,6 +18,7 @@
     "fmt": "oxfmt 'src/**/*.ts' 'src/**/*.tsx' 'scripts/*.ts' 'tests/*.ts'",
     "fmt:check": "oxfmt --check 'src/**/*.ts' 'src/**/*.tsx' 'scripts/*.ts' 'tests/*.ts'",
     "anno:schema:register": "tsx scripts/register-anno-schema.ts",
+    "anno:schema:calldata": "MODE=calldata tsx scripts/register-anno-schema.ts",
     "gen:mock": "tsx scripts/gen-mock-comments.ts"
   },
   "dependencies": {
