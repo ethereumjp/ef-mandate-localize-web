@@ -7,17 +7,17 @@ name: Deploy to 4everland
 # under the hood. It is stable in practice but NOT a published/contracted API, so
 # this step may need adjusting if 4everland changes it.
 #
-# Required repo Secrets (Settings → Secrets and variables → Actions):
-#   FOUR_EVERLAND_TOKEN         Hosting → Auth Token → +Create
-#   FOUR_EVERLAND_PROJECT_ID    id of the Hosting project (create it once; see below)
-#   PUBLIC_EAS_ANNO_SCHEMA_UID  baked into the build (e.g. 0xc12b39c7…)
-# Optional repo Variable:
-#   FOUR_EVERLAND_DEPLOY_URL    the project's IPNS gateway URL — enables
-#                               "skip deploy when the build is unchanged"
+# Config (Settings → Environments → "production", + Secrets and variables → Actions):
+#   secret   FOUR_EVERLAND_TOKEN         Hosting → Auth Token → +Create
+#   variable FOUR_EVERLAND_PROJECT_ID    id of the Hosting project (just an identifier)
+#   variable PUBLIC_EAS_ANNO_SCHEMA_UID  public; baked into the build (e.g. 0xc12b39c7…)
+#   variable FOUR_EVERLAND_DEPLOY_URL    (optional) project IPNS gateway URL — enables
+#                                        "skip deploy when the build is unchanged"
 #
-# One-time project creation (locally): `npm i -g @4everland/hosting-cli`,
-# `4ever-hosting login`, `4ever-hosting deploy -ipfs` → creates the project and
-# writes its projectId into ./.hostingConfig.json. Use that id as the secret.
+# Create the project WITHOUT GitHub integration (so 4everland does NOT build) via the
+# API, then use content.projectId:
+#   curl -H "token: $TOKEN" -F name=ef-mandate-localize -F platform=IPFS \
+#        https://cli-api.4everland.org/project
 
 on:
   workflow_dispatch: {}
@@ -37,6 +37,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
     timeout-minutes: 15
     steps:
       - name: Check out repository (with submodules)
@@ -58,7 +59,7 @@ jobs:
 
       - name: Build
         env:
-          PUBLIC_EAS_ANNO_SCHEMA_UID: ${{ secrets.PUBLIC_EAS_ANNO_SCHEMA_UID }}
+          PUBLIC_EAS_ANNO_SCHEMA_UID: ${{ vars.PUBLIC_EAS_ANNO_SCHEMA_UID }}
         run: pnpm run build:web
 
       - name: Build id + skip-if-unchanged
@@ -89,7 +90,7 @@ jobs:
         if: steps.gate.outputs.deploy == 'true'
         env:
           TOKEN: ${{ secrets.FOUR_EVERLAND_TOKEN }}
-          PROJECT_ID: ${{ secrets.FOUR_EVERLAND_PROJECT_ID }}
+          PROJECT_ID: ${{ vars.FOUR_EVERLAND_PROJECT_ID }}
         run: |
           if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
             echo "::warning::FOUR_EVERLAND_TOKEN / FOUR_EVERLAND_PROJECT_ID not set — built but did not deploy."
