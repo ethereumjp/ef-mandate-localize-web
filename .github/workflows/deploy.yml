@@ -1,0 +1,103 @@
+name: Deploy to 4everland
+
+# Builds the site in CI (reproducible: pinned toolchain + submodule checkout) and
+# deploys apps/web/dist to a 4everland Hosting project.
+#
+# NOTE: cli-api.4everland.org is the API the official @4everland/hosting-cli uses
+# under the hood. It is stable in practice but NOT a published/contracted API, so
+# this step may need adjusting if 4everland changes it.
+#
+# Required repo Secrets (Settings → Secrets and variables → Actions):
+#   FOUR_EVERLAND_TOKEN         Hosting → Auth Token → +Create
+#   FOUR_EVERLAND_PROJECT_ID    id of the Hosting project (create it once; see below)
+#   PUBLIC_EAS_ANNO_SCHEMA_UID  baked into the build (e.g. 0xc12b39c7…)
+# Optional repo Variable:
+#   FOUR_EVERLAND_DEPLOY_URL    the project's IPNS gateway URL — enables
+#                               "skip deploy when the build is unchanged"
+#
+# One-time project creation (locally): `npm i -g @4everland/hosting-cli`,
+# `4ever-hosting login`, `4ever-hosting deploy -ipfs` → creates the project and
+# writes its projectId into ./.hostingConfig.json. Use that id as the secret.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "localize" # submodule pointer bumps
+      - "pnpm-lock.yaml"
+      - ".github/workflows/deploy.yml"
+
+concurrency:
+  group: deploy-4everland
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository (with submodules)
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        env:
+          PUBLIC_EAS_ANNO_SCHEMA_UID: ${{ secrets.PUBLIC_EAS_ANNO_SCHEMA_UID }}
+        run: pnpm run build:web
+
+      - name: Build id + skip-if-unchanged
+        id: gate
+        env:
+          DEPLOY_URL: ${{ vars.FOUR_EVERLAND_DEPLOY_URL }}
+        run: |
+          new=$(cd apps/web/dist && find . -type f -exec sha256sum {} \; | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
+          echo "build id: $new"
+          cur=""
+          if [ -n "$DEPLOY_URL" ]; then
+            cur=$(curl -fsS --max-time 20 "${DEPLOY_URL%/}/.build-id" 2>/dev/null || echo "")
+          fi
+          if [ -n "$cur" ] && [ "$new" = "$cur" ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Build unchanged ($new) — skipping deploy."
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+          # stamp the id so the next run can compare against the live site
+          echo "$new" > apps/web/dist/.build-id
+
+      - name: Zip dist
+        if: steps.gate.outputs.deploy == 'true'
+        run: cd apps/web/dist && zip -qr "$GITHUB_WORKSPACE/hostingDeploy.zip" .
+
+      - name: Deploy to 4everland Hosting
+        if: steps.gate.outputs.deploy == 'true'
+        env:
+          TOKEN: ${{ secrets.FOUR_EVERLAND_TOKEN }}
+          PROJECT_ID: ${{ secrets.FOUR_EVERLAND_PROJECT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "::warning::FOUR_EVERLAND_TOKEN / FOUR_EVERLAND_PROJECT_ID not set — built but did not deploy."
+            exit 0
+          fi
+          curl -fsS --retry 3 \
+            -H "token: $TOKEN" \
+            -F "file=@hostingDeploy.zip" \
+            -F "projectId=$PROJECT_ID" \
+            https://cli-api.4everland.org/deploy
+          echo "::notice::Deployed — the project's IPNS now points to the new build."
