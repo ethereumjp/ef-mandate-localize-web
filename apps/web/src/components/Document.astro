@@ -22,6 +22,10 @@ const mock = import.meta.env.PUBLIC_MOCK_COMMENTS ? "1" : undefined;
 // → Sepolia), so we don't pin data-network here — just pass both optional RPCs.
 const rpc = import.meta.env.PUBLIC_SEPOLIA_RPC_URL;
 const mainnetRpc = import.meta.env.PUBLIC_MAINNET_RPC_URL;
+// Where to load the widget bundle from. Default: the same-origin copy produced by
+// embed:build (good for local dev). Production: set PUBLIC_EMBED_SRC to the
+// widget's own gateway URL so the widget deploys/updates independently of the site.
+const embedSrc = import.meta.env.PUBLIC_EMBED_SRC || withBase("annotation/embed.js");
 const annotationEnabled = Boolean(schemaUid) || Boolean(mock);
 ---
 
@@ -104,7 +108,7 @@ const annotationEnabled = Boolean(schemaUid) || Boolean(mock);
         <script
             is:inline
             type="module"
-            src={withBase("annotation/embed.js")}
+            src={embedSrc}
             data-schema-uid={schemaUid}
             data-lang={lang}
             data-mock={mock}
