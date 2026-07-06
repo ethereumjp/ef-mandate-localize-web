@@ -1,7 +1,7 @@
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
 import { normalize } from "viem/ens";
-import type { CommentNode } from "../web3/thread";
+import type { CommentNode } from "@anno/core/anno/thread";
 import type { StoredAnno } from "@anno/core/anno/locate";
 import type { Projection } from "@anno/core/lib/anchoring";
 import { ct } from "./i18n";

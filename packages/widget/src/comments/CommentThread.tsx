@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import type { LocatedAnno, StoredAnno } from "@anno/core/anno/locate";
-import { buildThreads } from "../web3/thread";
+import { buildThreads } from "@anno/core/anno/thread";
 import { ct } from "./i18n";
 import { CommentCard } from "./CommentCard";
 
 interface Props {
-  /** All projected comments for the page (document order), threaded by parentUid. */
+  /** All projected comments for the page (document order), threaded by refUID. */
   comments: LocatedAnno[];
   lang: string;
   focusedUid: string | null;

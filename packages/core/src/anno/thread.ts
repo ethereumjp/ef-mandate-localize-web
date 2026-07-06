@@ -1,7 +1,9 @@
+import { EMPTY_UID } from "./constants";
+
 /** Minimal shape needed to thread comments (any stored-comment type works). */
-interface Threadable {
+export interface Threadable {
   uid: string;
-  parentUid: string;
+  refUID: string;
 }
 
 export interface CommentNode<T extends Threadable> {
@@ -9,9 +11,7 @@ export interface CommentNode<T extends Threadable> {
   replies: CommentNode<T>[];
 }
 
-const ZERO_UID = "0x" + "00".repeat(32);
-
-/** Build reply trees by `parentUid`. Zero parent (or unknown parent) = top-level. */
+/** Build reply trees by `refUID`. Empty parent (or unknown parent) = top-level. */
 export function buildThreads<T extends Threadable>(comments: T[]): CommentNode<T>[] {
   const nodes = new Map<string, CommentNode<T>>();
   for (const c of comments) nodes.set(c.uid, { comment: c, replies: [] });
@@ -19,7 +19,7 @@ export function buildThreads<T extends Threadable>(comments: T[]): CommentNode<T
   const roots: CommentNode<T>[] = [];
   for (const c of comments) {
     const node = nodes.get(c.uid)!;
-    const parent = c.parentUid !== ZERO_UID ? nodes.get(c.parentUid) : undefined;
+    const parent = c.refUID !== EMPTY_UID ? nodes.get(c.refUID) : undefined;
     if (parent) parent.replies.push(node);
     else roots.push(node);
   }

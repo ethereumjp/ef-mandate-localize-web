@@ -9,7 +9,7 @@ function stored(over: Partial<StoredAnno>): StoredAnno {
     uid: "0x1",
     attester: "0xa",
     time: 0,
-    parentUid: "0x" + "00".repeat(32),
+    refUID: "0x" + "00".repeat(32),
     url: "https://example.com/x",
     urlCanonical: "https://example.com/x",
     origin: "https://example.com",

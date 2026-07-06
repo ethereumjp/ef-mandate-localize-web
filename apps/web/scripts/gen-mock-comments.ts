@@ -12,7 +12,7 @@ import { blockHash } from "@anno/core/lib/hash";
 import { normalizeBlockText } from "@anno/core/lib/normalize";
 import type { AnnoFields } from "@anno/core/anno/schema";
 import { annoFieldDefs } from "@anno/core/anno/encode-defs";
-import { ANNO_SCHEMA } from "@anno/core/anno/constants";
+import { ANNO_SCHEMA, EMPTY_UID } from "@anno/core/anno/constants";
 // Node-side EAS encoder: the SDK's named export isn't available under Node 24
 // strict ESM, so use the default (CJS-interop) import here. anno/schema.ts uses
 // the named import (for Vite/vitest); both share annoFieldDefs (encode-defs).
@@ -24,7 +24,6 @@ const encodeAnno = (f: AnnoFields) => enc.encodeData(annoFieldDefs(f));
 
 const AUTHOR = "0x1234567890abcdef1234567890abcdef12345678";
 const TIME = 1717000000; // fixed → shown as 2024/5/30 in the card
-const ZERO_UID = "0x" + "00".repeat(32);
 /** A bytes32 mock attestation id from a small seed byte. */
 const id = (seed: number) => "0x" + seed.toString(16).padStart(2, "0").repeat(32);
 
@@ -121,7 +120,7 @@ function fields(o: { lang: "en" | "ja"; path: string; body: string; anchor: Anch
 
 const raws: Raw[] = [];
 const add = (uid: string, f: AnnoFields) =>
-  raws.push({ id: uid, attester: AUTHOR, time: TIME, revoked: false, refUID: ZERO_UID, data: encodeAnno(f) });
+  raws.push({ id: uid, attester: AUTHOR, time: TIME, revoked: false, refUID: EMPTY_UID, data: encodeAnno(f) });
 
 for (const lang of ["en", "ja"] as const) {
   const path = lang === "ja" ? "/ja" : "/";

@@ -10,25 +10,22 @@ importers:
 
   apps/web:
     dependencies:
-      '@anno/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@ethereum-attestation-service/eas-sdk':
-        specifier: ^2.9.1
-        version: 2.9.1(supports-color@8.1.1)(typescript@5.9.3)
       astro:
         specifier: ^7.0.0
         version: 7.0.0(@astrojs/markdown-remark@7.2.0)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@types/node@22.19.21)(jiti@2.7.0)(rollup@4.61.1)(tsx@4.22.4)(yaml@2.9.0)
-      ethers:
-        specifier: ^6.16.0
-        version: 6.16.0
       marked:
         specifier: ^14.1.4
         version: 14.1.4
     devDependencies:
+      '@anno/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@astrojs/check':
         specifier: ^0.9.9
         version: 0.9.9(prettier@3.8.4)(typescript@5.9.3)
+      '@ethereum-attestation-service/eas-sdk':
+        specifier: ^2.9.1
+        version: 2.9.1(supports-color@8.1.1)(typescript@5.9.3)
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.20(tailwindcss@4.3.0)
@@ -38,6 +35,9 @@ importers:
       '@types/node':
         specifier: ^22.5.0
         version: 22.19.21
+      ethers:
+        specifier: ^6.16.0
+        version: 6.16.0
       jsdom:
         specifier: ^29.1.1
         version: 29.1.1(@noble/hashes@1.8.0)

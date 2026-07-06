@@ -9,7 +9,8 @@ import {
   type LocatedAnno,
 } from "@anno/core/anno/locate";
 import { resolveContainer } from "@anno/core/anno/selector";
-import { applyHighlights, rangeForOffsets } from "./web3/highlight";
+import { rangeForOffsets } from "@anno/core/lib/anchor-dom";
+import { applyHighlights } from "./highlight";
 
 export interface DisplayOpts {
   schemaUid: string;

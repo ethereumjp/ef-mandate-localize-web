@@ -131,7 +131,7 @@ function Controller({
   }, [initialComposeRange, onComposeReady, openComposer]);
 
   // Reply: inherit the parent's span; the composer previews that quote and the
-  // new comment links to the parent via parentUid. No text selection involved.
+  // new comment links to the parent via refUID. No text selection involved.
   const handleReply = useCallback((parent: StoredAnno) => {
     composeRange.current = null;
     replyParent.current = parent;

@@ -33,7 +33,7 @@ export function decodeAttestation(a: RawAttestation): StoredAnno {
     uid: a.id,
     attester: a.attester,
     time: Number(a.time),
-    parentUid: a.refUID,
+    refUID: a.refUID,
     ...decodeAnno(a.data),
   };
 }

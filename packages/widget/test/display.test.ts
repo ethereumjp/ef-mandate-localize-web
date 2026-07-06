@@ -25,7 +25,7 @@ function stored(over: Partial<StoredAnno> = {}): StoredAnno {
     spanExact: "walkaway",
     spanPrefix: "the ",
     spanSuffix: " test",
-    parentUid: ZERO,
+    refUID: ZERO,
     body: "hi",
     meta: "",
     ...over,

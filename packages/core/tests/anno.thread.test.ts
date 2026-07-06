@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { buildThreads } from "../src/web3/thread";
+import { buildThreads } from "../src/anno/thread";
 
 const ZERO = "0x" + "00".repeat(32);
-function c(uid: string, parentUid: string) {
-  return { uid, parentUid };
+function c(uid: string, refUID: string) {
+  return { uid, refUID };
 }
 
 describe("buildThreads", () => {
-  it("nests replies under their parent; top-level = zero parentUid", () => {
+  it("nests replies under their parent; top-level = zero refUID", () => {
     const tree = buildThreads([c("0x1", ZERO), c("0x2", "0x1"), c("0x3", ZERO)]);
     expect(tree.map((n) => n.comment.uid)).toEqual(["0x1", "0x3"]);
     expect(tree[0].replies.map((n) => n.comment.uid)).toEqual(["0x2"]);

@@ -5,14 +5,14 @@ import { resolveContainer } from "./selector";
 import type { AnnoFields } from "./schema";
 
 /**
- * A stored generalized comment = AnnoFields + EAS attestation envelope.
- * Parallel to `StoredComment` in web3/read.ts (AnnoFields ≠ CommentFields, no shared base).
+ * A stored generalized comment = AnnoFields + EAS attestation envelope
+ * (uid / attester / time / refUID read from the on-chain attestation).
  */
 export interface StoredAnno extends AnnoFields {
   uid: string;
   attester: string;
   time: number; // unix seconds
-  parentUid: string; // on-chain refUID; EMPTY_UID = top-level
+  refUID: string; // on-chain reference UID; EMPTY_UID = top-level
 }
 
 export interface LocatedAnno {
@@ -49,8 +49,8 @@ export function locate(doc: Document, c: StoredAnno): LocatedAnno {
 
 /**
  * Project a group of stored comments (already filtered to one block) onto that
- * block's live text. The anno counterpart of `web3/projectComments`: resolve the
- * block's normalized text + hash once, then project each comment's span.
+ * block's live text: resolve the block's normalized text + hash once, then
+ * project each comment's span.
  */
 export function projectAnno(blockEl: Element, comments: StoredAnno[]): LocatedAnno[] {
   const text = normalizedBlockText(blockEl);
