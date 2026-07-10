@@ -7,7 +7,6 @@
     "verbatimModuleSyntax": false,
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "baseUrl": ".",
     "paths": {
       "@anno/core/*": ["../../packages/core/src/*"]
     }
