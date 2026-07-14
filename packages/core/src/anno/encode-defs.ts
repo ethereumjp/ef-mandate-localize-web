@@ -20,7 +20,7 @@ export const ANNO_ABI = [
   { name: "spanSuffix", type: "string" },
   { name: "body", type: "string" },
   { name: "meta", type: "string" },
-] as const;
+] as const satisfies readonly { name: keyof AnnoFields; type: string }[];
 
 /** The ordered EAS field descriptors *with values*, for `encodeAnno` (eas-sdk). */
 export function annoFieldDefs(
@@ -29,6 +29,6 @@ export function annoFieldDefs(
   return ANNO_ABI.map((p) => ({
     name: p.name,
     type: p.type,
-    value: f[p.name as keyof AnnoFields],
+    value: f[p.name],
   }));
 }

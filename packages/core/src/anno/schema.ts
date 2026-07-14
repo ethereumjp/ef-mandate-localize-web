@@ -7,7 +7,7 @@ export interface AnnoFields {
   origin: string;
   lang: string;
   rootSelector: string;
-  containerHash: string;
+  containerHash: `0x${string}`;
   spanStart: number;
   spanEnd: number;
   spanExact: string;

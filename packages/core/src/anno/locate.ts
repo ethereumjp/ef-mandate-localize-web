@@ -23,7 +23,7 @@ export interface LocatedAnno {
 /** View a stored comment's anchor fields as an `Anchor` (containerHash = blockHash). */
 function toAnchor(c: AnnoFields): Anchor {
   return {
-    blockHash: c.containerHash as `0x${string}`,
+    blockHash: c.containerHash,
     exact: c.spanExact,
     prefix: c.spanPrefix,
     suffix: c.spanSuffix,

@@ -15,7 +15,7 @@ function stored(over: Partial<StoredAnno>): StoredAnno {
     origin: "https://example.com",
     lang: "en",
     rootSelector: '[id="b1"]',
-    containerHash: "0x" + "00".repeat(32),
+    containerHash: `0x${"00".repeat(32)}`,
     spanStart: 4,
     spanEnd: 12,
     spanExact: "walkaway",
@@ -38,7 +38,7 @@ describe("locate", () => {
 
   it("re-anchors when the container changed but the quote still exists", () => {
     document.body.innerHTML = '<p id="b1">see the walkaway test now</p>';
-    const out = locate(document, stored({ containerHash: "0x" + "ab".repeat(32) }));
+    const out = locate(document, stored({ containerHash: `0x${"ab".repeat(32)}` }));
     expect(out.projection.status).toBe("re-anchored");
     expect(out.projection.pastVersion).toBe(true);
   });
@@ -47,7 +47,7 @@ describe("locate", () => {
     document.body.innerHTML = "<article><p>intro</p><p>the walkaway test</p></article>";
     const out = locate(
       document,
-      stored({ rootSelector: '[id="gone"]', containerHash: "0x" + "ab".repeat(32) }),
+      stored({ rootSelector: '[id="gone"]', containerHash: `0x${"ab".repeat(32)}` }),
     );
     expect(out.projection.status).toBe("re-anchored");
     expect(out.projection.pastVersion).toBe(true);
