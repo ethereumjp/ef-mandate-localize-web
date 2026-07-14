@@ -17,7 +17,6 @@ interface Props {
   lang: string;
   depth?: number;
   focusedUid?: string | null;
-  pendingUids?: Set<string>;
   onFocus?: (uid: string) => void;
   onReply?: (parent: StoredAnno) => void;
 }
@@ -28,13 +27,11 @@ export function CommentCard({
   lang,
   depth = 0,
   focusedUid,
-  pendingUids,
   onFocus,
   onReply,
 }: Props) {
   const c = node.comment;
   const focused = depth === 0 && focusedUid === c.uid;
-  const pending = pendingUids?.has(c.uid) ?? false;
   // ENS reverse records live on mainnet; resolve there and fall back to the
   // shortened address when the attester has no name.
   const { data: ensName } = useEnsName({
@@ -86,12 +83,6 @@ export function CommentCard({
         {projection?.pastVersion ? (
           <span className="text-cobalt/70">{ct(lang, "pastVersion")}</span>
         ) : null}
-        {pending ? (
-          <span
-            aria-hidden
-            className="inline-block size-1.5 animate-pulse bg-cobalt"
-          />
-        ) : null}
         <button
           type="button"
           onClick={(e) => {
@@ -110,7 +101,6 @@ export function CommentCard({
           lang={lang}
           depth={depth + 1}
           focusedUid={focusedUid}
-          pendingUids={pendingUids}
           onFocus={onFocus}
           onReply={onReply}
         />

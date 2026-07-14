@@ -6,7 +6,6 @@ export interface WidgetConfig {
   easGraphql?: string;
   position: string;
   lang: string;
-  theme: string;
   mock: boolean;
 }
 
@@ -43,7 +42,6 @@ export function readConfig(): WidgetConfig {
     easGraphql: d.easGraphql,
     position: d.position ?? "bottom-right",
     lang: d.lang || document.documentElement.lang || "en",
-    theme: d.theme ?? "auto",
     mock: d.mock === "1" || d.mock === "true",
   };
 }

@@ -35,7 +35,6 @@ a shadow root (no style bleed into the host page).
 | `data-eas-graphql` | No       | network default                  | EAS GraphQL read endpoint (defaults to the network's endpoint). |
 | `data-position`    | No       | `bottom-right`                   | Launcher corner: `bottom-right` or `bottom-left`. |
 | `data-lang`        | No       | `<html lang>` then `en`          | UI language. |
-| `data-theme`       | No       | `auto`                           | Color theme. |
 | `data-mock`        | No       | off                              | `1`/`true` uses bundled mock comments (demo, no chain calls). |
 
 ## Develop

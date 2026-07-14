@@ -28,7 +28,6 @@ import type { Display } from "./display";
 import css from "./app.css?inline";
 
 const queryClient = new QueryClient();
-const NO_PENDING = new Set<string>();
 const styled = new WeakSet<ShadowRoot>();
 
 const short = (a: string) => (a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a);
@@ -215,7 +214,6 @@ function Controller({
           comments={comments}
           lang={config.lang}
           focusedUid={focusedUid}
-          pendingUids={NO_PENDING}
           onFocus={handleFocus}
           onReply={handleReply}
         />
