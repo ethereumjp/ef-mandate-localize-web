@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { locate, type StoredAnno } from "../src/anno/locate";
+import { locate, orphanAnno, type StoredAnno } from "../src/anno/locate";
 import { normalizedBlockText } from "../src/lib/anchor-dom";
 import { blockHashFromNormalized } from "../src/lib/hash";
 
@@ -57,5 +57,19 @@ describe("locate", () => {
     document.body.innerHTML = "<p>unrelated content</p>";
     const out = locate(document, stored({ rootSelector: '[id="gone"]' }));
     expect(out.projection.status).toBe("orphaned");
+  });
+});
+
+describe("orphanAnno", () => {
+  it("projects a comment as orphaned/unplaceable", () => {
+    const c = stored({ rootSelector: "#gone" });
+    const located = orphanAnno(c);
+    expect(located.projection).toEqual({
+      status: "orphaned",
+      start: null,
+      end: null,
+      pastVersion: true,
+    });
+    expect(located.comment).toBe(c);
   });
 });

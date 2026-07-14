@@ -35,7 +35,7 @@ function stored(over: Partial<StoredAnno> = {}): StoredAnno {
 describe("projectComments", () => {
   it("projects page comments into byBlock (independent of highlight visibility)", () => {
     document.body.innerHTML = '<p data-block-id="t1">the walkaway test</p>';
-    const byBlock = projectComments([stored()], "https://x/");
+    const { byBlock } = projectComments([stored()], "https://x/");
     const items = [...byBlock.values()].flat();
     expect(items).toHaveLength(1);
     expect(items[0].comment.uid).toBe("0x1");
@@ -43,16 +43,25 @@ describe("projectComments", () => {
 
   it("scopes to the page's canonical URL", () => {
     document.body.innerHTML = '<p data-block-id="t1">the walkaway test</p>';
-    const byBlock = projectComments([stored({ urlCanonical: "https://other/" })], "https://x/");
+    const { byBlock } = projectComments([stored({ urlCanonical: "https://other/" })], "https://x/");
     expect([...byBlock.values()].flat()).toHaveLength(0);
   });
 
   it("anchors via findByQuote when rootSelector is empty/stale", () => {
     document.body.innerHTML = '<p data-block-id="t1">the walkaway test</p>';
-    const byBlock = projectComments([stored({ rootSelector: "" })], "https://x/");
+    const { byBlock } = projectComments([stored({ rootSelector: "" })], "https://x/");
     const items = [...byBlock.values()].flat();
     expect(items).toHaveLength(1);
     expect(items[0].comment.uid).toBe("0x1");
     expect(items[0].projection.status).not.toBe("orphaned");
+  });
+
+  it("keeps unresolvable comments in projected() as orphaned", () => {
+    document.body.innerHTML = '<p data-block-id="t1">the walkaway test</p>';
+    const ghost = stored({ rootSelector: "#nope", spanExact: "text that is not on this page" });
+    const { byBlock, unplaced } = projectComments([ghost], ghost.urlCanonical);
+    expect([...byBlock.values()].flat()).toHaveLength(0);
+    expect(unplaced).toHaveLength(1);
+    expect(unplaced[0].projection.status).toBe("orphaned");
   });
 });

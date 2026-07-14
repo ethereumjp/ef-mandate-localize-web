@@ -32,6 +32,11 @@ function toAnchor(c: AnnoFields): Anchor {
   };
 }
 
+/** A LocatedAnno for a comment whose container cannot be resolved at all. */
+export function orphanAnno(c: StoredAnno): LocatedAnno {
+  return { comment: c, projection: project(toAnchor(c), null) };
+}
+
 /**
  * Locate one stored comment within `doc` and project its span onto the live
  * container. Resolves the container via `rootSelector` (with quote fallback),
@@ -39,9 +44,7 @@ function toAnchor(c: AnnoFields): Anchor {
  */
 export function locate(doc: Document, c: StoredAnno): LocatedAnno {
   const container = resolveContainer(doc, c.rootSelector, c.spanExact);
-  if (container === null) {
-    return { comment: c, projection: project(toAnchor(c), null) };
-  }
+  if (container === null) return orphanAnno(c);
   const text = normalizedBlockText(container);
   const current = { blockHash: blockHashFromNormalized(text), text };
   return { comment: c, projection: project(toAnchor(c), current) };
