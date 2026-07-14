@@ -19,6 +19,11 @@ describe("resolveNetwork", () => {
     expect(NETWORKS.sepolia.eas).toBe("0xC2679fBD37d54388Ce493F1DB75320D236e1815e");
     expect(NETWORKS.sepolia.graphql).toBe("https://sepolia.easscan.org/graphql");
   });
+
+  it("every network carries a default public RPC endpoint", () => {
+    expect(NETWORKS.mainnet.rpc).toBe("https://ethereum-rpc.publicnode.com");
+    expect(NETWORKS.sepolia.rpc).toBe("https://ethereum-sepolia-rpc.publicnode.com");
+  });
 });
 
 describe("resolveNetworkStrict", () => {

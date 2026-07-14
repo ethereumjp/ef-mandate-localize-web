@@ -1,6 +1,7 @@
 import { http, createConfig } from "wagmi";
 import { mainnet, sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
+import { NETWORKS } from "@anno/core/chain";
 
 /**
  * Build a wagmi config from explicit RPC URLs (the embed passes these from its
@@ -13,8 +14,8 @@ export function buildWagmiConfig(opts: { rpc?: string; mainnetRpc?: string } = {
     chains: [sepolia, mainnet],
     connectors: [injected()],
     transports: {
-      [sepolia.id]: http(opts.rpc ?? "https://ethereum-sepolia-rpc.publicnode.com"),
-      [mainnet.id]: http(opts.mainnetRpc ?? "https://ethereum-rpc.publicnode.com"),
+      [sepolia.id]: http(opts.rpc ?? NETWORKS.sepolia.rpc),
+      [mainnet.id]: http(opts.mainnetRpc ?? NETWORKS.mainnet.rpc),
     },
   });
 }

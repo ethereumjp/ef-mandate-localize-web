@@ -52,11 +52,7 @@ if (process.env.MODE === "calldata") {
       `set EAS_PRIVATE_KEY (a funded ${network.label} key), or use MODE=calldata to register via a Safe`,
     );
   }
-  const rpc =
-    process.env.EAS_RPC_URL ??
-    (network.name === "sepolia"
-      ? "https://ethereum-sepolia-rpc.publicnode.com"
-      : "https://ethereum-rpc.publicnode.com");
+  const rpc = process.env.EAS_RPC_URL ?? network.rpc;
 
   const signer = new Wallet(pk, new JsonRpcProvider(rpc));
   const registry = new SchemaRegistry(network.schemaRegistry);
