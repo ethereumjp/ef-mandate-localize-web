@@ -20,18 +20,3 @@ export const ANNO_ABI = [
   { name: "body", type: "string" },
   { name: "meta", type: "string" },
 ] as const satisfies readonly { name: keyof AnnoFields; type: string }[];
-
-/**
- * The ordered EAS field descriptors *with values*, for eas-sdk's `SchemaEncoder`.
- * `@anno/core`'s own `encodeAnno` no longer needs this (it uses viem directly);
- * kept for apps/web's mock-comment generation script, which still uses eas-sdk.
- */
-export function annoFieldDefs(
-  f: AnnoFields,
-): { name: string; type: string; value: string | number }[] {
-  return ANNO_ABI.map((p) => ({
-    name: p.name,
-    type: p.type,
-    value: f[p.name],
-  }));
-}
