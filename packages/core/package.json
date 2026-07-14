@@ -13,7 +13,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ethereum-attestation-service/eas-sdk": "^2.9.1",
     "viem": "^2.21.0"
   },
   "devDependencies": {

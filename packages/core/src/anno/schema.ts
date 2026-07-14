@@ -19,9 +19,8 @@ export interface AnnoFields {
 
 /**
  * Decode EAS attestation data (ABI-encoded per `ANNO_SCHEMA`) into `AnnoFields`.
- * Uses viem's ABI decoder rather than the eas-sdk `SchemaEncoder`, so the read
- * path (Stage 1 of the embed) stays free of eas-sdk/ethers. The write path
- * (`encodeAnno` in `anno/encode.ts`) keeps eas-sdk.
+ * Uses viem's ABI decoder, so `@anno/core` stays free of the eas-sdk entirely —
+ * `encodeAnno` (`anno/encode.ts`) also uses viem, sharing `ANNO_ABI`.
  */
 export function decodeAnno(data: string): AnnoFields {
   const v = decodeAbiParameters(ANNO_ABI, data as `0x${string}`);
