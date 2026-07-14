@@ -66,4 +66,23 @@ describe("fetchAnno", () => {
     expect(out).toEqual([]);
     expect(cap.body).toBeUndefined();
   });
+
+  it("throws when the GraphQL response carries errors", async () => {
+    const fetchImpl = (async () =>
+      new Response(JSON.stringify({ errors: [{ message: "bad query" }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })) as unknown as typeof fetch;
+    await expect(
+      fetchAnno("0x" + "11".repeat(32), { fetchImpl }),
+    ).rejects.toThrow(/bad query/);
+  });
+
+  it("throws on a non-2xx HTTP response", async () => {
+    const fetchImpl = (async () =>
+      new Response("oops", { status: 503 })) as unknown as typeof fetch;
+    await expect(
+      fetchAnno("0x" + "11".repeat(32), { fetchImpl }),
+    ).rejects.toThrow(/503/);
+  });
 });

@@ -55,7 +55,14 @@ export async function fetchAnno(
     body: JSON.stringify({ query: buildQuery(scoped), variables }),
   });
   if (!res.ok) throw new Error(`EAS GraphQL ${res.status}`);
-  const json = (await res.json()) as { data?: { attestations?: RawAttestation[] } };
+  const json = (await res.json()) as {
+    data?: { attestations?: RawAttestation[] };
+    errors?: { message?: string }[];
+  };
+  if (json.errors?.length) {
+    const msgs = json.errors.map((e) => e.message ?? "unknown error").join("; ");
+    throw new Error(`EAS GraphQL: ${msgs}`);
+  }
   const rows = json.data?.attestations ?? [];
   return rows.map(decodeAttestation);
 }
