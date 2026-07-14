@@ -80,12 +80,6 @@ export function selectorFor(el: Element): string {
   return parts.join(" > ");
 }
 
-/** Selector for the stable container of `node`, or null if none. */
-export function generateSelector(node: Node): string | null {
-  const container = nearestContainer(node);
-  return container ? selectorFor(container) : null;
-}
-
 /**
  * Resolve the container element for a stored comment: try `rootSelector`, then
  * fall back to the smallest block-level element whose normalized text contains

@@ -15,8 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint src scripts tests",
-    "fmt": "oxfmt 'src/**/*.ts' 'src/**/*.tsx' 'scripts/*.ts' 'tests/*.ts'",
-    "fmt:check": "oxfmt --check 'src/**/*.ts' 'src/**/*.tsx' 'scripts/*.ts' 'tests/*.ts'",
+    "fmt": "oxfmt 'src/**/*.ts' 'scripts/*.ts' 'tests/*.ts'",
+    "fmt:check": "oxfmt --check 'src/**/*.ts' 'scripts/*.ts' 'tests/*.ts'",
     "anno:schema:register": "tsx scripts/register-anno-schema.ts",
     "anno:schema:calldata": "MODE=calldata tsx scripts/register-anno-schema.ts",
     "gen:mock": "tsx scripts/gen-mock-comments.ts"
@@ -33,7 +33,6 @@
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^22.5.0",
     "ethers": "^6.16.0",
-    "jsdom": "^29.1.1",
     "oxfmt": "^0.53.0",
     "oxlint": "^1.68.0",
     "tailwindcss": "^4.3.0",

@@ -38,9 +38,6 @@ importers:
       ethers:
         specifier: ^6.16.0
         version: 6.16.0
-      jsdom:
-        specifier: ^29.1.1
-        version: 29.1.1(@noble/hashes@1.8.0)
       oxfmt:
         specifier: ^0.53.0
         version: 0.53.0
