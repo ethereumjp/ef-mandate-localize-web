@@ -45,3 +45,16 @@ export const DEFAULT_NETWORK: NetworkName = "mainnet";
 export function resolveNetwork(name?: string): NetworkConfig {
   return NETWORKS[name as NetworkName] ?? NETWORKS[DEFAULT_NETWORK];
 }
+
+/**
+ * Strict variant for operational scripts (key-spending paths): an unrecognized
+ * non-empty name throws instead of silently falling back to mainnet.
+ */
+export function resolveNetworkStrict(name?: string): NetworkConfig {
+  if (name && !(name in NETWORKS)) {
+    throw new Error(
+      `unknown network "${name}" — expected one of: ${Object.keys(NETWORKS).join(", ")}`,
+    );
+  }
+  return resolveNetwork(name);
+}

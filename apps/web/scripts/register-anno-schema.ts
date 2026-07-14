@@ -8,7 +8,7 @@ import easSdk from "@ethereum-attestation-service/eas-sdk";
 const { SchemaRegistry } = easSdk as unknown as {
   SchemaRegistry: typeof SchemaRegistryType;
 };
-import { resolveNetwork } from "@anno/core/chain";
+import { resolveNetworkStrict } from "@anno/core/chain";
 import { ANNO_SCHEMA } from "@anno/core/anno/constants";
 
 // Registration params — identical on every chain, so the resulting UID is too.
@@ -19,7 +19,7 @@ const REVOCABLE = true;
 // keccak256(schema, resolver, revocable) — the same on every chain and
 // independent of who registers; register the same schema once per chain to make
 // it usable there.
-const network = resolveNetwork(process.env.NETWORK);
+const network = resolveNetworkStrict(process.env.NETWORK);
 const uid = solidityPackedKeccak256(
   ["string", "address", "bool"],
   [ANNO_SCHEMA, RESOLVER, REVOCABLE],
