@@ -44,4 +44,9 @@ describe("container resolution", () => {
     setBody("<p>nothing here</p>");
     expect(findByQuote(document, "walkaway")).toBeNull();
   });
+
+  it("findByQuote returns the smallest block element containing the quote", () => {
+    setBody("<article><p>intro</p><p>see the walkaway test now</p></article>");
+    expect(findByQuote(document, "walkaway test")).toBe(document.querySelectorAll("p")[1]);
+  });
 });
