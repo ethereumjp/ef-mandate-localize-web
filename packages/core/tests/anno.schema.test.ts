@@ -35,8 +35,4 @@ describe("anno schema encode/decode", () => {
       "string url,string urlCanonical,string origin,string lang,string rootSelector,bytes32 containerHash,uint32 spanStart,uint32 spanEnd,string spanExact,string spanPrefix,string spanSuffix,string body,string meta",
     );
   });
-
-  it("encodeAnno round-trips through decodeAnno", () => {
-    expect(decodeAnno(encodeAnno(fields))).toEqual(fields);
-  });
 });

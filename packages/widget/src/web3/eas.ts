@@ -42,6 +42,7 @@ export async function attestComment(
   });
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   for (const log of receipt.logs) {
+    if (log.address.toLowerCase() !== opts.eas.toLowerCase()) continue;
     try {
       const ev = decodeEventLog({ abi: EAS_ABI, data: log.data, topics: log.topics });
       if (ev.eventName === "Attested") return ev.args.uid;

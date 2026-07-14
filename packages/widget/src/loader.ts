@@ -172,7 +172,11 @@ function mount(): void {
     loaded = true;
     renderButton();
   });
-  void display.refresh();
+  display.refresh().catch((e) => {
+    console.error("[anno] initial comment load failed:", e);
+    loaded = true; // show [0] rather than a stuck [...] placeholder
+    renderButton();
+  });
 }
 
 mount();

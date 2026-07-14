@@ -141,6 +141,10 @@ function Controller({
       setComposerError(`Connect a wallet on ${net.label} to publish.`);
       return;
     }
+    if (walletClient.chain?.id !== net.chainId) {
+      setComposerError(`Switch your wallet to ${net.label} to publish.`);
+      return;
+    }
     let fields: AnnoFields | null;
     const parent = replyParent.current;
     if (parent) {
@@ -161,7 +165,10 @@ function Controller({
         refUID: parent ? parent.uid : EMPTY_UID,
         eas: net.eas,
       });
-      await display.refresh();
+      // The attestation is on-chain now — a failed refresh must not reopen the
+      // composer (retrying would double-post). Log and move on; the next
+      // refresh will pick the comment up.
+      await display.refresh().catch((e) => console.error("[anno] refresh after attest failed:", e));
       replyParent.current = null;
       setReplyTo(null);
       setMode("list");

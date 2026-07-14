@@ -37,6 +37,13 @@ export interface Display {
   dispose(): void;
 }
 
+/** Comments grouped by resolved live container, plus any that couldn't be placed. */
+export interface ProjectedComments {
+  byBlock: Map<Element, LocatedAnno[]>;
+  /** Comments whose container could not be resolved (selector + quote both failed). */
+  unplaced: LocatedAnno[];
+}
+
 /**
  * Resolve each page-scoped comment to its live container (rootSelector → quote
  * fallback via resolveContainer) and project its span. Keyed by the resolved
@@ -44,12 +51,6 @@ export interface Display {
  * visibility/painting, so the list + count work even while highlights are hidden.
  * Block-ID-free: a stale or empty rootSelector still anchors by quote.
  */
-export interface ProjectedComments {
-  byBlock: Map<Element, LocatedAnno[]>;
-  /** Comments whose container could not be resolved (selector + quote both failed). */
-  unplaced: LocatedAnno[];
-}
-
 export function projectComments(
   stored: StoredAnno[],
   urlCanonical: string,
