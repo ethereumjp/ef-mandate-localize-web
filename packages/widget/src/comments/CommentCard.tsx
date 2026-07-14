@@ -6,10 +6,7 @@ import type { StoredAnno } from "@anno/core/anno/locate";
 import type { Projection } from "@anno/core/lib/anchoring";
 import { ct } from "./i18n";
 import { AnchorStatusBadge } from "./AnchorStatusBadge";
-
-function short(addr: string) {
-  return addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr;
-}
+import { shortHex } from "../lib/format";
 
 interface Props {
   node: CommentNode<StoredAnno>;
@@ -73,7 +70,7 @@ export function CommentCard({
             className="size-4 shrink-0 rounded-full border border-cobalt/40 object-cover"
           />
         ) : null}
-        <span className="font-mono">{ensName ?? short(c.attester)}</span>
+        <span className="font-mono">{ensName ?? shortHex(c.attester)}</span>
         {c.time > 0 ? (
           <span>{new Date(c.time * 1000).toLocaleDateString(lang)}</span>
         ) : null}

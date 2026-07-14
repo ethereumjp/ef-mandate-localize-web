@@ -25,12 +25,11 @@ import { Composer } from "./comments/Composer";
 import { Panel } from "./comments/Panel";
 import type { WidgetConfig } from "./config";
 import type { Display } from "./display";
+import { shortHex } from "./lib/format";
 import css from "./app.css?inline";
 
 const queryClient = new QueryClient();
 const styled = new WeakSet<ShadowRoot>();
-
-const short = (a: string) => (a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a);
 
 /** A reply inherits the parent's anchor (same span); only body changes; refUID wired on submit. */
 function replyFields(parent: StoredAnno, body: string): AnnoFields {
@@ -138,7 +137,7 @@ function Controller({
   const handleReply = useCallback((parent: StoredAnno) => {
     composeRange.current = null;
     replyParent.current = parent;
-    setReplyTo(short(parent.attester));
+    setReplyTo(shortHex(parent.attester));
     setComposerError(null);
     setComposerFields(replyFields(parent, ""));
     setMode("compose");

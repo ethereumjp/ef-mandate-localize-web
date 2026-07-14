@@ -8,10 +8,7 @@ import {
 import { injected } from "wagmi/connectors";
 import { mainnet } from "wagmi/chains";
 import type { NetworkConfig } from "@anno/core/chain";
-
-function short(addr: string) {
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-}
+import { shortHex } from "../lib/format";
 
 // Outline cobalt, square. Action states (connect/switch) are uppercased; the
 // connected state shows an address/ENS name, which must NOT be uppercased.
@@ -51,7 +48,7 @@ export function ConnectButton({ net }: { net: NetworkConfig }) {
   }
   return (
     <button className={base} title="Disconnect" onClick={() => disconnect()}>
-      {ensName ?? (address ? short(address) : "Connected")}
+      {ensName ?? (address ? shortHex(address) : "Connected")}
     </button>
   );
 }
