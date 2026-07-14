@@ -30,6 +30,8 @@ export interface Display {
   projected(): LocatedAnno[];
   /** Register a callback for clicks that land on an anchored comment span. */
   onClickHighlight(cb: (uid: string) => void): void;
+  /** Subscribe to data changes (fires after each refresh). Returns unsubscribe. */
+  onChange(cb: () => void): () => void;
   /** Focus a comment: wash its span (comment-focus) + scroll it into view; null clears. */
   focus(uid: string | null): void;
   dispose(): void;
@@ -100,6 +102,7 @@ export function createDisplay(opts: DisplayOpts): Display {
   let stored: StoredAnno[] = [];
   let visible = false;
   let clickCb: ((uid: string) => void) | null = null;
+  const changeCbs = new Set<() => void>();
 
   function pageScoped(): StoredAnno[] {
     return commentsForUrl(stored, canonicalizeUrl(location.href).urlCanonical);
@@ -164,6 +167,7 @@ export function createDisplay(opts: DisplayOpts): Display {
       }
       project();
       paintHighlights();
+      for (const cb of changeCbs) cb();
     },
     setVisible(on: boolean) {
       visible = on;
@@ -177,6 +181,10 @@ export function createDisplay(opts: DisplayOpts): Display {
     },
     onClickHighlight(cb) {
       clickCb = cb;
+    },
+    onChange(cb) {
+      changeCbs.add(cb);
+      return () => changeCbs.delete(cb);
     },
     focus(uid: string | null) {
       if (!uid) {
@@ -201,6 +209,7 @@ export function createDisplay(opts: DisplayOpts): Display {
       applyHighlights("comment-focus", []);
       byBlock = new Map();
       unplaced = [];
+      changeCbs.clear();
     },
   };
 }

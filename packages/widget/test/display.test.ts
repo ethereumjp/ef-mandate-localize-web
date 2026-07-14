@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { projectComments } from "../src/display";
+import { projectComments, createDisplay } from "../src/display";
 import { blockHash } from "@anno/core/lib/hash";
 import { normalizeBlockText } from "@anno/core/lib/normalize";
 import type { StoredAnno } from "@anno/core/anno/locate";
@@ -63,5 +63,17 @@ describe("projectComments", () => {
     expect([...byBlock.values()].flat()).toHaveLength(0);
     expect(unplaced).toHaveLength(1);
     expect(unplaced[0].projection.status).toBe("orphaned");
+  });
+
+  it("notifies onChange subscribers after refresh, and unsubscribes cleanly", async () => {
+    const display = createDisplay({ schemaUid: "0xabc", mock: true });
+    let calls = 0;
+    const off = display.onChange(() => calls++);
+    await display.refresh();
+    expect(calls).toBe(1);
+    off();
+    await display.refresh();
+    expect(calls).toBe(1);
+    display.dispose();
   });
 });

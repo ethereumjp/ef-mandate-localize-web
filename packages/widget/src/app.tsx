@@ -84,6 +84,10 @@ function Controller({
   const { isConnected } = useAccount();
   const { connect } = useConnect();
   const [comments, setComments] = useState(display.projected());
+  useEffect(
+    () => display.onChange(() => setComments(display.projected())),
+    [display],
+  );
   const [focusedUid, setFocusedUid] = useState<string | null>(initialFocusUid ?? null);
   const [mode, setMode] = useState<"list" | "compose">("list");
   const [composerFields, setComposerFields] = useState<AnnoFields | null>(null);
@@ -174,7 +178,6 @@ function Controller({
         eas: net.eas,
       });
       await display.refresh();
-      setComments(display.projected());
       replyParent.current = null;
       setReplyTo(null);
       setMode("list");

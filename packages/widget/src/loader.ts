@@ -168,10 +168,11 @@ function mount(): void {
   display.onClickHighlight((uid) => void openApp({ focusUid: uid }));
 
   renderButton(); // paint the icon + [...] placeholder immediately (pre-load)
-  void display.refresh().then(() => {
+  display.onChange(() => {
     loaded = true;
     renderButton();
   });
+  void display.refresh();
 }
 
 mount();
