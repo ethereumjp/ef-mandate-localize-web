@@ -6,7 +6,7 @@
 // reuses the Stage-1 `display` for read/paint/focus.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { WagmiProvider, useAccount, useConnect } from "wagmi";
+import { WagmiProvider, useAccount, useConnect, usePublicClient, useWalletClient } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { buildAnnoFields } from "@anno/core/anno/author";
@@ -17,7 +17,6 @@ import type { AnnoFields } from "@anno/core/anno/schema";
 import { annoFieldsOf, type StoredAnno } from "@anno/core/anno/locate";
 import { resolveNetwork } from "@anno/core/chain";
 import { buildWagmiConfig } from "./web3/config";
-import { useEthersSigner } from "./web3/ethers";
 import { attestComment } from "./web3/eas";
 import { ConnectButton } from "./comments/ConnectButton";
 import { CommentThread } from "./comments/CommentThread";
@@ -63,7 +62,8 @@ function Controller({
   initialComposeRange,
   onComposeReady,
 }: ControllerProps) {
-  const signer = useEthersSigner();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
   const net = resolveNetwork(config.network);
   const { isConnected } = useAccount();
   const { connect } = useConnect();
@@ -137,7 +137,7 @@ function Controller({
   }
 
   async function handleSubmit(body: string) {
-    if (!signer || !config.schemaUid) {
+    if (!walletClient || !publicClient || !config.schemaUid) {
       setComposerError(`Connect a wallet on ${net.label} to publish.`);
       return;
     }
@@ -156,7 +156,7 @@ function Controller({
     }
     setComposerPending(true);
     try {
-      await attestComment(signer, config.schemaUid, encodeAnno(fields), {
+      await attestComment(walletClient, publicClient, config.schemaUid, encodeAnno(fields), {
         recipient: pageKey(fields.urlCanonical),
         refUID: parent ? parent.uid : EMPTY_UID,
         eas: net.eas,

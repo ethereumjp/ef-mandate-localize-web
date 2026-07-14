@@ -41,12 +41,10 @@
   "dependencies": {},
   "devDependencies": {
     "@anno/core": "workspace:*",
-    "@ethereum-attestation-service/eas-sdk": "^2.9.1",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/react-query": "^5.101.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "ethers": "^6.16.0",
     "jsdom": "^29.1.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
