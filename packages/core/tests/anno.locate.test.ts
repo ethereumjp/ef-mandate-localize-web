@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { locate, orphanAnno, type StoredAnno } from "../src/anno/locate";
+import { annoFieldsOf, locate, orphanAnno, type StoredAnno } from "../src/anno/locate";
 import { normalizedBlockText } from "../src/lib/anchor-dom";
 import { blockHashFromNormalized } from "../src/lib/hash";
 
@@ -57,6 +57,19 @@ describe("locate", () => {
     document.body.innerHTML = "<p>unrelated content</p>";
     const out = locate(document, stored({ rootSelector: '[id="gone"]' }));
     expect(out.projection.status).toBe("orphaned");
+  });
+});
+
+describe("annoFieldsOf", () => {
+  it("strips exactly the attestation envelope", () => {
+    const c = stored({});
+    const fields = annoFieldsOf(c);
+    expect(fields).not.toHaveProperty("uid");
+    expect(fields).not.toHaveProperty("attester");
+    expect(fields).not.toHaveProperty("time");
+    expect(fields).not.toHaveProperty("refUID");
+    expect(fields.spanExact).toBe(c.spanExact);
+    expect(fields.body).toBe(c.body);
   });
 });
 

@@ -14,7 +14,7 @@ import { encodeAnno } from "@anno/core/anno/encode";
 import { pageKey } from "@anno/core/anno/pageKey";
 import { EMPTY_UID } from "@anno/core/anno/constants";
 import type { AnnoFields } from "@anno/core/anno/schema";
-import type { StoredAnno } from "@anno/core/anno/locate";
+import { annoFieldsOf, type StoredAnno } from "@anno/core/anno/locate";
 import { resolveNetwork } from "@anno/core/chain";
 import { buildWagmiConfig } from "./web3/config";
 import { useEthersSigner } from "./web3/ethers";
@@ -33,21 +33,7 @@ const styled = new WeakSet<ShadowRoot>();
 
 /** A reply inherits the parent's anchor (same span); only body changes; refUID wired on submit. */
 function replyFields(parent: StoredAnno, body: string): AnnoFields {
-  return {
-    url: parent.url,
-    urlCanonical: parent.urlCanonical,
-    origin: parent.origin,
-    lang: parent.lang,
-    rootSelector: parent.rootSelector,
-    containerHash: parent.containerHash,
-    spanStart: parent.spanStart,
-    spanEnd: parent.spanEnd,
-    spanExact: parent.spanExact,
-    spanPrefix: parent.spanPrefix,
-    spanSuffix: parent.spanSuffix,
-    body,
-    meta: "",
-  };
+  return { ...annoFieldsOf(parent), body, meta: "" };
 }
 
 function injectStyles(shadow: ShadowRoot): void {

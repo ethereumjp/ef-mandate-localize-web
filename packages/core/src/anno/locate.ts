@@ -15,6 +15,15 @@ export interface StoredAnno extends AnnoFields {
   refUID: string; // on-chain reference UID; EMPTY_UID = top-level
 }
 
+/**
+ * Strip the attestation envelope, leaving only the schema fields. Lives beside
+ * `StoredAnno` so the envelope key list stays with the type that defines it.
+ */
+export function annoFieldsOf(c: StoredAnno): AnnoFields {
+  const { uid, attester, time, refUID, ...fields } = c;
+  return fields;
+}
+
 export interface LocatedAnno {
   comment: StoredAnno;
   projection: Projection;
