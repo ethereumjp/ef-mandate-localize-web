@@ -1,7 +1,17 @@
 import { describe, it, expect } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { parseChapter, type Block } from "../src/lib/blocks";
 import { renderMarkdown } from "../src/lib/render";
-import { mergeChapter, blockHtml, titleFor, isPending, isFallback } from "../src/lib/content";
+import {
+  mergeChapter,
+  blockHtml,
+  titleFor,
+  isPending,
+  isFallback,
+  loadChapters,
+} from "../src/lib/content";
 import type { Lang } from "../src/lib/i18n";
 
 const en = parseChapter("# Chapter One\n\nEnglish body."); // 2 blocks
@@ -49,5 +59,18 @@ describe("mergeChapter", () => {
     expect(isPending(ch, "en")).toBe(false);
     expect(blockHtml(ch.blocks[0], "en")).toBe(renderMarkdown("# Chapter One"));
     expect(isFallback(ch.blocks[0], "en")).toBe(false);
+  });
+});
+
+describe("loadChapters", () => {
+  it("names the offending file when an EN chapter is empty", () => {
+    const dir = mkdtempSync(join(tmpdir(), "content-"));
+    mkdirSync(join(dir, "en"));
+    writeFileSync(join(dir, "en", "01-empty.md"), "\n");
+    writeFileSync(
+      join(dir, "config.json"),
+      JSON.stringify({ sources: [{ lang: "en", path: "en" }] }),
+    );
+    expect(() => loadChapters(join(dir, "config.json"))).toThrow(/01-empty\.md/);
   });
 });

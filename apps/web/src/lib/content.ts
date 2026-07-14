@@ -1,4 +1,6 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Block, parseChapter } from "./blocks";
 import { renderMarkdown } from "./render";
 import { loadConfig, listChapters, chaptersDir } from "./sources";
@@ -74,8 +76,34 @@ export function mergeChapter(
   };
 }
 
+// Anchor the default config to this module, not process.cwd(), so builds work
+// regardless of the invoking directory. Walk up from the module's own location
+// (rather than hardcoding a fixed "../../") because Astro's SSR build bundles
+// this module into a relocated chunk under dist/.prerender/chunks/ — a static
+// relative offset resolves to the wrong depth there. Since dist/ is always
+// nested under apps/web/, climbing until config.json is found converges on the
+// real file regardless of how deep the bundler places the chunk.
+function findDefaultConfig(startDir: string): string {
+  let dir = startDir;
+  for (let i = 0; i < 8; i++) {
+    const candidate = join(dir, "config.json");
+    if (existsSync(candidate)) return candidate;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error(`could not locate config.json above ${startDir}`);
+}
+const DEFAULT_CONFIG = findDefaultConfig(dirname(fileURLToPath(import.meta.url)));
+
+// Content is immutable within a production build; per-page calls reuse one parse.
+// Dev/test skip the cache so markdown edits show on refresh.
+const chapterCache = new Map<string, Chapter[]>();
+
 /** Load + merge every chapter from config (EN authority). Used at build time. */
-export function loadChapters(configPath = "config.json"): Chapter[] {
+export function loadChapters(configPath = DEFAULT_CONFIG): Chapter[] {
+  const cached = import.meta.env?.PROD ? chapterCache.get(configPath) : undefined;
+  if (cached) return cached;
   const { config, baseDir } = loadConfig(configPath);
   const en = config.sources.find((s) => s.lang === SOURCE_LANG);
   if (!en) throw new Error(`config must include a '${SOURCE_LANG}' source`);
@@ -96,6 +124,9 @@ export function loadChapters(configPath = "config.json"): Chapter[] {
   const out: Chapter[] = [];
   for (const [number, enFile] of enChapters) {
     const enBlocks = parseChapter(readFileSync(enFile, "utf8"));
+    if (enBlocks.length === 0) {
+      throw new Error(`chapter ${number}: no content blocks in ${enFile}`);
+    }
     const perLang = new Map<Lang, Block[]>();
     for (const [lang, chapterMap] of translationChapters) {
       const file = chapterMap.get(number);
@@ -103,5 +134,6 @@ export function loadChapters(configPath = "config.json"): Chapter[] {
     }
     out.push(mergeChapter(number, enBlocks, perLang));
   }
+  if (import.meta.env?.PROD) chapterCache.set(configPath, out);
   return out;
 }
