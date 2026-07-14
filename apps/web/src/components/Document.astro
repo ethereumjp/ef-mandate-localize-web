@@ -6,6 +6,12 @@ import T from "./T.astro";
 import { loadChapters, isPending } from "../lib/content";
 import { withBase } from "../lib/i18n";
 import type { Lang } from "../lib/i18n";
+import {
+    PUBLIC_EAS_ANNO_SCHEMA_UID,
+    PUBLIC_MOCK_COMMENTS,
+    PUBLIC_SEPOLIA_RPC_URL,
+    PUBLIC_MAINNET_RPC_URL,
+} from "astro:env/client";
 interface Props {
     lang: Lang;
 }
@@ -16,12 +22,12 @@ const chapters = loadChapters();
 // @anno/widget → public/annotation/embed.js), so this site is "just
 // another host". Inject it only when there's something to show: a registered
 // ANNO schema, or mock mode for local preview.
-const schemaUid = import.meta.env.PUBLIC_EAS_ANNO_SCHEMA_UID ?? "";
-const mock = import.meta.env.PUBLIC_MOCK_COMMENTS ? "1" : undefined;
+const schemaUid = PUBLIC_EAS_ANNO_SCHEMA_UID;
+const mock = PUBLIC_MOCK_COMMENTS ? "1" : undefined;
 // Network is chosen at runtime by the widget (mainnet by default; `?mode=testnet`
 // → Sepolia), so we don't pin data-network here — just pass both optional RPCs.
-const rpc = import.meta.env.PUBLIC_SEPOLIA_RPC_URL;
-const mainnetRpc = import.meta.env.PUBLIC_MAINNET_RPC_URL;
+const rpc = PUBLIC_SEPOLIA_RPC_URL;
+const mainnetRpc = PUBLIC_MAINNET_RPC_URL;
 const annotationEnabled = Boolean(schemaUid) || Boolean(mock);
 ---
 

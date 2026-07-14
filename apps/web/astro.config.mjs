@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
 // Static build, always served at root (IPNS subdomain / ENS gateways, DNSLink).
@@ -14,5 +14,31 @@ export default defineConfig({
     // don't pre-bundle the workspace package.
     ssr: { noExternal: ["@anno/core"] },
     optimizeDeps: { exclude: ["@anno/core"] },
+  },
+  env: {
+    schema: {
+      PUBLIC_EAS_ANNO_SCHEMA_UID: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+        default: "",
+      }),
+      PUBLIC_MOCK_COMMENTS: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+        default: "",
+      }),
+      PUBLIC_SEPOLIA_RPC_URL: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+      }),
+      PUBLIC_MAINNET_RPC_URL: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+      }),
+    },
   },
 });
