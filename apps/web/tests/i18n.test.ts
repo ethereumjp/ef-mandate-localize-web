@@ -25,7 +25,7 @@ describe("resolveMessage", () => {
 
 describe("t", () => {
   it("returns the translated UI string, falling back to source", () => {
-    expect(t("ja", "comments")).toBe("コメント");
-    expect(t("en", "comments")).toBe("Comments");
+    expect(t("ja", "index")).toBe("目次");
+    expect(t("en", "index")).toBe("Chapters");
   });
 });
