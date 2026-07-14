@@ -42,7 +42,7 @@ export function readConfig(): WidgetConfig {
     mainnetRpc: d.mainnetRpc,
     easGraphql: d.easGraphql,
     position: d.position ?? "bottom-right",
-    lang: d.lang ?? document.documentElement.lang ?? "en",
+    lang: d.lang || document.documentElement.lang || "en",
     theme: d.theme ?? "auto",
     mock: d.mock === "1" || d.mock === "true",
   };

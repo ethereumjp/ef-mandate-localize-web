@@ -1,5 +1,6 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { resolveNetworkName } from "../src/config";
+import { readConfig, resolveNetworkName } from "../src/config";
 
 describe("resolveNetworkName", () => {
   it("defaults to mainnet with no flag or data-network", () => {
@@ -22,5 +23,19 @@ describe("resolveNetworkName", () => {
   it("honors an explicit data-network when no testnet mode is present", () => {
     expect(resolveNetworkName("sepolia", "")).toBe("sepolia");
     expect(resolveNetworkName("mainnet", "?other=1")).toBe("mainnet");
+  });
+});
+
+describe("readConfig", () => {
+  it("falls back to 'en' when neither data-lang nor <html lang> is set", () => {
+    document.documentElement.removeAttribute("lang"); // documentElement.lang === ""
+    const s = document.createElement("script");
+    s.dataset.schemaUid = "0xabc";
+    document.head.appendChild(s);
+    try {
+      expect(readConfig().lang).toBe("en");
+    } finally {
+      s.remove();
+    }
   });
 });
