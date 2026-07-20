@@ -39,6 +39,12 @@ export default defineConfig({
         access: "public",
         optional: true,
       }),
+      PUBLIC_EMBED_SRC: envField.string({
+        context: "client",
+        access: "public",
+        optional: true,
+        default: "",
+      }),
     },
   },
 });

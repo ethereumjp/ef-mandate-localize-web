@@ -11,6 +11,7 @@ import {
     PUBLIC_MOCK_COMMENTS,
     PUBLIC_SEPOLIA_RPC_URL,
     PUBLIC_MAINNET_RPC_URL,
+    PUBLIC_EMBED_SRC,
 } from "astro:env/client";
 interface Props {
     lang: Lang;
@@ -28,6 +29,10 @@ const mock = PUBLIC_MOCK_COMMENTS ? "1" : undefined;
 // → Sepolia), so we don't pin data-network here — just pass both optional RPCs.
 const rpc = PUBLIC_SEPOLIA_RPC_URL;
 const mainnetRpc = PUBLIC_MAINNET_RPC_URL;
+// Where to load the widget bundle from. Default: the same-origin copy produced by
+// embed:build (good for local dev). Production: set PUBLIC_EMBED_SRC to the
+// widget's own gateway URL so the widget deploys/updates independently of the site.
+const embedSrc = PUBLIC_EMBED_SRC || withBase("annotation/embed.js");
 const annotationEnabled = Boolean(schemaUid) || Boolean(mock);
 ---
 
@@ -110,7 +115,7 @@ const annotationEnabled = Boolean(schemaUid) || Boolean(mock);
         <script
             is:inline
             type="module"
-            src={withBase("annotation/embed.js")}
+            src={embedSrc}
             data-schema-uid={schemaUid}
             data-lang={lang}
             data-mock={mock}

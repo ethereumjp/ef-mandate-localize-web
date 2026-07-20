@@ -1,0 +1,97 @@
+name: Deploy widget to 4everland
+
+# Builds @anno/widget in CI and deploys packages/widget/dist (embed.js + lazy
+# chunks) to its OWN 4everland Hosting project, served at a stable IPNS URL. The
+# site (and any third party) embeds it via <script src="…/embed.js">. Managed
+# independently of the web app (see deploy-web.yml). No submodule needed — the
+# widget is generic and does not use localize/ content.
+#
+# NOTE: cli-api.4everland.org is the API the official @4everland/hosting-cli uses
+# under the hood — stable in practice but not a published/contracted API.
+#
+# Config (Settings → Environments → "production", + Secrets and variables → Actions):
+#   secret   FOUR_EVERLAND_TOKEN              Hosting → Auth Token → +Create
+#   variable FOUR_EVERLAND_WIDGET_PROJECT_ID  id of the widget Hosting project
+#   variable FOUR_EVERLAND_WIDGET_DEPLOY_URL  (optional) live URL → skip-if-unchanged
+#
+# Create the project via the API (NOT GitHub integration, so 4everland does NOT build):
+#   curl -H "token: $TOKEN" -F name=anno-widget -F platform=IPFS \
+#        https://cli-api.4everland.org/project
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - "packages/widget/**"
+      - "packages/core/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/deploy-widget.yml"
+
+concurrency:
+  group: deploy-widget-4everland
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build widget
+        run: pnpm run build:widget
+
+      - name: Build id + skip-if-unchanged
+        id: gate
+        env:
+          DEPLOY_URL: ${{ vars.FOUR_EVERLAND_WIDGET_DEPLOY_URL }}
+        run: |
+          new=$(cd packages/widget/dist && find . -type f -exec sha256sum {} \; | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
+          echo "widget build id: $new"
+          cur=""
+          if [ -n "$DEPLOY_URL" ]; then
+            cur=$(curl -fsS --max-time 20 "${DEPLOY_URL%/}/.build-id" 2>/dev/null || echo "")
+          fi
+          if [ -n "$cur" ] && [ "$new" = "$cur" ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Widget build unchanged ($new) — skipping deploy."
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "$new" > packages/widget/dist/.build-id
+
+      - name: Zip dist
+        if: steps.gate.outputs.deploy == 'true'
+        run: cd packages/widget/dist && zip -qr "$GITHUB_WORKSPACE/widget.zip" .
+
+      - name: Deploy to 4everland Hosting
+        if: steps.gate.outputs.deploy == 'true'
+        env:
+          TOKEN: ${{ secrets.FOUR_EVERLAND_TOKEN }}
+          PROJECT_ID: ${{ vars.FOUR_EVERLAND_WIDGET_PROJECT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "::warning::FOUR_EVERLAND_TOKEN / FOUR_EVERLAND_WIDGET_PROJECT_ID not set — built but did not deploy."
+            exit 0
+          fi
+          curl -fsS --retry 3 \
+            -H "token: $TOKEN" \
+            -F "file=@widget.zip" \
+            -F "projectId=$PROJECT_ID" \
+            https://cli-api.4everland.org/deploy
+          echo "::notice::Widget deployed — its IPNS now points to the new build."
