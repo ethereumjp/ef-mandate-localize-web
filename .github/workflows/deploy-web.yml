@@ -1,18 +1,24 @@
 name: Deploy web to 4everland
 
-# Builds the reading site (apps/web) in CI and deploys apps/web/dist to its OWN
-# 4everland Hosting project. The widget is loaded from its own deploy via
-# PUBLIC_ANNO_WIDGET_URL, so the site is managed independently (see deploy-widget.yml).
+# Builds the reading site (apps/web) in CI — with the widget bundled in
+# (embed:build copies @anno/widget dist into public/annotation/, and the page
+# falls back to the same-origin annotation/embed.js when PUBLIC_ANNO_WIDGET_URL
+# is unset) — and deploys apps/web/dist to its OWN 4everland Hosting project.
+#
+# The site is deliberately self-contained: it works on any IPFS gateway (incl.
+# Service-Worker gateways like inbrowser.link) with no external delivery
+# dependency. Third parties embed the widget via jsDelivr/IPNS instead (see
+# deploy-widget.yml). Do NOT set PUBLIC_ANNO_WIDGET_URL for this deploy —
+# public IPFS gateway hotlinking is being sunset in 2026, and any external URL
+# reintroduces a delivery dependency the site doesn't need.
 #
 # NOTE: cli-api.4everland.org is the API the official @4everland/hosting-cli uses
 # under the hood — stable in practice but not a published/contracted API.
 #
 # Config (Settings → Environments → "production", + Secrets and variables → Actions):
 #   secret   FOUR_EVERLAND_TOKEN           Hosting → Auth Token → +Create
-#   variable FOUR_EVERLAND_WEB_PROJECT_ID  id of the web Hosting project
-#   variable PUBLIC_ANNO_WIDGET_URL       the widget's gateway URL (…/embed.js) — REQUIRED
-#                                          (deploy fails without it; the site loads the widget from it)
-#   variable FOUR_EVERLAND_WEB_DEPLOY_URL  (optional) live URL → skip-if-unchanged
+#   variable FOUR_EVERLAND_PROJECT_ID      id of the (only) Hosting project — the site
+#   variable FOUR_EVERLAND_DEPLOY_URL      (optional) live URL → skip-if-unchanged
 #
 # Create the project via the API (NOT GitHub integration, so 4everland does NOT build):
 #   curl -H "token: $TOKEN" -F name=ef-mandate-localize-web -F platform=IPFS \
@@ -25,6 +31,7 @@ on:
     paths:
       - "apps/web/**"
       - "packages/core/**"
+      - "packages/widget/**" # widget is bundled into the site
       - "localize" # submodule pointer bumps (content)
       - "pnpm-lock.yaml"
       - ".github/workflows/deploy-web.yml"
@@ -56,21 +63,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build site (widget loaded externally)
-        env:
-          PUBLIC_ANNO_WIDGET_URL: ${{ vars.PUBLIC_ANNO_WIDGET_URL }}
-        run: pnpm --filter ef-mandate-localize-web build:site
+      - name: Build site (widget bundled, served same-origin)
+        run: pnpm --filter ef-mandate-localize-web build
 
-      - name: Require PUBLIC_ANNO_WIDGET_URL
-        if: vars.PUBLIC_ANNO_WIDGET_URL == ''
+      - name: Require bundled widget
         run: |
-          echo "::error::PUBLIC_ANNO_WIDGET_URL is not set — site would ship without the widget. Deploy blocked."
-          exit 1
+          if [ ! -f apps/web/dist/annotation/embed.js ]; then
+            echo "::error::annotation/embed.js missing from dist — site would ship without the widget. Deploy blocked."
+            exit 1
+          fi
 
       - name: Build id + skip-if-unchanged
         id: gate
         env:
-          DEPLOY_URL: ${{ vars.FOUR_EVERLAND_WEB_DEPLOY_URL }}
+          DEPLOY_URL: ${{ vars.FOUR_EVERLAND_DEPLOY_URL }}
         run: |
           new=$(cd apps/web/dist && find . -type f -exec sha256sum {} \; | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
           echo "web build id: $new"
@@ -94,10 +100,10 @@ jobs:
         if: steps.gate.outputs.deploy == 'true'
         env:
           TOKEN: ${{ secrets.FOUR_EVERLAND_TOKEN }}
-          PROJECT_ID: ${{ vars.FOUR_EVERLAND_WEB_PROJECT_ID }}
+          PROJECT_ID: ${{ vars.FOUR_EVERLAND_PROJECT_ID }}
         run: |
           if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
-            echo "::warning::FOUR_EVERLAND_TOKEN / FOUR_EVERLAND_WEB_PROJECT_ID not set — built but did not deploy."
+            echo "::warning::FOUR_EVERLAND_TOKEN / FOUR_EVERLAND_PROJECT_ID not set — built but did not deploy."
             exit 0
           fi
           curl -fsS --retry 3 \

@@ -1,22 +1,20 @@
-name: Deploy widget to 4everland
+name: Publish widget (jsDelivr)
 
-# Builds @anno/widget in CI and deploys packages/widget/dist (embed.js + lazy
-# chunks) to its OWN 4everland Hosting project, served at a stable IPNS URL. The
-# site (and any third party) embeds it via <script src="…/embed.js">. Managed
-# independently of the web app (see deploy-web.yml). No submodule needed — the
-# widget is generic and does not use localize/ content.
+# Builds @anno/widget in CI and publishes packages/widget/dist (embed.js + lazy
+# chunks) to the `widget-release` branch — a single orphan commit holding only
+# the built dist, force-pushed on every publish. jsDelivr serves it at
+#   https://cdn.jsdelivr.net/gh/<owner>/<repo>@widget-release/packages/widget/dist/embed.js
+# (branch refs are cached ~12h; the publish purges embed.js so updates land
+# immediately — lazy chunks are content-hashed and need no purge).
 #
-# NOTE: cli-api.4everland.org is the API the official @4everland/hosting-cli uses
-# under the hood — stable in practice but not a published/contracted API.
+# This is the embed URL for third-party sites: correct-MIME, CORS-enabled,
+# multi-CDN, and immune to the 2026 public IPFS gateway sunset
+# (ipfs.io/dweb.link → inbrowser.link redirects — SW gateways cannot serve
+# cross-origin <script src>). The reading site does NOT use it: the widget is
+# bundled into the site build, served same-origin (see deploy-web.yml).
 #
-# Config (Settings → Environments → "production", + Secrets and variables → Actions):
-#   secret   FOUR_EVERLAND_TOKEN              Hosting → Auth Token → +Create
-#   variable FOUR_EVERLAND_WIDGET_PROJECT_ID  id of the widget Hosting project
-#   variable FOUR_EVERLAND_WIDGET_DEPLOY_URL  (optional) live URL → skip-if-unchanged
-#
-# Create the project via the API (NOT GitHub integration, so 4everland does NOT build):
-#   curl -H "token: $TOKEN" -F name=anno-widget -F platform=IPFS \
-#        https://cli-api.4everland.org/project
+# No secrets or variables needed — pushes with the workflow's GITHUB_TOKEN.
+# No submodule needed — the widget is generic and does not use localize/ content.
 
 on:
   workflow_dispatch: {}
@@ -29,14 +27,15 @@ on:
       - ".github/workflows/deploy-widget.yml"
 
 concurrency:
-  group: deploy-widget-4everland
+  group: publish-widget-jsdelivr
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    environment: production
     timeout-minutes: 15
+    permissions:
+      contents: write # force-push the widget-release dist branch
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -58,40 +57,39 @@ jobs:
 
       - name: Build id + skip-if-unchanged
         id: gate
-        env:
-          DEPLOY_URL: ${{ vars.FOUR_EVERLAND_WIDGET_DEPLOY_URL }}
         run: |
           new=$(cd packages/widget/dist && find . -type f -exec sha256sum {} \; | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
           echo "widget build id: $new"
           cur=""
-          if [ -n "$DEPLOY_URL" ]; then
-            cur=$(curl -fsS --max-time 20 "${DEPLOY_URL%/}/.build-id" 2>/dev/null || echo "")
+          if git fetch --depth 1 origin widget-release 2>/dev/null; then
+            cur=$(git show FETCH_HEAD:packages/widget/dist/.build-id 2>/dev/null || echo "")
           fi
           if [ -n "$cur" ] && [ "$new" = "$cur" ]; then
-            echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Widget build unchanged ($new) — skipping deploy."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Widget build unchanged ($new) — skipping publish."
           else
-            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
           echo "$new" > packages/widget/dist/.build-id
 
-      - name: Zip dist
-        if: steps.gate.outputs.deploy == 'true'
-        run: cd packages/widget/dist && zip -qr "$GITHUB_WORKSPACE/widget.zip" .
-
-      - name: Deploy to 4everland Hosting
-        if: steps.gate.outputs.deploy == 'true'
+      - name: Publish dist to widget-release branch (jsDelivr)
+        if: steps.gate.outputs.publish == 'true'
         env:
-          TOKEN: ${{ secrets.FOUR_EVERLAND_TOKEN }}
-          PROJECT_ID: ${{ vars.FOUR_EVERLAND_WIDGET_PROJECT_ID }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
-            echo "::warning::FOUR_EVERLAND_TOKEN / FOUR_EVERLAND_WIDGET_PROJECT_ID not set — built but did not deploy."
-            exit 0
-          fi
-          curl -fsS --retry 3 \
-            -H "token: $TOKEN" \
-            -F "file=@widget.zip" \
-            -F "projectId=$PROJECT_ID" \
-            https://cli-api.4everland.org/deploy
-          echo "::notice::Widget deployed — its IPNS now points to the new build."
+          tmp=$(mktemp -d)
+          mkdir -p "$tmp/packages/widget"
+          cp -r packages/widget/dist "$tmp/packages/widget/dist"
+          cd "$tmp"
+          git init -q -b widget-release
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -qm "widget dist from ${GITHUB_SHA}"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" widget-release
+          # Branch refs are cached ~12h on jsDelivr; purge embed.js so the new
+          # build is picked up now. Best-effort — a failed purge only delays it.
+          curl -fsS --max-time 30 \
+            "https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@widget-release/packages/widget/dist/embed.js" \
+            || echo "::warning::jsDelivr purge failed — embed.js may take up to 12h to refresh."
+          echo "::notice::Widget published — https://cdn.jsdelivr.net/gh/${GITHUB_REPOSITORY}@widget-release/packages/widget/dist/embed.js"
