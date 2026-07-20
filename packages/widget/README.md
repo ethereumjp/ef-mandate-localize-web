@@ -19,7 +19,7 @@ published by CI to this repo's `widget-release` branch:
 ```
 
 Any static host works the same way (same-origin, CDN, or IPFS/ENS) as long as `dist/`'s
-files stay co-located — see [Deployment & distribution, Part 2](../../docs/deployment.md#part-2--the-widget).
+files stay co-located — `embed.js` lazy-imports its hashed chunks by relative URL.
 
 The loader injects a floating launcher pill plus a selection "Comment" popover, both inside
 a shadow root (no style bleed into the host page).
