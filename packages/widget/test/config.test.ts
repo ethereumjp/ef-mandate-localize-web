@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
 import { readConfig, resolveNetworkName } from "../src/config";
+import { ANNO_SCHEMA_UID } from "@anno/core/anno/constants";
 
 describe("resolveNetworkName", () => {
   it("defaults to mainnet with no flag or data-network", () => {
@@ -34,6 +35,44 @@ describe("readConfig", () => {
     document.head.appendChild(s);
     try {
       expect(readConfig().lang).toBe("en");
+    } finally {
+      s.remove();
+    }
+  });
+});
+
+describe("readConfig schemaUid", () => {
+  it("defaults to the built-in canonical UID when data-schema-uid is absent (src fallback finds the script)", () => {
+    const s = document.createElement("script");
+    s.src = "https://example.ipns.dweb.link/embed.js";
+    document.head.appendChild(s);
+    try {
+      const c = readConfig();
+      expect(c.schemaUid).toBe(ANNO_SCHEMA_UID);
+      // the src*="embed.js" fallback also carried the other data-* defaults
+      expect(c.network).toBe("mainnet");
+    } finally {
+      s.remove();
+    }
+  });
+
+  it("data-schema-uid overrides the built-in default", () => {
+    const s = document.createElement("script");
+    s.dataset.schemaUid = "0xabc";
+    document.head.appendChild(s);
+    try {
+      expect(readConfig().schemaUid).toBe("0xabc");
+    } finally {
+      s.remove();
+    }
+  });
+
+  it("empty data-schema-uid falls back to the built-in default", () => {
+    const s = document.createElement("script");
+    s.setAttribute("data-schema-uid", "");
+    document.head.appendChild(s);
+    try {
+      expect(readConfig().schemaUid).toBe(ANNO_SCHEMA_UID);
     } finally {
       s.remove();
     }
