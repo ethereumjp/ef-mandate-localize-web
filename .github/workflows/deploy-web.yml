@@ -17,8 +17,8 @@ name: Deploy web to 4everland
 #
 # Config (Settings → Environments → "production", + Secrets and variables → Actions):
 #   secret   FOUR_EVERLAND_TOKEN           Hosting → Auth Token → +Create
-#   variable FOUR_EVERLAND_WEB_PROJECT_ID  id of the web Hosting project
-#   variable FOUR_EVERLAND_WEB_DEPLOY_URL  (optional) live URL → skip-if-unchanged
+#   variable FOUR_EVERLAND_PROJECT_ID      id of the (only) Hosting project — the site
+#   variable FOUR_EVERLAND_DEPLOY_URL      (optional) live URL → skip-if-unchanged
 #
 # Create the project via the API (NOT GitHub integration, so 4everland does NOT build):
 #   curl -H "token: $TOKEN" -F name=ef-mandate-localize-web -F platform=IPFS \
@@ -76,7 +76,7 @@ jobs:
       - name: Build id + skip-if-unchanged
         id: gate
         env:
-          DEPLOY_URL: ${{ vars.FOUR_EVERLAND_WEB_DEPLOY_URL }}
+          DEPLOY_URL: ${{ vars.FOUR_EVERLAND_DEPLOY_URL }}
         run: |
           new=$(cd apps/web/dist && find . -type f -exec sha256sum {} \; | LC_ALL=C sort | sha256sum | cut -d' ' -f1)
           echo "web build id: $new"
@@ -100,10 +100,10 @@ jobs:
         if: steps.gate.outputs.deploy == 'true'
         env:
           TOKEN: ${{ secrets.FOUR_EVERLAND_TOKEN }}
-          PROJECT_ID: ${{ vars.FOUR_EVERLAND_WEB_PROJECT_ID }}
+          PROJECT_ID: ${{ vars.FOUR_EVERLAND_PROJECT_ID }}
         run: |
           if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
-            echo "::warning::FOUR_EVERLAND_TOKEN / FOUR_EVERLAND_WEB_PROJECT_ID not set — built but did not deploy."
+            echo "::warning::FOUR_EVERLAND_TOKEN / FOUR_EVERLAND_PROJECT_ID not set — built but did not deploy."
             exit 0
           fi
           curl -fsS --retry 3 \
