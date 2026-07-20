@@ -78,7 +78,7 @@ Comments are **EAS attestations anchored to an exact text span** so they survive
 ## Gotchas that aren't obvious from a single file
 
 - **`localize/` submodule must be initialized** before any site build/test, or content loading fails. CI checks out with `submodules: recursive`.
-- **`PUBLIC_EAS_ANNO_SCHEMA_UID` is baked at build time** (Astro static build / `apps/web/.env`). Set it before `pnpm build`; rebuild after changing `.env`. Without it the read/attest paths are inert. `.env` lives at `apps/web/.env` (gitignored; see `.env.example`).
+- **The anno schema UID is built into the widget** (`ANNO_SCHEMA_UID` in `@anno/core/anno/constants`, derived from `ANNO_SCHEMA`; `data-schema-uid` is an optional host override). No env var — but the schema must still be **registered on-chain** once per network (`anno:schema:register`). `PUBLIC_ANNO_WIDGET_URL` (baked at build time, `apps/web/.env`) points the site at the widget bundle; empty → same-origin `annotation/embed.js`.
 - **Mock mode** (`PUBLIC_MOCK_COMMENTS=1`, what `dev:web:mock` sets, or widget `data-mock`) shows bundled comments with no wallet/chain — use it for UI work.
 - **Network:** **mainnet by default**; append `?mode=testnet` to a page URL → Sepolia (demo / local dev). `resolveNetwork()` (`@anno/core/chain`) maps the name to EAS addresses + GraphQL endpoint. Reads go through the EAS GraphQL API; the write path needs a wallet (MetaMask/Rabby). Register the schema once per network (same string → same UID).
 - **pnpm build-script approvals** live in `pnpm-workspace.yaml` under `allowBuilds:` (esbuild/keccak/secp256k1/sharp). pnpm 11 **ignores** the old `pnpm.onlyBuiltDependencies` in `package.json` and warns — keep the config in the workspace file.
