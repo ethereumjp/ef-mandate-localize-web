@@ -26,7 +26,7 @@ as the `localize/` git submodule (source of truth — translations are edited up
 ## Setup
 
 ```bash
-git clone --recursive https://github.com/<owner>/ef-mandate-localize-web
+git clone --recursive https://github.com/ethereumjp/ef-mandate-localize-web
 # or, in an existing clone:
 git submodule update --init
 pnpm install

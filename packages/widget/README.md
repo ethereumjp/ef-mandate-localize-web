@@ -8,12 +8,13 @@ backend, no build step on the host site.
 ## Embed
 
 Build produces a single ESM loader (`dist/embed.js`) that lazy-loads the React app on
-first use. Drop it on any page — e.g. from the CDN (pin an exact version):
+first use. Drop it on any page — e.g. from jsDelivr, which serves the latest build
+published by CI to this repo's `widget-release` branch:
 
 ```html
 <script
   type="module"
-  src="https://cdn.jsdelivr.net/npm/@anno/widget@0.1.0/dist/embed.js"
+  src="https://cdn.jsdelivr.net/gh/ethereumjp/ef-mandate-localize-web@widget-release/packages/widget/dist/embed.js"
 ></script>
 ```
 
@@ -48,8 +49,8 @@ pnpm --filter @anno/widget serve:test  # static server on :5180 (requires python
 
 ## Dependencies & assumptions
 
-- The mounted app is a React 19 island using wagmi/viem and ethers v6 for wallet + chain
-  access, and the EAS SDK for attestations.
+- The mounted app is a React 19 island using wagmi/viem for wallet + chain access and for
+  attestations (a viem `writeContract` against the EAS contract — no ethers, no EAS SDK).
 - Anchoring, selectors, schema encode/decode, and EAS read helpers come from
   [`@anno/core`](../core).
 - The host page needs readable text containers; the widget anchors selections to the
@@ -57,6 +58,8 @@ pnpm --filter @anno/widget serve:test  # static server on :5180 (requires python
 
 ## Standalone build
 
-`@anno/widget` builds and ships independently of `apps/web`. The web app simply copies the
-built `dist/` into its served `public/annotation/` (see the web app's `embed:build` script),
-but any static host can serve `embed.js` the same way.
+`@anno/widget` builds and ships independently of `apps/web`. The web app bundles the built
+`dist/` into its own site as same-origin `annotation/embed.js` (see the web app's
+`embed:build` script). For everyone else, CI publishes each build to the `widget-release`
+branch, served via jsDelivr (see `.github/workflows/deploy-widget.yml`) — but any static
+host can serve `embed.js` the same way as long as `dist/`'s files stay co-located.
