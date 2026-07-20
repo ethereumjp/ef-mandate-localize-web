@@ -16,30 +16,29 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "oxlint src scripts tests",
-    "fmt": "oxfmt 'src/**/*.ts' 'src/**/*.tsx' 'scripts/*.ts' 'tests/*.ts'",
-    "fmt:check": "oxfmt --check 'src/**/*.ts' 'src/**/*.tsx' 'scripts/*.ts' 'tests/*.ts'",
+    "fmt": "oxfmt 'src/**/*.ts' 'scripts/*.ts' 'tests/*.ts'",
+    "fmt:check": "oxfmt --check 'src/**/*.ts' 'scripts/*.ts' 'tests/*.ts'",
     "anno:schema:register": "tsx scripts/register-anno-schema.ts",
     "anno:schema:calldata": "MODE=calldata tsx scripts/register-anno-schema.ts",
     "gen:mock": "tsx scripts/gen-mock-comments.ts"
   },
   "dependencies": {
-    "@anno/core": "workspace:*",
-    "@ethereum-attestation-service/eas-sdk": "^2.9.1",
-    "astro": "^7.0.0",
-    "ethers": "^6.16.0",
+    "astro": "^7.0.7",
     "marked": "^14.1.4"
   },
   "devDependencies": {
+    "@anno/core": "workspace:*",
     "@astrojs/check": "^0.9.9",
+    "@ethereum-attestation-service/eas-sdk": "^2.9.1",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^22.5.0",
-    "jsdom": "^29.1.1",
+    "ethers": "^6.16.0",
     "oxfmt": "^0.53.0",
     "oxlint": "^1.68.0",
     "tailwindcss": "^4.3.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.6.0",
+    "typescript": "^7.0.0",
     "vitest": "^4.1.9"
   }
 }

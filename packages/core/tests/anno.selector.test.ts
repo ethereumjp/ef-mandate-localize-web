@@ -1,26 +1,12 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import {
-  generateSelector,
-  selectorFor,
-  nearestContainer,
-  resolveContainer,
-  findByQuote,
-} from "../src/anno/selector";
+import { selectorFor, nearestContainer, resolveContainer, findByQuote } from "../src/anno/selector";
 
 function setBody(html: string): void {
   document.body.innerHTML = html;
 }
 
 describe("selector generation", () => {
-  it("uses an attribute selector for an id (valid even when id starts with a digit)", () => {
-    setBody('<p id="02-p7">the walkaway test</p>');
-    const p = document.querySelector("p")!;
-    const sel = generateSelector(p.firstChild!); // a text node inside the block
-    expect(sel).toBe('[id="02-p7"]');
-    expect(document.querySelector(sel!)).toBe(p);
-  });
-
   it("builds an nth-of-type path down from the nearest id-bearing ancestor", () => {
     setBody('<article id="main"><p>one</p><p>two</p><p>three</p></article>');
     const third = document.querySelectorAll("p")[2];
@@ -57,5 +43,10 @@ describe("container resolution", () => {
   it("findByQuote returns null when the quote is absent", () => {
     setBody("<p>nothing here</p>");
     expect(findByQuote(document, "walkaway")).toBeNull();
+  });
+
+  it("findByQuote returns the smallest block element containing the quote", () => {
+    setBody("<article><p>intro</p><p>see the walkaway test now</p></article>");
+    expect(findByQuote(document, "walkaway test")).toBe(document.querySelectorAll("p")[1]);
   });
 });

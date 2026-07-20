@@ -1,11 +1,17 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { normalizedBlockText, selectionToOffsets } from "../src/lib/anchor-dom";
+import { normalizedBlockText, rangeForOffsets, selectionToOffsets } from "../src/lib/anchor-dom";
 import { normalizeBlockText } from "../src/lib/normalize";
 
 function blockEl(text: string) {
   const el = document.createElement("div");
   el.textContent = text;
+  return el;
+}
+
+function blockHtml(html: string) {
+  const el = document.createElement("div");
+  el.innerHTML = html;
   return el;
 }
 
@@ -44,5 +50,33 @@ describe("selection", () => {
     collapsed.setStart(node, 1);
     collapsed.setEnd(node, 1);
     expect(selectionToOffsets(el, collapsed)).toBeNull();
+  });
+});
+
+describe("rangeForOffsets", () => {
+  it("maps normalized offsets to a DOM range over plain text", () => {
+    const el = blockHtml("the walkaway test"); // normalized == raw
+    expect(rangeForOffsets(el, 4, 12)?.toString()).toBe("walkaway");
+  });
+
+  it("accounts for leading-whitespace trim", () => {
+    const el = blockHtml("  the walkaway test"); // 2 leading spaces trimmed by normalize
+    expect(rangeForOffsets(el, 4, 12)?.toString()).toBe("walkaway");
+  });
+
+  it("spans across inline element boundaries", () => {
+    const el = blockHtml("a <strong>bold</strong> word"); // textContent "a bold word"
+    expect(rangeForOffsets(el, 2, 6)?.toString()).toBe("bold");
+  });
+
+  it("returns null for an out-of-range span", () => {
+    const el = blockHtml("abc");
+    expect(rangeForOffsets(el, 1, 99)).toBeNull();
+  });
+
+  it("round-trips with selectionToOffsets", () => {
+    const el = blockHtml("  the walkaway test");
+    const range = rangeForOffsets(el, 4, 12)!;
+    expect(selectionToOffsets(el, range)).toEqual({ start: 4, end: 12, exact: "walkaway" });
   });
 });

@@ -1,9 +1,7 @@
 import { useState } from "react";
 import type { AnnoFields } from "@anno/core/anno/schema";
 import { ct } from "./i18n";
-
-const shortHex = (h: string) =>
-  h.length > 12 ? `${h.slice(0, 6)}…${h.slice(-4)}` : h;
+import { shortHex } from "../lib/format";
 
 interface Props {
   /** The anchored fields for the current selection (quote + on-chain preview). */

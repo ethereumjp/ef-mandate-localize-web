@@ -36,19 +36,7 @@ const EN_MESSAGES = {
   index: "Chapters",
   backToIndex: "Back to index",
   language: "Language",
-  comments: "Comments",
-  pastVersion: "Comment for past version",
-  statusReanchored: "Re-anchored",
-  statusNeedsReview: "Needs review",
-  statusOrphaned: "Block removed",
-  reply: "Reply",
-  threadTitle: "Comments",
-  noComments: "No comments on this block yet.",
-  needsReviewTitle: "Needs review (text changed)",
-  on: "On",
-  off: "Off",
   pending: "This chapter isn't translated yet — showing the original (English).",
-  home: "Home",
   sourceCode: "Source code",
   originalPdf: "Original PDF",
   projectNote: "A community localization of the EF Mandate — not an official EF translation.",
@@ -67,19 +55,7 @@ const _MESSAGES: MessageTable = {
     index: "目次",
     backToIndex: "目次へ戻る",
     language: "言語",
-    comments: "コメント",
-    pastVersion: "過去のバージョンに対するコメント",
-    statusReanchored: "再アンカリング",
-    statusNeedsReview: "要確認",
-    statusOrphaned: "ブロックが削除されました",
-    reply: "返信",
-    threadTitle: "コメント",
-    noComments: "このブロックにはまだコメントがありません。",
-    needsReviewTitle: "要確認（本文が変更されました）",
-    on: "オン",
-    off: "オフ",
     pending: "この章はまだ翻訳されていません — 原文（英語）を表示しています。",
-    home: "ホーム",
     sourceCode: "ソースコード",
     originalPdf: "原文PDF",
     projectNote:
@@ -103,14 +79,3 @@ export function resolveMessage(
 /** Translate UI message `k` for `lang`, falling back to the source language. */
 export const t = (lang: Lang, k: MessageKey): string =>
   resolveMessage(_MESSAGES, SOURCE_LANG, lang, k);
-
-/**
- * Full per-language message table with EN fallback applied.
- * Exposed for legacy consumers; prefer `t()` for new code.
- */
-export const MESSAGES: Record<Lang, Record<MessageKey, string>> = Object.fromEntries(
-  LANGS.map((lang) => [
-    lang,
-    Object.fromEntries((Object.keys(EN_MESSAGES) as MessageKey[]).map((k) => [k, t(lang, k)])),
-  ]),
-) as Record<Lang, Record<MessageKey, string>>;

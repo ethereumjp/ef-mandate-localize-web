@@ -10,7 +10,8 @@ function mockFetch(captured: { body?: any }) {
   }) as unknown as typeof fetch;
 }
 
-// Build attestation `data` from the (post-Task-3) ABI: no parentUid field.
+// Build attestation `data` from the ABI: no threading field — replies link via
+// the on-chain envelope refUID, decoded onto StoredAnno.refUID.
 function encodeData(over: Partial<Record<string, unknown>> = {}): `0x${string}` {
   const base: Record<string, unknown> = {
     url: "https://example.com/p",
@@ -35,7 +36,7 @@ function encodeData(over: Partial<Record<string, unknown>> = {}): `0x${string}` 
 }
 
 describe("decodeAttestation", () => {
-  it("sources parentUid from the envelope refUID", () => {
+  it("sources refUID from the envelope", () => {
     const parent = "0x" + "ab".repeat(32);
     const c = decodeAttestation({
       id: "0x" + "cd".repeat(32),
@@ -45,7 +46,7 @@ describe("decodeAttestation", () => {
       refUID: parent,
       data: encodeData(),
     });
-    expect(c.parentUid).toBe(parent);
+    expect(c.refUID).toBe(parent);
     expect(c.body).toBe("hi");
   });
 });
@@ -64,5 +65,24 @@ describe("fetchAnno", () => {
     const out = await fetchAnno("", { pageKey: "0xPAGEADDR", fetchImpl: mockFetch(cap) });
     expect(out).toEqual([]);
     expect(cap.body).toBeUndefined();
+  });
+
+  it("throws when the GraphQL response carries errors", async () => {
+    const fetchImpl = (async () =>
+      new Response(JSON.stringify({ errors: [{ message: "bad query" }] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })) as unknown as typeof fetch;
+    await expect(
+      fetchAnno("0x" + "11".repeat(32), { fetchImpl }),
+    ).rejects.toThrow(/bad query/);
+  });
+
+  it("throws on a non-2xx HTTP response", async () => {
+    const fetchImpl = (async () =>
+      new Response("oops", { status: 503 })) as unknown as typeof fetch;
+    await expect(
+      fetchAnno("0x" + "11".repeat(32), { fetchImpl }),
+    ).rejects.toThrow(/503/);
   });
 });

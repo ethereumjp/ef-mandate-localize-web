@@ -5,14 +5,23 @@ import { resolveContainer } from "./selector";
 import type { AnnoFields } from "./schema";
 
 /**
- * A stored generalized comment = AnnoFields + EAS attestation envelope.
- * Parallel to `StoredComment` in web3/read.ts (AnnoFields ≠ CommentFields, no shared base).
+ * A stored generalized comment = AnnoFields + EAS attestation envelope
+ * (uid / attester / time / refUID read from the on-chain attestation).
  */
 export interface StoredAnno extends AnnoFields {
   uid: string;
   attester: string;
   time: number; // unix seconds
-  parentUid: string; // on-chain refUID; EMPTY_UID = top-level
+  refUID: string; // on-chain reference UID; EMPTY_UID = top-level
+}
+
+/**
+ * Strip the attestation envelope, leaving only the schema fields. Lives beside
+ * `StoredAnno` so the envelope key list stays with the type that defines it.
+ */
+export function annoFieldsOf(c: StoredAnno): AnnoFields {
+  const { uid, attester, time, refUID, ...fields } = c;
+  return fields;
 }
 
 export interface LocatedAnno {
@@ -23,13 +32,18 @@ export interface LocatedAnno {
 /** View a stored comment's anchor fields as an `Anchor` (containerHash = blockHash). */
 function toAnchor(c: AnnoFields): Anchor {
   return {
-    blockHash: c.containerHash as `0x${string}`,
+    blockHash: c.containerHash,
     exact: c.spanExact,
     prefix: c.spanPrefix,
     suffix: c.spanSuffix,
     start: c.spanStart,
     end: c.spanEnd,
   };
+}
+
+/** A LocatedAnno for a comment whose container cannot be resolved at all. */
+export function orphanAnno(c: StoredAnno): LocatedAnno {
+  return { comment: c, projection: project(toAnchor(c), null) };
 }
 
 /**
@@ -39,9 +53,7 @@ function toAnchor(c: AnnoFields): Anchor {
  */
 export function locate(doc: Document, c: StoredAnno): LocatedAnno {
   const container = resolveContainer(doc, c.rootSelector, c.spanExact);
-  if (container === null) {
-    return { comment: c, projection: project(toAnchor(c), null) };
-  }
+  if (container === null) return orphanAnno(c);
   const text = normalizedBlockText(container);
   const current = { blockHash: blockHashFromNormalized(text), text };
   return { comment: c, projection: project(toAnchor(c), current) };
@@ -49,8 +61,8 @@ export function locate(doc: Document, c: StoredAnno): LocatedAnno {
 
 /**
  * Project a group of stored comments (already filtered to one block) onto that
- * block's live text. The anno counterpart of `web3/projectComments`: resolve the
- * block's normalized text + hash once, then project each comment's span.
+ * block's live text: resolve the block's normalized text + hash once, then
+ * project each comment's span.
  */
 export function projectAnno(blockEl: Element, comments: StoredAnno[]): LocatedAnno[] {
   const text = normalizedBlockText(blockEl);

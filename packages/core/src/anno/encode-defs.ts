@@ -3,8 +3,7 @@ import type { AnnoFields } from "./schema";
 /**
  * Ordered field descriptors (name + ABI type) for an `AnnoFields`, matching
  * `ANNO_SCHEMA`. Shared by the viem decoder (`anno/schema.ts` `decodeAnno`) and
- * the eas-sdk encoder (`anno/encode.ts` `encodeAnno`). SDK-free, so the read path
- * (decode) never pulls in the EAS SDK.
+ * the viem encoder (`anno/encode.ts` `encodeAnno`).
  */
 export const ANNO_ABI = [
   { name: "url", type: "string" },
@@ -20,15 +19,4 @@ export const ANNO_ABI = [
   { name: "spanSuffix", type: "string" },
   { name: "body", type: "string" },
   { name: "meta", type: "string" },
-] as const;
-
-/** The ordered EAS field descriptors *with values*, for `encodeAnno` (eas-sdk). */
-export function annoFieldDefs(
-  f: AnnoFields,
-): { name: string; type: string; value: string | number }[] {
-  return ANNO_ABI.map((p) => ({
-    name: p.name,
-    type: p.type,
-    value: f[p.name as keyof AnnoFields],
-  }));
-}
+] as const satisfies readonly { name: keyof AnnoFields; type: string }[];

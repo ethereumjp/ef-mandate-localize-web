@@ -4,12 +4,14 @@ import { canonicalizeUrl } from "@anno/core/anno/canonicalUrl";
 import { pageKey } from "@anno/core/anno/pageKey";
 import {
   commentsForUrl,
+  orphanAnno,
   projectAnno,
   type StoredAnno,
   type LocatedAnno,
 } from "@anno/core/anno/locate";
 import { resolveContainer } from "@anno/core/anno/selector";
-import { applyHighlights, rangeForOffsets } from "./web3/highlight";
+import { rangeForOffsets } from "@anno/core/lib/anchor-dom";
+import { applyHighlights } from "./highlight";
 
 export interface DisplayOpts {
   schemaUid: string;
@@ -28,9 +30,18 @@ export interface Display {
   projected(): LocatedAnno[];
   /** Register a callback for clicks that land on an anchored comment span. */
   onClickHighlight(cb: (uid: string) => void): void;
+  /** Subscribe to data changes (fires after each refresh). Returns unsubscribe. */
+  onChange(cb: () => void): () => void;
   /** Focus a comment: wash its span (comment-focus) + scroll it into view; null clears. */
   focus(uid: string | null): void;
   dispose(): void;
+}
+
+/** Comments grouped by resolved live container, plus any that couldn't be placed. */
+export interface ProjectedComments {
+  byBlock: Map<Element, LocatedAnno[]>;
+  /** Comments whose container could not be resolved (selector + quote both failed). */
+  unplaced: LocatedAnno[];
 }
 
 /**
@@ -43,18 +54,22 @@ export interface Display {
 export function projectComments(
   stored: StoredAnno[],
   urlCanonical: string,
-): Map<Element, LocatedAnno[]> {
+): ProjectedComments {
   const groups = new Map<Element, StoredAnno[]>();
+  const unplaced: LocatedAnno[] = [];
   for (const c of commentsForUrl(stored, urlCanonical)) {
     const el = resolveContainer(document, c.rootSelector, c.spanExact);
-    if (!el) continue;
+    if (!el) {
+      unplaced.push(orphanAnno(c));
+      continue;
+    }
     const arr = groups.get(el);
     if (arr) arr.push(c);
     else groups.set(el, [c]);
   }
   const byBlock = new Map<Element, LocatedAnno[]>();
   for (const [el, group] of groups) byBlock.set(el, projectAnno(el, group));
-  return byBlock;
+  return { byBlock, unplaced };
 }
 
 /** The caret (node, offset) under a viewport point — used to hit-test span clicks. */
@@ -84,9 +99,11 @@ function caretFromPoint(x: number, y: number): { node: Node; offset: number } | 
  */
 export function createDisplay(opts: DisplayOpts): Display {
   let byBlock = new Map<Element, LocatedAnno[]>();
+  let unplaced: LocatedAnno[] = [];
   let stored: StoredAnno[] = [];
   let visible = false;
   let clickCb: ((uid: string) => void) | null = null;
+  const changeCbs = new Set<() => void>();
 
   function pageScoped(): StoredAnno[] {
     return commentsForUrl(stored, canonicalizeUrl(location.href).urlCanonical);
@@ -94,7 +111,9 @@ export function createDisplay(opts: DisplayOpts): Display {
 
   // Always rebuild the projection (list/count data), regardless of visibility.
   function project(): void {
-    byBlock = projectComments(stored, canonicalizeUrl(location.href).urlCanonical);
+    const p = projectComments(stored, canonicalizeUrl(location.href).urlCanonical);
+    byBlock = p.byBlock;
+    unplaced = p.unplaced;
   }
 
   // Paint (or clear) the underline markers; gated by `visible` only.
@@ -149,6 +168,7 @@ export function createDisplay(opts: DisplayOpts): Display {
       }
       project();
       paintHighlights();
+      for (const cb of changeCbs) cb();
     },
     setVisible(on: boolean) {
       visible = on;
@@ -158,10 +178,14 @@ export function createDisplay(opts: DisplayOpts): Display {
       return pageScoped().length;
     },
     projected() {
-      return [...byBlock.values()].flat();
+      return [...[...byBlock.values()].flat(), ...unplaced];
     },
     onClickHighlight(cb) {
       clickCb = cb;
+    },
+    onChange(cb) {
+      changeCbs.add(cb);
+      return () => changeCbs.delete(cb);
     },
     focus(uid: string | null) {
       if (!uid) {
@@ -185,6 +209,8 @@ export function createDisplay(opts: DisplayOpts): Display {
       applyHighlights("comment", []);
       applyHighlights("comment-focus", []);
       byBlock = new Map();
+      unplaced = [];
+      changeCbs.clear();
     },
   };
 }

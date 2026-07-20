@@ -7,24 +7,20 @@
 // to the running origin so the fixture works on any dev port.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { makeAnchor, codePoints, type Anchor } from "@anno/core/lib/anchoring";
+import {
+  makeAnchor,
+  codePoints,
+  findOccurrences,
+  type Anchor,
+} from "@anno/core/lib/anchoring";
 import { blockHash } from "@anno/core/lib/hash";
 import { normalizeBlockText } from "@anno/core/lib/normalize";
 import type { AnnoFields } from "@anno/core/anno/schema";
-import { annoFieldDefs } from "@anno/core/anno/encode-defs";
-import { ANNO_SCHEMA } from "@anno/core/anno/constants";
-// Node-side EAS encoder: the SDK's named export isn't available under Node 24
-// strict ESM, so use the default (CJS-interop) import here. anno/schema.ts uses
-// the named import (for Vite/vitest); both share annoFieldDefs (encode-defs).
-import type { SchemaEncoder as SchemaEncoderType } from "@ethereum-attestation-service/eas-sdk";
-import easSdk from "@ethereum-attestation-service/eas-sdk";
-const { SchemaEncoder } = easSdk as unknown as { SchemaEncoder: typeof SchemaEncoderType };
-const enc = new SchemaEncoder(ANNO_SCHEMA);
-const encodeAnno = (f: AnnoFields) => enc.encodeData(annoFieldDefs(f));
+import { encodeAnno } from "@anno/core/anno/encode";
+import { EMPTY_UID } from "@anno/core/anno/constants";
 
 const AUTHOR = "0x1234567890abcdef1234567890abcdef12345678";
 const TIME = 1717000000; // fixed → shown as 2024/5/30 in the card
-const ZERO_UID = "0x" + "00".repeat(32);
 /** A bytes32 mock attestation id from a small seed byte. */
 const id = (seed: number) => "0x" + seed.toString(16).padStart(2, "0").repeat(32);
 
@@ -82,22 +78,12 @@ interface Raw {
   data: string;
 }
 
-/** Find the code-point index of `quote` within `normCps`, or -1. */
-function cpIndexOf(normCps: string[], quoteCps: string[]): number {
-  outer: for (let i = 0; i + quoteCps.length <= normCps.length; i++) {
-    for (let j = 0; j < quoteCps.length; j++) {
-      if (normCps[i + j] !== quoteCps[j]) continue outer;
-    }
-    return i;
-  }
-  return -1;
-}
-
 /** Anchor the verbatim `quote` within normalized block text (status: anchored). */
 function anchorQuote(norm: string, hash: `0x${string}`, quote: string): Anchor {
-  const idx = cpIndexOf(codePoints(norm), codePoints(quote));
+  const quoteCps = codePoints(quote);
+  const idx = findOccurrences(codePoints(norm), quoteCps)[0] ?? -1;
   if (idx < 0) throw new Error(`quote not found in block text: ${JSON.stringify(quote)}`);
-  return makeAnchor(hash, norm, idx, idx + codePoints(quote).length);
+  return makeAnchor(hash, norm, idx, idx + quoteCps.length);
 }
 
 function fields(o: { lang: "en" | "ja"; path: string; body: string; anchor: Anchor }): AnnoFields {
@@ -121,7 +107,7 @@ function fields(o: { lang: "en" | "ja"; path: string; body: string; anchor: Anch
 
 const raws: Raw[] = [];
 const add = (uid: string, f: AnnoFields) =>
-  raws.push({ id: uid, attester: AUTHOR, time: TIME, revoked: false, refUID: ZERO_UID, data: encodeAnno(f) });
+  raws.push({ id: uid, attester: AUTHOR, time: TIME, revoked: false, refUID: EMPTY_UID, data: encodeAnno(f) });
 
 for (const lang of ["en", "ja"] as const) {
   const path = lang === "ja" ? "/ja" : "/";

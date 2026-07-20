@@ -1,9 +1,6 @@
 import { decodeAnno } from "./schema";
 import type { StoredAnno } from "./locate";
-
-// Fallback endpoint when a caller omits one; the widget always passes the
-// resolved network's endpoint (see chain.ts NETWORKS). Defaults to mainnet.
-const EAS_GRAPHQL = "https://easscan.org/graphql";
+import { DEFAULT_NETWORK, NETWORKS } from "../chain";
 
 /** GraphQL query; scoped by `recipient` (the page key) when one is supplied. */
 function buildQuery(scoped: boolean): string {
@@ -33,7 +30,7 @@ export function decodeAttestation(a: RawAttestation): StoredAnno {
     uid: a.id,
     attester: a.attester,
     time: Number(a.time),
-    parentUid: a.refUID,
+    refUID: a.refUID,
     ...decodeAnno(a.data),
   };
 }
@@ -49,13 +46,20 @@ export async function fetchAnno(
   const variables = scoped
     ? { schemaId: schemaUid, recipient: opts.pageKey }
     : { schemaId: schemaUid };
-  const res = await f(opts.endpoint ?? EAS_GRAPHQL, {
+  const res = await f(opts.endpoint ?? NETWORKS[DEFAULT_NETWORK].graphql, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ query: buildQuery(scoped), variables }),
   });
   if (!res.ok) throw new Error(`EAS GraphQL ${res.status}`);
-  const json = (await res.json()) as { data?: { attestations?: RawAttestation[] } };
+  const json = (await res.json()) as {
+    data?: { attestations?: RawAttestation[] };
+    errors?: { message?: string }[];
+  };
+  if (json.errors?.length) {
+    const msgs = json.errors.map((e) => e.message ?? "unknown error").join("; ");
+    throw new Error(`EAS GraphQL: ${msgs}`);
+  }
   const rows = json.data?.attestations ?? [];
   return rows.map(decodeAttestation);
 }

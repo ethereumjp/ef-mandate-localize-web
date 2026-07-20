@@ -15,6 +15,8 @@ export interface NetworkConfig {
   graphql: string;
   /** easscan base URL (UI links). */
   easscan: string;
+  /** Default public RPC endpoint (overridable by embed config / env). */
+  rpc: string;
 }
 
 export const NETWORKS: Record<NetworkName, NetworkConfig> = {
@@ -26,6 +28,7 @@ export const NETWORKS: Record<NetworkName, NetworkConfig> = {
     schemaRegistry: "0xA7b39296258348C78294F95B872b282326A97BDF",
     graphql: "https://easscan.org/graphql",
     easscan: "https://easscan.org",
+    rpc: "https://ethereum-rpc.publicnode.com",
   },
   sepolia: {
     name: "sepolia",
@@ -35,6 +38,7 @@ export const NETWORKS: Record<NetworkName, NetworkConfig> = {
     schemaRegistry: "0x0a7E2Ff54e76B8E6659aedc9103FB21c038050D0",
     graphql: "https://sepolia.easscan.org/graphql",
     easscan: "https://sepolia.easscan.org",
+    rpc: "https://ethereum-sepolia-rpc.publicnode.com",
   },
 };
 
@@ -44,4 +48,17 @@ export const DEFAULT_NETWORK: NetworkName = "mainnet";
 /** Resolve a network by name, falling back to the production default (mainnet). */
 export function resolveNetwork(name?: string): NetworkConfig {
   return NETWORKS[name as NetworkName] ?? NETWORKS[DEFAULT_NETWORK];
+}
+
+/**
+ * Strict variant for operational scripts (key-spending paths): an unrecognized
+ * non-empty name throws instead of silently falling back to mainnet.
+ */
+export function resolveNetworkStrict(name?: string): NetworkConfig {
+  if (name && !(name in NETWORKS)) {
+    throw new Error(
+      `unknown network "${name}" — expected one of: ${Object.keys(NETWORKS).join(", ")}`,
+    );
+  }
+  return resolveNetwork(name);
 }

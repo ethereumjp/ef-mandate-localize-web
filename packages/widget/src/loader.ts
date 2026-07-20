@@ -168,8 +168,13 @@ function mount(): void {
   display.onClickHighlight((uid) => void openApp({ focusUid: uid }));
 
   renderButton(); // paint the icon + [...] placeholder immediately (pre-load)
-  void display.refresh().then(() => {
+  display.onChange(() => {
     loaded = true;
+    renderButton();
+  });
+  display.refresh().catch((e) => {
+    console.error("[anno] initial comment load failed:", e);
+    loaded = true; // show [0] rather than a stuck [...] placeholder
     renderButton();
   });
 }

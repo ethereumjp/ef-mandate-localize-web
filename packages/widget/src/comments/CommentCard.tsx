@@ -1,15 +1,12 @@
 import { useEnsAvatar, useEnsName } from "wagmi";
 import { mainnet } from "wagmi/chains";
 import { normalize } from "viem/ens";
-import type { CommentNode } from "../web3/thread";
+import type { CommentNode } from "@anno/core/anno/thread";
 import type { StoredAnno } from "@anno/core/anno/locate";
 import type { Projection } from "@anno/core/lib/anchoring";
 import { ct } from "./i18n";
 import { AnchorStatusBadge } from "./AnchorStatusBadge";
-
-function short(addr: string) {
-  return addr.length > 12 ? `${addr.slice(0, 6)}…${addr.slice(-4)}` : addr;
-}
+import { shortHex } from "../lib/format";
 
 interface Props {
   node: CommentNode<StoredAnno>;
@@ -17,7 +14,6 @@ interface Props {
   lang: string;
   depth?: number;
   focusedUid?: string | null;
-  pendingUids?: Set<string>;
   onFocus?: (uid: string) => void;
   onReply?: (parent: StoredAnno) => void;
 }
@@ -28,13 +24,11 @@ export function CommentCard({
   lang,
   depth = 0,
   focusedUid,
-  pendingUids,
   onFocus,
   onReply,
 }: Props) {
   const c = node.comment;
   const focused = depth === 0 && focusedUid === c.uid;
-  const pending = pendingUids?.has(c.uid) ?? false;
   // ENS reverse records live on mainnet; resolve there and fall back to the
   // shortened address when the attester has no name.
   const { data: ensName } = useEnsName({
@@ -76,7 +70,7 @@ export function CommentCard({
             className="size-4 shrink-0 rounded-full border border-cobalt/40 object-cover"
           />
         ) : null}
-        <span className="font-mono">{ensName ?? short(c.attester)}</span>
+        <span className="font-mono">{ensName ?? shortHex(c.attester)}</span>
         {c.time > 0 ? (
           <span>{new Date(c.time * 1000).toLocaleDateString(lang)}</span>
         ) : null}
@@ -85,12 +79,6 @@ export function CommentCard({
         ) : null}
         {projection?.pastVersion ? (
           <span className="text-cobalt/70">{ct(lang, "pastVersion")}</span>
-        ) : null}
-        {pending ? (
-          <span
-            aria-hidden
-            className="inline-block size-1.5 animate-pulse bg-cobalt"
-          />
         ) : null}
         <button
           type="button"
@@ -110,7 +98,6 @@ export function CommentCard({
           lang={lang}
           depth={depth + 1}
           focusedUid={focusedUid}
-          pendingUids={pendingUids}
           onFocus={onFocus}
           onReply={onReply}
         />

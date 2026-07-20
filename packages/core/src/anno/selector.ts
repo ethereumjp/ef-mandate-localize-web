@@ -1,4 +1,3 @@
-import { codePoints, findOccurrences } from "../lib/anchoring";
 import { normalizedBlockText } from "../lib/anchor-dom";
 
 /** Block-level tags treated as stable comment containers. */
@@ -80,12 +79,6 @@ export function selectorFor(el: Element): string {
   return parts.join(" > ");
 }
 
-/** Selector for the stable container of `node`, or null if none. */
-export function generateSelector(node: Node): string | null {
-  const container = nearestContainer(node);
-  return container ? selectorFor(container) : null;
-}
-
 /**
  * Resolve the container element for a stored comment: try `rootSelector`, then
  * fall back to the smallest block-level element whose normalized text contains
@@ -108,18 +101,19 @@ export function resolveContainer(
   return findByQuote(doc, exact);
 }
 
+// Lowercased selector list matching BLOCK_TAGS, built once.
+const BLOCK_SELECTOR = [...BLOCK_TAGS].join(",").toLowerCase();
+
 /** Smallest block-level element whose normalized text contains `exact` (read-side fallback). */
 export function findByQuote(doc: Document, exact: string): Element | null {
-  const needle = codePoints(exact);
-  if (needle.length === 0 || !doc.body) return null;
+  if (exact.length === 0 || !doc.body) return null;
   let best: Element | null = null;
   let bestLen = Infinity;
-  for (const el of Array.from(doc.body.querySelectorAll<Element>("*"))) {
-    // Only block-level elements, to match the author-time `nearestContainer`
-    // granularity (an inline <strong> would mismatch the stored containerHash).
-    if (!BLOCK_TAGS.has(el.tagName)) continue;
+  // Only block-level elements, to match the author-time `nearestContainer`
+  // granularity (an inline <strong> would mismatch the stored containerHash).
+  for (const el of Array.from(doc.body.querySelectorAll<Element>(BLOCK_SELECTOR))) {
     const text = normalizedBlockText(el);
-    if (text.length < bestLen && findOccurrences(codePoints(text), needle).length > 0) {
+    if (text.length < bestLen && text.includes(exact)) {
       best = el;
       bestLen = text.length;
     }

@@ -6,7 +6,7 @@
 // reuses the Stage-1 `display` for read/paint/focus.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { WagmiProvider, useAccount, useConnect } from "wagmi";
+import { WagmiProvider, useAccount, useConnect, usePublicClient, useWalletClient } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { buildAnnoFields } from "@anno/core/anno/author";
@@ -14,10 +14,9 @@ import { encodeAnno } from "@anno/core/anno/encode";
 import { pageKey } from "@anno/core/anno/pageKey";
 import { EMPTY_UID } from "@anno/core/anno/constants";
 import type { AnnoFields } from "@anno/core/anno/schema";
-import type { StoredAnno } from "@anno/core/anno/locate";
+import { annoFieldsOf, type StoredAnno } from "@anno/core/anno/locate";
 import { resolveNetwork } from "@anno/core/chain";
 import { buildWagmiConfig } from "./web3/config";
-import { useEthersSigner } from "./web3/ethers";
 import { attestComment } from "./web3/eas";
 import { ConnectButton } from "./comments/ConnectButton";
 import { CommentThread } from "./comments/CommentThread";
@@ -25,31 +24,15 @@ import { Composer } from "./comments/Composer";
 import { Panel } from "./comments/Panel";
 import type { WidgetConfig } from "./config";
 import type { Display } from "./display";
+import { shortHex } from "./lib/format";
 import css from "./app.css?inline";
 
 const queryClient = new QueryClient();
-const NO_PENDING = new Set<string>();
 const styled = new WeakSet<ShadowRoot>();
-
-const short = (a: string) => (a.length > 12 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a);
 
 /** A reply inherits the parent's anchor (same span); only body changes; refUID wired on submit. */
 function replyFields(parent: StoredAnno, body: string): AnnoFields {
-  return {
-    url: parent.url,
-    urlCanonical: parent.urlCanonical,
-    origin: parent.origin,
-    lang: parent.lang,
-    rootSelector: parent.rootSelector,
-    containerHash: parent.containerHash,
-    spanStart: parent.spanStart,
-    spanEnd: parent.spanEnd,
-    spanExact: parent.spanExact,
-    spanPrefix: parent.spanPrefix,
-    spanSuffix: parent.spanSuffix,
-    body,
-    meta: "",
-  };
+  return { ...annoFieldsOf(parent), body, meta: "" };
 }
 
 function injectStyles(shadow: ShadowRoot): void {
@@ -79,11 +62,16 @@ function Controller({
   initialComposeRange,
   onComposeReady,
 }: ControllerProps) {
-  const signer = useEthersSigner();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = usePublicClient();
   const net = resolveNetwork(config.network);
   const { isConnected } = useAccount();
   const { connect } = useConnect();
   const [comments, setComments] = useState(display.projected());
+  useEffect(
+    () => display.onChange(() => setComments(display.projected())),
+    [display],
+  );
   const [focusedUid, setFocusedUid] = useState<string | null>(initialFocusUid ?? null);
   const [mode, setMode] = useState<"list" | "compose">("list");
   const [composerFields, setComposerFields] = useState<AnnoFields | null>(null);
@@ -131,11 +119,11 @@ function Controller({
   }, [initialComposeRange, onComposeReady, openComposer]);
 
   // Reply: inherit the parent's span; the composer previews that quote and the
-  // new comment links to the parent via parentUid. No text selection involved.
+  // new comment links to the parent via refUID. No text selection involved.
   const handleReply = useCallback((parent: StoredAnno) => {
     composeRange.current = null;
     replyParent.current = parent;
-    setReplyTo(short(parent.attester));
+    setReplyTo(shortHex(parent.attester));
     setComposerError(null);
     setComposerFields(replyFields(parent, ""));
     setMode("compose");
@@ -149,8 +137,12 @@ function Controller({
   }
 
   async function handleSubmit(body: string) {
-    if (!signer || !config.schemaUid) {
+    if (!walletClient || !publicClient || !config.schemaUid) {
       setComposerError(`Connect a wallet on ${net.label} to publish.`);
+      return;
+    }
+    if (walletClient.chain?.id !== net.chainId) {
+      setComposerError(`Switch your wallet to ${net.label} to publish.`);
       return;
     }
     let fields: AnnoFields | null;
@@ -168,13 +160,15 @@ function Controller({
     }
     setComposerPending(true);
     try {
-      await attestComment(signer, config.schemaUid, encodeAnno(fields), {
+      await attestComment(walletClient, publicClient, config.schemaUid, encodeAnno(fields), {
         recipient: pageKey(fields.urlCanonical),
         refUID: parent ? parent.uid : EMPTY_UID,
         eas: net.eas,
       });
-      await display.refresh();
-      setComments(display.projected());
+      // The attestation is on-chain now — a failed refresh must not reopen the
+      // composer (retrying would double-post). Log and move on; the next
+      // refresh will pick the comment up.
+      await display.refresh().catch((e) => console.error("[anno] refresh after attest failed:", e));
       replyParent.current = null;
       setReplyTo(null);
       setMode("list");
@@ -212,7 +206,6 @@ function Controller({
           comments={comments}
           lang={config.lang}
           focusedUid={focusedUid}
-          pendingUids={NO_PENDING}
           onFocus={handleFocus}
           onReply={handleReply}
         />
