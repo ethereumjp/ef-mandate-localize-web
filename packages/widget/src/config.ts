@@ -1,3 +1,5 @@
+import { ANNO_SCHEMA_UID } from "@anno/core/anno/constants";
+
 export interface WidgetConfig {
   schemaUid: string;
   network: string;
@@ -35,7 +37,7 @@ function findScript(): HTMLScriptElement | null {
 export function readConfig(): WidgetConfig {
   const d = findScript()?.dataset ?? {};
   return {
-    schemaUid: d.schemaUid ?? "",
+    schemaUid: d.schemaUid || ANNO_SCHEMA_UID,
     network: resolveNetworkName(d.network, location.search),
     rpc: d.rpc,
     mainnetRpc: d.mainnetRpc,

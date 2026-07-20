@@ -14,7 +14,6 @@ first use. Drop it on any page — e.g. from the CDN (pin an exact version):
 <script
   type="module"
   src="https://cdn.jsdelivr.net/npm/@anno/widget@0.1.0/dist/embed.js"
-  data-schema-uid="0x…"
 ></script>
 ```
 
@@ -28,7 +27,7 @@ a shadow root (no style bleed into the host page).
 
 | Attribute          | Required | Default                          | Notes |
 |--------------------|----------|----------------------------------|-------|
-| `data-schema-uid`  | Yes      | —                                | EAS schema UID the widget reads/writes. |
+| `data-schema-uid`  | No       | built-in canonical anno schema UID | Override to read/write a different EAS schema. |
 | `data-network`     | No       | `mainnet`                        | Target network (`mainnet` or `sepolia`). `?mode=testnet` in the URL forces `sepolia`. |
 | `data-rpc`         | No       | public node                      | Sepolia JSON-RPC endpoint (write path). |
 | `data-mainnet-rpc` | No       | public node                      | Mainnet JSON-RPC endpoint (write path / ENS). |

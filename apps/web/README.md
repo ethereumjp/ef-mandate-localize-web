@@ -32,9 +32,8 @@ rebuild).
 ## Configuration
 
 - `config.json` — the localization sources (chapters in the `localize/` submodule).
-- `PUBLIC_EAS_ANNO_SCHEMA_UID` — the registered EAS schema UID, **baked in at build time**;
-  without it the read/attest paths are inert. Set it in `apps/web/.env` (gitignored; see
-  [`.env.example`](.env.example)), then rebuild.
+- `PUBLIC_ANNO_WIDGET_URL` — where the page loads the widget bundle from, **baked in at build time**;
+  empty → the same-origin copy from `embed:build`. (The schema UID is built into the widget.)
 - `PUBLIC_MOCK_COMMENTS=1` — show bundled mock comments with no wallet/chain (what
   `dev:web:mock` sets). Use it for UI work.
 - Network: **Sepolia** for the demo, Ethereum mainnet for production. Reads go through the

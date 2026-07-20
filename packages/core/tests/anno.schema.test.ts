@@ -1,7 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { decodeAnno, type AnnoFields } from "../src/anno/schema";
 import { encodeAnno } from "../src/anno/encode";
-import { ANNO_SCHEMA } from "../src/anno/constants";
+import {
+  ANNO_SCHEMA,
+  ANNO_SCHEMA_UID,
+  ANNO_RESOLVER,
+  ANNO_REVOCABLE,
+  deriveSchemaUid,
+} from "../src/anno/constants";
 
 const fields: AnnoFields = {
   url: "https://example.com/post?id=42",
@@ -34,5 +40,11 @@ describe("anno schema encode/decode", () => {
     expect(ANNO_SCHEMA).toBe(
       "string url,string urlCanonical,string origin,string lang,string rootSelector,bytes32 containerHash,uint32 spanStart,uint32 spanEnd,string spanExact,string spanPrefix,string spanSuffix,string body,string meta",
     );
+  });
+  it("ANNO_SCHEMA_UID is the deterministic EAS UID (golden — same on every chain)", () => {
+    expect(ANNO_SCHEMA_UID).toBe(
+      "0xc12b39c75a5d08a325d6b246ad3ff622c2ade9f4198b9c63ddcec472ac695a04",
+    );
+    expect(deriveSchemaUid(ANNO_SCHEMA, ANNO_RESOLVER, ANNO_REVOCABLE)).toBe(ANNO_SCHEMA_UID);
   });
 });

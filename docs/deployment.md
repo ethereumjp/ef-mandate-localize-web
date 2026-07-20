@@ -25,10 +25,10 @@ Everything required lives under `apps/web/`.
 pnpm run build:web        # → apps/web/dist/  (root-relative; also rebuilds the widget embed)
 ```
 
-`PUBLIC_EAS_ANNO_SCHEMA_UID` is **baked in at build time** — set it in `apps/web/.env` before
-building (see [`.env.example`](../apps/web/.env.example)); rebuild after changing it.
-`SITE_URL` is optional (canonical / OG absolute URLs). `PUBLIC_MOCK_COMMENTS=1` builds with
-bundled mock comments (no chain).
+`PUBLIC_ANNO_WIDGET_URL` is **baked in at build time** — set it in `apps/web/.env` (see
+[`.env.example`](../apps/web/.env.example)) to point the site at a hosted widget bundle instead
+of the same-origin copy; rebuild after changing it. `SITE_URL` is optional (canonical / OG
+absolute URLs). `PUBLIC_MOCK_COMMENTS=1` builds with bundled mock comments (no chain).
 
 ## Publish to IPFS / IPNS
 
@@ -68,10 +68,10 @@ caller-independent, so the registrant address doesn't affect it):
 NETWORK=mainnet pnpm --filter ef-mandate-localize-web anno:schema:calldata
 ```
 
-Set the resulting UID as `PUBLIC_EAS_ANNO_SCHEMA_UID` before building. Reads go through the
-network's EAS GraphQL endpoint (no wallet/RPC needed); publishing a comment needs a wallet on
-the active network. Custom RPCs are optional (`PUBLIC_MAINNET_RPC_URL`,
-`PUBLIC_SEPOLIA_RPC_URL`; public defaults otherwise).
+The widget ships this UID as its built-in default — registration is the only per-chain step.
+Reads go through the network's EAS GraphQL endpoint (no wallet/RPC needed); publishing a
+comment needs a wallet on the active network. Custom RPCs are optional
+(`PUBLIC_MAINNET_RPC_URL`, `PUBLIC_SEPOLIA_RPC_URL`; public defaults otherwise).
 
 > The site bundles the widget **same-origin** (`embed:build` copies it into
 > `public/annotation/`), so it ships inside the site's own IPFS deploy. To host the widget
@@ -104,7 +104,7 @@ The loader pulls the app chunk with a **relative** dynamic import — `import(".
   gateway shape — subdomain, ENS, **and** path gateways. (Unlike the site in Part 1, the
   widget has no path-gateway limitation.)
 
-Everything else (React, wagmi/viem, ethers, the EAS SDK, `@anno/core`) is bundled in, so the
+Everything else (React, wagmi/viem, `@anno/core`) is bundled in, so the
 published package has **no runtime dependencies** — a `<script>` consumer fetches one file
 (plus the lazy chunk) and nothing else.
 
