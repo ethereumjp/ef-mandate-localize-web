@@ -17,12 +17,6 @@ export default defineConfig({
   },
   env: {
     schema: {
-      PUBLIC_EAS_ANNO_SCHEMA_UID: envField.string({
-        context: "client",
-        access: "public",
-        optional: true,
-        default: "",
-      }),
       PUBLIC_MOCK_COMMENTS: envField.string({
         context: "client",
         access: "public",
@@ -39,7 +33,7 @@ export default defineConfig({
         access: "public",
         optional: true,
       }),
-      PUBLIC_EMBED_SRC: envField.string({
+      PUBLIC_ANNO_WIDGET_URL: envField.string({
         context: "client",
         access: "public",
         optional: true,
