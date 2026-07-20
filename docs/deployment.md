@@ -104,7 +104,7 @@ The loader pulls the app chunk with a **relative** dynamic import — `import(".
   gateway shape — subdomain, ENS, **and** path gateways. (Unlike the site in Part 1, the
   widget has no path-gateway limitation.)
 
-Everything else (React, wagmi/viem, ethers, the EAS SDK, `@anno/core`) is bundled in, so the
+Everything else (React, wagmi/viem, `@anno/core`) is bundled in, so the
 published package has **no runtime dependencies** — a `<script>` consumer fetches one file
 (plus the lazy chunk) and nothing else.
 

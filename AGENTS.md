@@ -73,7 +73,7 @@ Comments are **EAS attestations anchored to an exact text span** so they survive
 
 - **Stage 1 — `src/loader.ts`** (tiny, no React/wallet): reads config from the embed `<script data-*>` (`src/config.ts`), mounts a host element + **shadow root** (no style bleed), paints a floating launcher pill + a selection "Comment" popover, and runs the framework-free `display.ts` controller (read/project/paint/hit-test). It **lazy-imports `./app`** only on first open.
 - **Stage 2 — `src/app.tsx`** (`mountApp(shadow, config, display, …)`): the React 19 island — wagmi/viem for wallet/chain AND for attest (a viem `writeContract` against the EAS contract in `src/web3/eas.ts`; ethers + the EAS SDK were removed from the widget in 2026-07), `src/comments/*` (Composer, CommentThread, CommentCard, ConnectButton, …), `src/web3/*` (eas, config, highlight, thread). Built by Vite (`vite.config.ts`) into a single ESM `dist/embed.js` loader + a hashed lazy `app` chunk.
-- Config attributes are documented in `packages/widget/README.md`; defaults live in `src/config.ts` (`data-schema-uid` required; network is chosen at runtime — `mainnet` by default, `?mode=testnet` URL flag → Sepolia; `data-mock` for the bundled demo comments; etc.).
+- Config attributes are documented in `packages/widget/README.md`; defaults live in `src/config.ts` (`data-schema-uid` is an optional override of the built-in schema UID; network is chosen at runtime — `mainnet` by default, `?mode=testnet` URL flag → Sepolia; `data-mock` for the bundled demo comments; etc.).
 
 ## Gotchas that aren't obvious from a single file
 
