@@ -1,4 +1,4 @@
-name: Deploy web to 4everland
+name: Deploy web to IPFS
 
 # Builds the reading site (apps/web) in CI — with the widget bundled in
 # (embed:build copies @anno/widget dist into public/annotation/, and the page
