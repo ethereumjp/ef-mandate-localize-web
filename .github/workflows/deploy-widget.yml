@@ -1,10 +1,22 @@
-name: Deploy widget to 4everland
+name: Deploy widget
 
-# Builds @anno/widget in CI and deploys packages/widget/dist (embed.js + lazy
-# chunks) to its OWN 4everland Hosting project, served at a stable IPNS URL. The
-# site (and any third party) embeds it via <script src="…/embed.js">. Managed
-# independently of the web app (see deploy-web.yml). No submodule needed — the
-# widget is generic and does not use localize/ content.
+# Builds @anno/widget in CI and publishes packages/widget/dist (embed.js + lazy
+# chunks) to two independent delivery channels:
+#
+#   1. The `widget-release` branch — a single orphan commit holding only the
+#      built dist, force-pushed on every deploy. jsDelivr serves it at
+#        https://cdn.jsdelivr.net/gh/<owner>/<repo>@widget-release/packages/widget/dist/embed.js
+#      (branch refs are cached ~12h; the deploy purges embed.js so updates land
+#      immediately — lazy chunks are content-hashed and need no purge).
+#      This is the URL the site bakes in as PUBLIC_ANNO_WIDGET_URL: it is
+#      correct-MIME, CORS-enabled, multi-CDN, and immune to the 2026 public
+#      IPFS gateway sunset (ipfs.io/dweb.link → inbrowser.link redirects —
+#      SW gateways cannot serve cross-origin <script src>).
+#   2. Its OWN 4everland Hosting project, served at a stable IPNS URL — kept as
+#      the verifiable, decentralized distribution channel for third parties.
+#
+# Managed independently of the web app (see deploy-web.yml). No submodule
+# needed — the widget is generic and does not use localize/ content.
 #
 # NOTE: cli-api.4everland.org is the API the official @4everland/hosting-cli uses
 # under the hood — stable in practice but not a published/contracted API.
@@ -37,6 +49,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 15
+    permissions:
+      contents: write # force-push the widget-release dist branch
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -74,6 +88,27 @@ jobs:
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           fi
           echo "$new" > packages/widget/dist/.build-id
+
+      - name: Publish dist to widget-release branch (jsDelivr)
+        if: steps.gate.outputs.deploy == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tmp=$(mktemp -d)
+          mkdir -p "$tmp/packages/widget"
+          cp -r packages/widget/dist "$tmp/packages/widget/dist"
+          cd "$tmp"
+          git init -q -b widget-release
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -qm "widget dist from ${GITHUB_SHA}"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" widget-release
+          # Branch refs are cached ~12h on jsDelivr; purge embed.js so the new
+          # build is picked up now. Best-effort — a failed purge only delays it.
+          curl -fsS --max-time 30 \
+            "https://purge.jsdelivr.net/gh/${GITHUB_REPOSITORY}@widget-release/packages/widget/dist/embed.js" \
+            || echo "::warning::jsDelivr purge failed — embed.js may take up to 12h to refresh."
 
       - name: Zip dist
         if: steps.gate.outputs.deploy == 'true'

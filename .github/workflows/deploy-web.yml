@@ -10,8 +10,11 @@ name: Deploy web to 4everland
 # Config (Settings → Environments → "production", + Secrets and variables → Actions):
 #   secret   FOUR_EVERLAND_TOKEN           Hosting → Auth Token → +Create
 #   variable FOUR_EVERLAND_WEB_PROJECT_ID  id of the web Hosting project
-#   variable PUBLIC_ANNO_WIDGET_URL       the widget's gateway URL (…/embed.js) — REQUIRED
-#                                          (deploy fails without it; the site loads the widget from it)
+#   variable PUBLIC_ANNO_WIDGET_URL       the widget bundle URL (…/embed.js) — REQUIRED
+#                                          (deploy fails without it; the site loads the widget from it).
+#                                          Use the jsDelivr URL backed by the widget-release branch
+#                                          (see deploy-widget.yml) — NOT a public IPFS gateway URL;
+#                                          ipfs.io/dweb.link hotlinking is being sunset in 2026.
 #   variable FOUR_EVERLAND_WEB_DEPLOY_URL  (optional) live URL → skip-if-unchanged
 #
 # Create the project via the API (NOT GitHub integration, so 4everland does NOT build):
