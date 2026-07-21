@@ -29,13 +29,79 @@ a shadow root (no style bleed into the host page).
 | Attribute          | Required | Default                          | Notes |
 |--------------------|----------|----------------------------------|-------|
 | `data-schema-uid`  | No       | built-in canonical anno schema UID | Override to read/write a different EAS schema. |
-| `data-network`     | No       | `mainnet`                        | Target network (`mainnet` or `sepolia`). `?mode=testnet` in the URL forces `sepolia`. |
+| `data-network`     | No       | `mainnet`                        | Target network (`mainnet` or `sepolia`). `?mode=testnet` in the page URL forces `sepolia` — it wins even over an explicit `data-network`. |
 | `data-rpc`         | No       | public node                      | Sepolia JSON-RPC endpoint (write path). |
 | `data-mainnet-rpc` | No       | public node                      | Mainnet JSON-RPC endpoint (write path / ENS). |
 | `data-eas-graphql` | No       | network default                  | EAS GraphQL read endpoint (defaults to the network's endpoint). |
 | `data-position`    | No       | `bottom-right`                   | Launcher corner: `bottom-right` or `bottom-left`. |
 | `data-lang`        | No       | `<html lang>` then `en`          | UI language. |
 | `data-mock`        | No       | off                              | `1`/`true` uses bundled mock comments (demo, no chain calls). |
+
+## Embedding notes
+
+Things to know before dropping the widget on a third-party site:
+
+### Version pinning & CDN caching
+
+`@widget-release` is a moving branch: jsDelivr caches branch references (up to ~12h),
+so new builds roll out with a delay and different visitors can briefly see different
+versions. To freeze the widget, pin a commit instead:
+
+```
+https://cdn.jsdelivr.net/gh/ethereumjp/ef-mandate-localize-web@<commit-sha>/packages/widget/dist/embed.js
+```
+
+Subresource Integrity (`integrity=…`) only works with a pinned commit — the branch
+URL's content changes on every release.
+
+### Content-Security-Policy
+
+On a page with a CSP, allow:
+
+- `script-src`: the host serving `embed.js` (e.g. `cdn.jsdelivr.net`) — the loader
+  also dynamically `import()`s its hashed app chunk from the same directory.
+- `connect-src`: the EAS GraphQL endpoint for the target network (see
+  `@anno/core/chain`) and the JSON-RPC endpoints (the built-in public nodes, or
+  whatever `data-rpc` / `data-mainnet-rpc` point at).
+
+Wallet extensions (MetaMask/Rabby) inject their own transport and need no CSP entry.
+
+### Page identity: how comments are grouped
+
+Comments are fetched per page, keyed by a **canonicalized URL** (see
+`@anno/core/anno/canonicalUrl`). Practical consequences:
+
+- Query params are **kept** (only known tracking params like `utm_*` are dropped) —
+  `?page=2` is a different comment bucket than the bare path.
+- The `#fragment` is **dropped** — hash-routed SPA "pages" all share one bucket.
+- The origin is part of the key: `www.` vs bare domain, http vs https, staging vs
+  production, and IPFS-gateway mirrors each get **separate** comments.
+
+Serve each piece of content from one canonical URL if you want one comment thread.
+
+### Static/MPA sites only (no SPA route tracking)
+
+The loader mounts once on page load and reads `location` at that moment. Client-side
+navigations (`pushState`) don't re-fetch comments for the new URL — on an SPA the
+widget keeps showing the first page's comments. Use it on static or server-rendered
+multi-page sites.
+
+### Anchor stability: mark your blocks
+
+Selections anchor to the nearest stable block container: an element with
+`data-block-id`, else one with an `id`, else the nearest block-level tag
+(`p`, `li`, headings, …) located by an `:nth-of-type` path. On sites whose markup is
+mostly anonymous `<div>`s, or whose DOM structure shifts between deploys, comments
+degrade to quote-based re-anchoring ("needs review" / orphaned) more often. For the
+most durable anchors, give your content blocks stable `id` or `data-block-id`
+attributes.
+
+### Widget UI placement
+
+The launcher pill is `position: fixed` at a corner with a near-maximal `z-index`. If
+it collides with your own floating UI (chat widgets etc.), switch corners with
+`data-position="bottom-left"`. All widget styles live in a shadow root, so there is
+no CSS bleed in either direction.
 
 ## Develop
 

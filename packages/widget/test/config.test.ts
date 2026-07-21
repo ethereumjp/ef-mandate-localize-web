@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { readConfig, resolveNetworkName } from "../src/config";
+import { findEmbedScript, readConfig, resolveNetworkName } from "../src/config";
 import { ANNO_SCHEMA_UID } from "@anno/core/anno/constants";
 
 describe("resolveNetworkName", () => {
@@ -24,6 +24,45 @@ describe("resolveNetworkName", () => {
   it("honors an explicit data-network when no testnet mode is present", () => {
     expect(resolveNetworkName("sepolia", "")).toBe("sepolia");
     expect(resolveNetworkName("mainnet", "?other=1")).toBe("mainnet");
+  });
+});
+
+describe("findEmbedScript", () => {
+  it("prefers the script whose resolved src matches the module's own URL", () => {
+    // A renamed bundle (no "embed.js" in the src, no data-schema-uid) plus a
+    // decoy that the old heuristics would have matched first.
+    const decoy = document.createElement("script");
+    decoy.src = "https://other.example/embed.js";
+    const own = document.createElement("script");
+    own.src = "https://cdn.example/widget/anno.min.js";
+    own.dataset.network = "sepolia";
+    document.head.append(decoy, own);
+    try {
+      // jsdom resolves .src to an absolute URL — compare against that form.
+      expect(findEmbedScript(own.src)).toBe(own);
+    } finally {
+      decoy.remove();
+      own.remove();
+    }
+  });
+
+  it("falls back to data-schema-uid, then an embed.js src, when no src matches", () => {
+    const bySrc = document.createElement("script");
+    bySrc.src = "https://example.ipns.dweb.link/embed.js";
+    document.head.appendChild(bySrc);
+    try {
+      expect(findEmbedScript("file:///not-a-real-script.js")).toBe(bySrc);
+      const byAttr = document.createElement("script");
+      byAttr.setAttribute("data-schema-uid", "0xabc");
+      document.head.appendChild(byAttr);
+      try {
+        expect(findEmbedScript("file:///not-a-real-script.js")).toBe(byAttr);
+      } finally {
+        byAttr.remove();
+      }
+    } finally {
+      bySrc.remove();
+    }
   });
 });
 
