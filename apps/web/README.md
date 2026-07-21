@@ -65,6 +65,24 @@ caller-independent, so the registrant address doesn't affect it):
 NETWORK=mainnet pnpm --filter ef-mandate-localize-web anno:schema:calldata
 ```
 
+## Adding a language
+
+Markdown alone in the `localize/` submodule is **not** enough — languages the site doesn't
+know about are ignored at build time (no route, no errors). Once the translation exists
+upstream under `source/<lang>/chapters` (and the submodule is bumped), register it here:
+
+1. `config.json` — add a source entry:
+   `{ "lang": "<lang>", "path": "../../localize/source/<lang>/chapters" }`
+2. `src/lib/i18n.ts` — add the code to `Lang` and `LANGS`, a switcher row to
+   `LANG_OPTIONS` (endonym label), and an `OG_LOCALES` row (`ll_CC`).
+3. Optionally translate the UI strings in `_MESSAGES` and `siteDescription` — untranslated
+   keys fall back to English.
+
+That's all: the route appears at `/<lang>`, and chapters or blocks that aren't translated
+yet render the English source with a "not translated yet" notice, so a partially
+translated language can ship immediately. hreflang / `og:locale` alternates are generated
+from `LANGS` automatically.
+
 ## Operational scripts
 
 - `anno:schema:register` / `anno:schema:calldata` — one-time EAS schema registration (per

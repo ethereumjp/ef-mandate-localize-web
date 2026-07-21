@@ -50,3 +50,6 @@ Localization is pinned via the `localize/` submodule. To pull the latest upstrea
 git -C localize pull origin main
 git add localize && git commit -m "chore: bump localize submodule"
 ```
+
+New translation languages added upstream don't appear on the site until registered in
+`apps/web` — see [Adding a language](apps/web/README.md#adding-a-language).

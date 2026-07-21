@@ -30,9 +30,19 @@ export const LANG_OPTIONS: { code: Lang; label: string; route: string }[] = [
   { code: "ja", label: "日本語", route: langRoute("ja") },
 ];
 
+/** Open Graph locale (ll_CC) per language. Add a row per new language. */
+const OG_LOCALES: Record<Lang, string> = {
+  en: "en_US",
+  ja: "ja_JP",
+};
+
+export const ogLocale = (lang: Lang): string => OG_LOCALES[lang] ?? lang;
+
 /** EN is the only complete, required dictionary; other languages may be partial. */
 const EN_MESSAGES = {
   siteTitle: "EF Mandate",
+  siteDescription:
+    "A community localization of the EF Mandate — read the original and translations side by side, with on-chain annotations as EAS attestations on Ethereum.",
   index: "Chapters",
   backToIndex: "Back to index",
   language: "Language",
@@ -52,6 +62,8 @@ const _MESSAGES: MessageTable = {
   en: EN_MESSAGES,
   ja: {
     siteTitle: "EF Mandate",
+    siteDescription:
+      "EF Mandate のコミュニティ・ローカライズ — 原文と翻訳を対訳で読めます。Ethereum 上の EAS アテステーションによるオンチェーン注釈付き。",
     index: "目次",
     backToIndex: "目次へ戻る",
     language: "言語",
