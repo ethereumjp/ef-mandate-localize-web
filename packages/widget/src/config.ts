@@ -23,10 +23,15 @@ export function resolveNetworkName(dataNetwork: string | undefined, search: stri
 
 /**
  * Find the `<script>` tag that loaded the embed. `document.currentScript` is null
- * for ES modules, so match by a `data-schema-uid` attr (preferred) or an
- * `embed.js` src.
+ * for ES modules, so first match the tag whose resolved `src` is this module's own
+ * URL (`ownUrl` = `import.meta.url` — survives renamed bundles and other
+ * "embed.js" scripts on the page), then fall back to a `data-schema-uid` attr or
+ * an `embed.js` src (covers loading via redirect, where the two URLs differ).
  */
-function findScript(): HTMLScriptElement | null {
+export function findEmbedScript(ownUrl: string): HTMLScriptElement | null {
+  for (const s of Array.from(document.querySelectorAll<HTMLScriptElement>("script[src]"))) {
+    if (s.src === ownUrl) return s;
+  }
   return (
     document.querySelector<HTMLScriptElement>("script[data-schema-uid]") ??
     document.querySelector<HTMLScriptElement>('script[src*="embed.js"]')
@@ -35,7 +40,7 @@ function findScript(): HTMLScriptElement | null {
 
 /** Read the widget config from the embed `<script data-*>` (with defaults). */
 export function readConfig(): WidgetConfig {
-  const d = findScript()?.dataset ?? {};
+  const d = findEmbedScript(import.meta.url)?.dataset ?? {};
   return {
     schemaUid: d.schemaUid || ANNO_SCHEMA_UID,
     network: resolveNetworkName(d.network, location.search),
