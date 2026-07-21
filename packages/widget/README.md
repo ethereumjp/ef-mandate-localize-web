@@ -9,10 +9,10 @@ backend, no build step on the host site.
 
 | | |
 |---|---|
+| ![Floating launcher pill with the comment count](assets/widget-image-1.png) | ![Thread panel listing comments, with the anchored span underlined in the text](assets/widget-image-2.png) |
+| **1. Launcher** — a floating pill shows the page's comment count. | **2. Read** — the panel lists comments; anchored spans are underlined in the page. |
 | ![Select text and a "Comment" popover appears](assets/widget-image-3.png) | ![Composer: write a comment and publish it as an EAS attestation](assets/widget-image-4.png) |
-| **1. Select text** — a "Comment" popover appears over the selection. | **2. Write & publish** — the comment is signed and stored on-chain (EAS). |
-| ![Thread panel listing comments, with the anchored span underlined in the text](assets/widget-image-2.png) | ![Floating launcher pill with the comment count](assets/widget-image-1.png) |
-| **3. Read** — the panel lists comments; anchored spans are underlined in the page. | **4. Launcher** — a floating pill shows the page's comment count. |
+| **3. Select text** — a "Comment" popover appears over the selection. | **4. Write & publish** — the comment is signed and stored on-chain (EAS). |
 
 ## Embed
 
