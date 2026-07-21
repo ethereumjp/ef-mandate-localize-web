@@ -77,6 +77,10 @@ Comments are **EAS attestations anchored to an exact text span** so they survive
 
 ## Gotchas that aren't obvious from a single file
 
+- **New languages need web-side registration.** Markdown committed to the `localize/`
+  submodule is ignored until the language is added to `apps/web/config.json` (sources) and
+  `apps/web/src/lib/i18n.ts` (`Lang`/`LANGS`/`LANG_OPTIONS`/`OG_LOCALES`) — no route is
+  generated, nothing breaks. Steps: `apps/web/README.md` § "Adding a language".
 - **`localize/` submodule must be initialized** before any site build/test, or content loading fails. CI checks out with `submodules: recursive`.
 - **The anno schema UID is built into the widget** (`ANNO_SCHEMA_UID` in `@anno/core/anno/constants`, derived from `ANNO_SCHEMA`; `data-schema-uid` is an optional host override). No env var — but the schema must still be **registered on-chain** once per network (`anno:schema:register`). `PUBLIC_ANNO_WIDGET_URL` (baked at build time, `apps/web/.env`) points the site at the widget bundle; empty → same-origin `annotation/embed.js`.
 - **Mock mode** (`PUBLIC_MOCK_COMMENTS=1`, what `dev:web:mock` sets, or widget `data-mock`) shows bundled comments with no wallet/chain — use it for UI work.
