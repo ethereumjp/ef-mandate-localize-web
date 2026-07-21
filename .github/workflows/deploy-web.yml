@@ -19,6 +19,11 @@ name: Deploy web to IPFS
 #   secret   FOUR_EVERLAND_TOKEN           Hosting → Auth Token → +Create
 #   variable FOUR_EVERLAND_PROJECT_ID      id of the (only) Hosting project — the site
 #   variable FOUR_EVERLAND_DEPLOY_URL      (optional) live URL → skip-if-unchanged
+#   variable SITE_URL                      (optional) canonical origin for absolute URLs
+#                                          (canonical / og:url / og:image / hreflang);
+#                                          unset → those tags are omitted. Point it at the
+#                                          current public URL (IPNS gateway now, the ENS
+#                                          .limo domain once live — just edit the variable)
 #
 # Create the project via the API (NOT GitHub integration, so 4everland does NOT build):
 #   curl -H "token: $TOKEN" -F name=ef-mandate-localize-web -F platform=IPFS \
@@ -64,6 +69,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build site (widget bundled, served same-origin)
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
         run: pnpm --filter ef-mandate-localize-web build
 
       - name: Require bundled widget

@@ -1,12 +1,25 @@
 ---
 import "../styles/global.css";
 import Toolbar from "../components/Toolbar.astro";
-import { LANGS, type Lang } from "../lib/i18n";
+import { LANGS, SOURCE_LANG, langRoute, ogLocale, t, withBase, type Lang } from "../lib/i18n";
 interface Props {
   title: string;
   lang: Lang;
 }
 const { title, lang } = Astro.props;
+const description = t(lang, "siteDescription");
+// Absolute URLs (canonical / og:url / og:image) need SITE_URL; omit them when
+// it isn't set so local/preview builds stay valid.
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const ogImage = Astro.site ? new URL(withBase("og.png"), Astro.site).href : undefined;
+// hreflang alternates for every language (x-default → the source language),
+// so search engines pair the translations. Scales with LANGS.
+const alternates = Astro.site
+  ? [
+      ...LANGS.map((l) => ({ hreflang: l, href: new URL(langRoute(l), Astro.site).href })),
+      { hreflang: "x-default", href: new URL(langRoute(SOURCE_LANG), Astro.site).href },
+    ]
+  : [];
 // Show only the active language's <T> spans. Generated from LANGS so it scales
 // to N languages. `is:inline` keeps Astro from scoping these global selectors.
 const langStyle = LANGS.map((l) => `[data-lang="${l}"] .lang:not(.lang-${l}){display:none}`).join("\n");
@@ -26,6 +39,24 @@ const langStyle = LANGS.map((l) => `[data-lang="${l}"] .lang:not(.lang-${l}){dis
       })();
     </script>
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={t(lang, "siteTitle")} />
+    <meta property="og:locale" content={ogLocale(lang)} />
+    {LANGS.filter((l) => l !== lang).map((l) => (
+      <meta property="og:locale:alternate" content={ogLocale(l)} />
+    ))}
+    {canonical && <link rel="canonical" href={canonical} />}
+    {alternates.map((a) => (
+      <link rel="alternate" hreflang={a.hreflang} href={a.href} />
+    ))}
+    {canonical && <meta property="og:url" content={canonical} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta property="og:image:width" content="1200" />}
+    {ogImage && <meta property="og:image:height" content="630" />}
+    {ogImage && <meta name="twitter:card" content="summary_large_image" />}
     <style is:inline set:html={langStyle}></style>
   </head>
   <body class="min-h-screen antialiased">
